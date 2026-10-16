@@ -91,7 +91,7 @@ test('it renders the dashboard action without a global header', function () {
         ->assertSee('class="btn dashboard-create"', false)
         ->assertSee('Transaksi baru', false);
 
-    expect(substr_count($response->getContent(), 'href="' . route('transactions.create') . '"'))->toBe(1);
+    expect(substr_count($response->getContent(), 'href="'.route('transactions.create').'"'))->toBe(1);
 
     $this->get(route('transactions.create'))
         ->assertOk()
@@ -133,11 +133,18 @@ test('it renders read-only setor profit and percentage calculations', function (
         ->assertSee('class="form-group selling-price-group"', false)
         ->assertSee('class="selling-price-inputs"', false)
         ->assertSee('id="calculated-sale-profit"', false)
+        ->assertSee('id="calculated-sale-profit-percentage"', false)
         ->assertSee('id="sell-date"', false)
+        ->assertSee('name="down_payment_date"', false)
+        ->assertSee('name="settlement_date"', false)
+        ->assertSee('name="leasing_disbursement_date"', false)
         ->assertDontSee('<label for="calculated-sale-profit">')
         ->assertDontSee('<label for="sell-date">')
         ->assertSee('aria-label="Selisih harga setor dengan modal (Rupiah)"', false)
-        ->assertSee('aria-label="Persentase selisih harga setor dari modal"', false);
+        ->assertSee('aria-label="Harga setor sebagai persentase dari total pengeluaran"', false)
+        ->assertSee('const saleProfitPercentage = totalCapital === 0 ? 0 : (salePrice / totalCapital) * 100;')
+        ->assertSee('const setorProfitPercentage = totalCapital === 0 ? 0 : (setorPrice / totalCapital) * 100;')
+        ->assertSee('const openingProfitPercentage = totalCapital === 0 ? 0 : (openingPrice / totalCapital) * 100;');
 });
 
 test('it ignores the untouched empty repair row when saving a transaction', function () {
@@ -179,6 +186,95 @@ test('it ignores untouched empty intertine expense rows when saving a transactio
     $response->assertRedirect(route('transactions.index'));
 
     expect(CarTransaction::query()->firstOrFail()->intertine_expenses)->toBe([]);
+});
+
+test('it stores zero for empty numeric inputs and costs on populated expense rows', function () {
+    $response = $this->post(route('transactions.store'), [
+        'plate_number' => 'B 1234 CD',
+        'brand' => 'TOYOTA',
+        'model' => 'INNOVA',
+        'year' => '',
+        'transmission' => 'MANUAL',
+        'color' => 'HITAM',
+        'buy_date' => '2026-10-12',
+        'buy_price' => '',
+        'mileage_km' => '',
+        'additional_repairs' => [
+            ['name' => 'Perbaikan jok', 'date' => '2026-10-11', 'cost' => '', 'payment_status' => 'lunas'],
+        ],
+        'tax_items' => [
+            ['name' => 'Pajak', 'date' => '2026-10-10', 'cost' => ''],
+        ],
+        'intertine_expenses' => [
+            ['name' => 'KR Jual', 'cost' => ''],
+        ],
+    ]);
+
+    $response->assertRedirect(route('transactions.index'));
+
+    $transaction = CarTransaction::query()->firstOrFail();
+    $numericFields = [
+        'year',
+        'mileage_km',
+        'buy_price',
+        'purchase_operational',
+        'other_costs',
+        'selling_price',
+        'down_payment',
+        'settlement_amount',
+        'leasing_disbursement',
+        'setor_price',
+        'opening_price',
+        'leasing_ripan',
+        'insurance_ripan',
+        'booster_ripan',
+    ];
+
+    $this->assertDatabaseHas('car_transactions', ['id' => $transaction->id] + array_fill_keys($numericFields, 0));
+
+    $mileageColumn = collect(Schema::getColumns('car_transactions'))
+        ->firstWhere('name', 'mileage_km');
+
+    expect($transaction->additional_repairs[0]['cost'])->toBe(0)
+        ->and($transaction->tax_items[0]['cost'])->toBe(0)
+        ->and($transaction->intertine_expenses[0]['cost'])->toBe(0)
+        ->and($mileageColumn['nullable'])->toBeFalse()
+        ->and((int) $mileageColumn['default'])->toBe(0);
+});
+
+test('it stores payment dates and displays them on the transaction receipt', function () {
+    $response = $this->post(route('transactions.store'), [
+        'plate_number' => 'B 1234 CD',
+        'brand' => 'TOYOTA',
+        'model' => 'INNOVA',
+        'year' => 2014,
+        'transmission' => 'MANUAL',
+        'color' => 'HITAM',
+        'buy_date' => '2026-10-12',
+        'buy_price' => 500000,
+        'down_payment' => 100000,
+        'down_payment_date' => '2026-10-13',
+        'settlement_amount' => 200000,
+        'settlement_date' => '2026-10-14',
+        'leasing_disbursement' => 150000,
+        'leasing_disbursement_date' => '2026-10-15',
+    ]);
+
+    $response->assertRedirect(route('transactions.index'));
+
+    $transaction = CarTransaction::query()->firstOrFail();
+    $this->assertDatabaseHas('car_transactions', [
+        'id' => $transaction->id,
+        'down_payment_date' => '2026-10-13',
+        'settlement_date' => '2026-10-14',
+        'leasing_disbursement_date' => '2026-10-15',
+    ]);
+
+    $this->get(route('transactions.show', $transaction))
+        ->assertOk()
+        ->assertSee('2026-10-13')
+        ->assertSee('2026-10-14')
+        ->assertSee('2026-10-15');
 });
 
 test('it saves manual intertine expense fields and calculates the net profit', function () {

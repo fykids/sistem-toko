@@ -74,9 +74,9 @@
             <div class="receipt-section-title">Harga Jual & Pembayaran</div>
             <table class="receipt-table">
                 <tr><td class="description">Harga Jual</td><td class="amount">Rp {{ number_format($transaction->selling_price) }}</td><td class="date">{{ $transaction->sell_date ?? '-' }}</td><td class="status"></td></tr>
-                <tr><td class="description">DP</td><td class="amount">Rp {{ number_format($transaction->down_payment) }}</td><td class="date"></td><td class="status"></td></tr>
-                <tr><td class="description">Pelunasan</td><td class="amount">Rp {{ number_format($transaction->settlement_amount) }}</td><td class="date"></td><td class="status"></td></tr>
-                <tr><td class="description">Pencairan Leasing</td><td class="amount">Rp {{ number_format($transaction->leasing_disbursement) }}</td><td class="date"></td><td class="status"></td></tr>
+                <tr><td class="description">DP</td><td class="amount">Rp {{ number_format($transaction->down_payment) }}</td><td class="date">{{ $transaction->down_payment_date ?? '-' }}</td><td class="status"></td></tr>
+                <tr><td class="description">Pelunasan</td><td class="amount">Rp {{ number_format($transaction->settlement_amount) }}</td><td class="date">{{ $transaction->settlement_date ?? '-' }}</td><td class="status"></td></tr>
+                <tr><td class="description">Pencairan Leasing</td><td class="amount">Rp {{ number_format($transaction->leasing_disbursement) }}</td><td class="date">{{ $transaction->leasing_disbursement_date ?? '-' }}</td><td class="status"></td></tr>
                 <tr class="receipt-rule receipt-total"><td class="description">Sisa Pembayaran</td><td class="amount">Rp {{ number_format($transaction->remaining_payment) }}</td><td colspan="2"></td></tr>
             </table>
         </div>

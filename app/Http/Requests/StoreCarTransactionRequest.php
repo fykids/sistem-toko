@@ -54,6 +54,49 @@ class StoreCarTransactionRequest extends FormRequest
                 ]);
             }
         }
+
+        foreach (['additional_repairs', 'tax_items', 'intertine_expenses'] as $field) {
+            $items = $this->input($field);
+
+            if (! is_array($items)) {
+                continue;
+            }
+
+            foreach ($items as &$item) {
+                if (is_array($item) && (($item['cost'] ?? null) === null || $item['cost'] === '')) {
+                    $item['cost'] = 0;
+                }
+            }
+
+            unset($item);
+
+            $this->merge([$field => $items]);
+        }
+
+        $numericValues = [];
+
+        foreach ([
+            'mileage_km',
+            'year',
+            'buy_price',
+            'purchase_operational',
+            'other_costs',
+            'selling_price',
+            'down_payment',
+            'settlement_amount',
+            'leasing_disbursement',
+            'setor_price',
+            'opening_price',
+            'leasing_ripan',
+            'insurance_ripan',
+            'booster_ripan',
+        ] as $field) {
+            $value = $this->input($field);
+
+            $numericValues[$field] = $value === null || $value === '' ? 0 : $value;
+        }
+
+        $this->merge($numericValues);
     }
 
     public function rules(): array
@@ -72,6 +115,9 @@ class StoreCarTransactionRequest extends FormRequest
             'owner_name' => ['nullable', 'string', 'max:255'],
             'buy_date' => ['required', 'date'],
             'sell_date' => ['nullable', 'date'],
+            'down_payment_date' => ['nullable', 'date'],
+            'settlement_date' => ['nullable', 'date'],
+            'leasing_disbursement_date' => ['nullable', 'date'],
             'buy_price' => ['required', 'numeric', 'min:0'],
             'purchase_operational' => ['nullable', 'numeric', 'min:0'],
             'other_costs' => ['nullable', 'numeric', 'min:0'],
