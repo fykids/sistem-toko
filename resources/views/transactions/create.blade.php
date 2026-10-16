@@ -114,17 +114,36 @@
                 </div>
             </div>
             <div class="sales-fields-row">
-                <div class="form-group"><label for="down-payment">DP (Rp)</label><input type="text" name="down_payment"
-                        id="down-payment" value="{{ old('down_payment', $transaction?->down_payment ?? 0) }}"
-                        inputmode="decimal" data-rupiah-input></div>
-                <div class="form-group"><label for="settlement-amount">Pelunasan (Rp)</label><input type="text"
-                        name="settlement_amount" id="settlement-amount"
-                        value="{{ old('settlement_amount', $transaction?->settlement_amount ?? 0) }}"
-                        inputmode="decimal" data-rupiah-input></div>
-                <div class="form-group"><label for="leasing-disbursement">Pencairan leasing (Rp)</label><input
-                        type="text" name="leasing_disbursement" id="leasing-disbursement"
-                        value="{{ old('leasing_disbursement', $transaction?->leasing_disbursement ?? 0) }}"
-                        inputmode="decimal" data-rupiah-input></div>
+                <div class="form-group"><label for="down-payment">DP (Rp)</label>
+                    <div class="payment-inputs">
+                        <input type="text" name="down_payment" id="down-payment"
+                            value="{{ old('down_payment', $transaction?->down_payment ?? 0) }}" inputmode="decimal"
+                            data-rupiah-input>
+                        <input type="date" name="down_payment_date" id="down-payment-date"
+                            value="{{ old('down_payment_date', $transaction?->down_payment_date) }}"
+                            aria-label="Tanggal DP">
+                    </div>
+                </div>
+                <div class="form-group"><label for="settlement-amount">Pelunasan (Rp)</label>
+                    <div class="payment-inputs">
+                        <input type="text" name="settlement_amount" id="settlement-amount"
+                            value="{{ old('settlement_amount', $transaction?->settlement_amount ?? 0) }}"
+                            inputmode="decimal" data-rupiah-input>
+                        <input type="date" name="settlement_date" id="settlement-date"
+                            value="{{ old('settlement_date', $transaction?->settlement_date) }}"
+                            aria-label="Tanggal pelunasan">
+                    </div>
+                </div>
+                <div class="form-group"><label for="leasing-disbursement">Pencairan leasing (Rp)</label>
+                    <div class="payment-inputs">
+                        <input type="text" name="leasing_disbursement" id="leasing-disbursement"
+                            value="{{ old('leasing_disbursement', $transaction?->leasing_disbursement ?? 0) }}"
+                            inputmode="decimal" data-rupiah-input>
+                        <input type="date" name="leasing_disbursement_date" id="leasing-disbursement-date"
+                            value="{{ old('leasing_disbursement_date', $transaction?->leasing_disbursement_date) }}"
+                            aria-label="Tanggal pencairan leasing">
+                    </div>
+                </div>
                 <div class="form-group"><label for="remaining-payment">Sisa pembayaran (Rp)</label><input type="text"
                         name="remaining_payment" id="remaining-payment"
                         value="{{ max((float) old('selling_price', $transaction?->selling_price ?? 0) - (float) old('down_payment', $transaction?->down_payment ?? 0) - (float) old('settlement_amount', $transaction?->settlement_amount ?? 0) - (float) old('leasing_disbursement', $transaction?->leasing_disbursement ?? 0), 0) }}"

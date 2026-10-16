@@ -280,23 +280,15 @@ h4 { font-size: 15px; }
 /* Container 2 Input (Nominal + Tanggal) pada DP, Pelunasan, dan Leasing */
 .transaction-form .marketing-section .sales-fields-row .payment-inputs { 
     display: grid !important; 
-    grid-template-columns: 1fr 1.35fr 0.65fr !important; 
+    grid-template-columns: minmax(0, 1.4fr) minmax(145px, 1fr) !important; 
     gap: 8px !important; 
     align-items: center !important; 
     width: 100% !important; 
     min-width: 0 !important; 
 }
 
-/* Input nominal mengambil 2 kolom pertama */
-.transaction-form .marketing-section .sales-fields-row .payment-inputs input[type="text"] {
-    grid-column: span 2 !important;
-    width: 100% !important;
-    min-width: 0 !important;
-}
-
-/* Input tanggal menempati kolom ke-3 (paling kanan) agar sejajar vertikal */
-.transaction-form .marketing-section .sales-fields-row .payment-inputs input[type="date"] {
-    grid-column: 3 !important;
+/* Keep both payment controls wide enough to read their values. */
+.transaction-form .marketing-section .sales-fields-row .payment-inputs input {
     width: 100% !important;
     min-width: 0 !important;
 }
@@ -474,6 +466,10 @@ h4 { font-size: 15px; }
     .filter-tabs button { flex: 1; }
     .field-grid, .field-grid.two-column, .repeatable-list { grid-template-columns: 1fr; }
     .transaction-form .marketing-section .sales-fields-row { grid-template-columns: 1fr; }
+    .transaction-form .marketing-section .sales-fields-row .form-group { grid-template-columns: minmax(0, 1fr) !important; }
+    .transaction-form .marketing-section .sales-fields-row .form-group label { margin-bottom: 5px; }
+    .transaction-form .marketing-section .sales-fields-row .payment-inputs { grid-template-columns: minmax(0, 1fr) minmax(130px, 1fr) !important; }
+    .transaction-form .marketing-section .sales-fields-row .form-help { grid-column: 1 !important; }
     .transaction-form .sales-section .intertine-expense-fields { grid-template-columns: 1fr; }
     .transaction-form .marketing-fields .setor-price-group,
     .transaction-form .marketing-fields .selling-price-group { grid-template-columns: minmax(100px, 0.7fr) minmax(0, 1.3fr); }
