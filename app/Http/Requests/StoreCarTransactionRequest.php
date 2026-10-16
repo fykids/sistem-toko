@@ -1,0 +1,107 @@
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class StoreCarTransactionRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        foreach ([
+            'additional_repairs' => ['name', 'date', 'cost', 'payment_status', 'payment_note'],
+            'tax_items' => ['date', 'cost'],
+            'intertine_expenses' => ['name', 'cost'],
+        ] as $field => $meaningfulKeys) {
+            $items = $this->input($field);
+
+            if ($items === null) {
+                $this->merge([$field => []]);
+
+                continue;
+            }
+
+            if (is_array($items)) {
+                if ($field === 'intertine_expenses') {
+                    foreach ($items as &$item) {
+                        if (is_array($item)) {
+                            unset($item['date']);
+                        }
+                    }
+
+                    unset($item);
+                }
+
+                $this->merge([
+                    $field => array_filter($items, static function ($item) use ($meaningfulKeys): bool {
+                        if (! is_array($item)) {
+                            return true;
+                        }
+
+                        foreach ($meaningfulKeys as $key) {
+                            if (filled($item[$key] ?? null)) {
+                                return true;
+                            }
+                        }
+
+                        return false;
+                    }),
+                ]);
+            }
+        }
+    }
+
+    public function rules(): array
+    {
+        return [
+            'plate_number' => ['required', 'string', 'max:255'],
+            'manager_name' => ['nullable', 'string', 'max:255'],
+            'chassis_number' => ['nullable', 'string', 'max:255'],
+            'engine_number' => ['nullable', 'string', 'max:255'],
+            'mileage_km' => ['nullable', 'integer', 'min:0'],
+            'brand' => ['required', 'string', 'max:255'],
+            'model' => ['required', 'string', 'max:255'],
+            'year' => ['required', 'integer'],
+            'transmission' => ['required', 'string', 'max:255'],
+            'color' => ['required', 'string', 'max:255'],
+            'owner_name' => ['nullable', 'string', 'max:255'],
+            'buy_date' => ['required', 'date'],
+            'sell_date' => ['nullable', 'date'],
+            'buy_price' => ['required', 'numeric', 'min:0'],
+            'purchase_operational' => ['nullable', 'numeric', 'min:0'],
+            'other_costs' => ['nullable', 'numeric', 'min:0'],
+            'selling_price' => ['nullable', 'numeric', 'min:0'],
+            'down_payment' => ['nullable', 'numeric', 'min:0'],
+            'settlement_amount' => ['nullable', 'numeric', 'min:0'],
+            'leasing_disbursement' => ['nullable', 'numeric', 'min:0'],
+            'setor_price' => ['nullable', 'numeric', 'min:0'],
+            'opening_price' => ['nullable', 'numeric', 'min:0'],
+            'leasing_ripan' => ['nullable', 'numeric', 'min:0'],
+            'insurance_ripan' => ['nullable', 'numeric', 'min:0'],
+            'booster_ripan' => ['nullable', 'numeric', 'min:0'],
+            'additional_repairs' => ['nullable', 'array', 'max:50'],
+            'additional_repairs.*' => ['array:name,date,cost,payment_status,payment_note'],
+            'additional_repairs.*.name' => ['required', 'string', 'max:100'],
+            'additional_repairs.*.date' => ['required', 'date'],
+            'additional_repairs.*.cost' => ['required', 'numeric', 'min:0'],
+            'additional_repairs.*.payment_status' => ['required', 'in:lunas,belum_lunas,panjar,lainnya'],
+            'additional_repairs.*.payment_note' => ['nullable', 'string', 'max:255'],
+            'tax_items' => ['nullable', 'array', 'max:50'],
+            'tax_items.*' => ['array:name,date,cost,payment_status,payment_note'],
+            'tax_items.*.name' => ['required', 'string', 'max:100'],
+            'tax_items.*.date' => ['nullable', 'date'],
+            'tax_items.*.cost' => ['required', 'numeric', 'min:0'],
+            'tax_items.*.payment_status' => ['nullable', 'in:lunas,belum_lunas,panjar,lainnya'],
+            'tax_items.*.payment_note' => ['nullable', 'string', 'max:255'],
+            'intertine_expenses' => ['nullable', 'array', 'max:50'],
+            'intertine_expenses.*' => ['array:name,cost'],
+            'intertine_expenses.*.name' => ['required', 'string', 'max:100'],
+            'intertine_expenses.*.cost' => ['required', 'numeric', 'min:0'],
+        ];
+    }
+}
