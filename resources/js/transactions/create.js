@@ -29,6 +29,11 @@
     const calculatedTotalIntertineExpensesInput = document.getElementById('calculated-total-intertine-expenses');
     const calculatedNetProfitInput = document.getElementById('calculated-net-profit');
     const leasingVehicleName = document.getElementById('leasing-vehicle-name');
+    const vehiclePhotoInput = document.getElementById('vehicle-photo-input');
+    const vehiclePhotoButton = document.getElementById('vehicle-photo-button');
+    const vehiclePhotoPreview = document.getElementById('vehicle-photo-preview');
+    const vehiclePhotoPlaceholder = document.getElementById('vehicle-photo-placeholder');
+    let vehiclePhotoPreviewUrl = null;
     const vehicleSummaryFields = [
         'brand',
         'model',
@@ -49,6 +54,31 @@
             .join(' ');
 
         leasingVehicleName.textContent = vehicleName || 'Lengkapi data kendaraan';
+    }
+
+    if (vehiclePhotoInput && vehiclePhotoPreview && vehiclePhotoPlaceholder) {
+        vehiclePhotoButton?.addEventListener('click', () => vehiclePhotoInput.click());
+
+        vehiclePhotoInput.addEventListener('change', () => {
+            const [photo] = vehiclePhotoInput.files ?? [];
+
+            if (!photo || !photo.type.startsWith('image/')) {
+                return;
+            }
+
+            if (vehiclePhotoButton) {
+                vehiclePhotoButton.textContent = 'Ganti foto';
+            }
+
+            if (vehiclePhotoPreviewUrl) {
+                URL.revokeObjectURL(vehiclePhotoPreviewUrl);
+            }
+
+            vehiclePhotoPreviewUrl = URL.createObjectURL(photo);
+            vehiclePhotoPreview.src = vehiclePhotoPreviewUrl;
+            vehiclePhotoPreview.hidden = false;
+            vehiclePhotoPlaceholder.hidden = true;
+        });
     }
 
     function toNumericAmount(value) {
@@ -114,6 +144,12 @@
             sellingPrice - downPayment - settlementAmount - leasingDisbursement,
             0,
         ));
+    }
+
+    function syncLeasingSellingPrices() {
+        transactionForm.querySelectorAll('[data-leasing-selling-price]').forEach((leasingSellingPriceInput) => {
+            leasingSellingPriceInput.value = sellingPriceInput.value;
+        });
     }
 
     function updateLeasingDownPayments() {
@@ -187,6 +223,7 @@
     transactionForm.querySelectorAll('[data-leasing-disbursement], [data-leasing-selling-price]').forEach((input) => {
         input.addEventListener('input', updateLeasingDownPayments);
     });
+    syncLeasingSellingPrices();
     updateLeasingDownPayments();
     updateProfitCalculation();
 
@@ -198,7 +235,10 @@
         if (event.target.matches('[data-rupiah-input]')) {
             formatRupiahInput(event.target, true);
 
-            if (event.target.matches('[data-leasing-disbursement], [data-leasing-selling-price]')) {
+            if (event.target.matches('#selling-price')) {
+                syncLeasingSellingPrices();
+                updateLeasingDownPayments();
+            } else if (event.target.matches('[data-leasing-disbursement], [data-leasing-selling-price]')) {
                 updateLeasingDownPayments();
             }
         }

@@ -175,6 +175,7 @@ class StoreCarTransactionRequest extends FormRequest
             'leasing_options.*.installment_3yr' => ['nullable', 'numeric', 'min:0'],
             'leasing_options.*.installment_4yr' => ['nullable', 'numeric', 'min:0'],
             'leasing_options.*.installment_5yr' => ['nullable', 'numeric', 'min:0'],
+            'vehicle_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ];
     }
 }

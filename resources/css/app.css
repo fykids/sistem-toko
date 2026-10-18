@@ -499,6 +499,7 @@ h4 { font-size: 15px; }
 .receipt-profit-summary .receipt-net { background: #141714; color: #fff; }
 .receipt-profit-summary .receipt-net td { padding-top: 6px; padding-bottom: 6px; }
 .vehicle-leasing-panel { min-width: 0; align-self: start; padding: 11px; border: 1px solid var(--line); border-radius: 13px; background: linear-gradient(180deg, #fff, #f9fbf9); box-shadow: var(--shadow-raised); }
+.vehicle-photo-detail { display: block; width: 100%; max-height: 280px; margin-bottom: 12px; border-radius: 9px; background: #f1f5f2; object-fit: contain; }
 .vehicle-leasing-heading { display: flex; align-items: end; justify-content: space-between; gap: 8px; padding: 2px 1px 8px; border-bottom: 1px solid var(--line); }
 .vehicle-leasing-heading .page-eyebrow { margin-bottom: 2px; font-size: 8px; }
 .vehicle-leasing-heading h2 { color: var(--green); font-size: 17px; }

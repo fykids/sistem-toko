@@ -149,6 +149,13 @@
         </div>
 
         <aside class="vehicle-leasing-panel" aria-labelledby="vehicle-leasing-title">
+            @if ($transaction->vehicle_photo_path)
+                <img
+                    class="vehicle-photo-detail"
+                    src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($transaction->vehicle_photo_path) }}"
+                    alt="Foto {{ $transaction->brand }} {{ $transaction->model }}"
+                >
+            @endif
             <div class="vehicle-leasing-heading">
                 <div>
                     <p class="page-eyebrow">Informasi pelengkap kendaraan</p>

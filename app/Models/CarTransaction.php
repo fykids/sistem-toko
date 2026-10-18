@@ -42,6 +42,7 @@ class CarTransaction extends Model
         'tax_items',
         'intertine_expenses',
         'leasing_options',
+        'vehicle_photo_path',
     ];
 
     protected function casts(): array

@@ -9,7 +9,7 @@
     <a href="{{ route('transactions.index') }}" class="btn btn-secondary">← Kembali ke transaksi</a>
 </div>
 <form action="{{ $isEditing ? route('transactions.update', $transaction) : route('transactions.store') }}" method="POST"
-    class="transaction-form">
+    enctype="multipart/form-data" class="transaction-form">
     @csrf
     @if ($isEditing)
         @method('PUT')
@@ -29,7 +29,10 @@
     @include('transactions.partials.sales-fields', ['transaction' => $transaction])
     @include('transactions.partials.costs-fields', ['transaction' => $transaction])
 
-    @include('transactions.partials.leasing-options', ['transaction' => $transaction])
+    <div class="leasing-photo-layout">
+        @include('transactions.partials.leasing-options', ['transaction' => $transaction])
+        @include('transactions.partials.vehicle-photo', ['transaction' => $transaction])
+    </div>
 
     <div class="form-actions"><a href="{{ route('transactions.index') }}" class="btn btn-secondary">Batal</a><button
             type="submit" class="btn btn-accent">{{ $isEditing ? 'Simpan perubahan' : 'Simpan transaksi' }}</button>
