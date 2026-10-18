@@ -12,8 +12,23 @@ class CarTransactionController extends Controller
     public function index(): View
     {
         $transactions = CarTransaction::latest()->get();
+        $stockCount = $transactions->whereNull('sell_date')->count();
+        $soldTransactions = $transactions->whereNotNull('sell_date');
+        $soldCount = $soldTransactions->count();
+        $recordedCapital = $transactions->sum('total_capital');
+        $soldRevenue = $soldTransactions->sum('selling_price');
+        $soldCapital = $soldTransactions->sum('total_capital');
+        $soldNetProfit = $soldTransactions->sum('net_profit');
 
-        return view('transactions.index', compact('transactions'));
+        return view('transactions.index', compact(
+            'transactions',
+            'stockCount',
+            'soldCount',
+            'recordedCapital',
+            'soldRevenue',
+            'soldCapital',
+            'soldNetProfit',
+        ));
     }
 
     public function create(): View

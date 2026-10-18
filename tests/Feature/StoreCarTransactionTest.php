@@ -88,14 +88,56 @@ test('it renders the dashboard action without a global header', function () {
 
     $response->assertOk()
         ->assertDontSee('<header class="app-header"', false)
-        ->assertSee('class="btn dashboard-create"', false)
+        ->assertSee('class="showroom-primary-action"', false)
         ->assertSee('Transaksi baru', false);
 
     expect(substr_count($response->getContent(), 'href="'.route('transactions.create').'"'))->toBe(1);
 
     $this->get(route('transactions.create'))
         ->assertOk()
-        ->assertDontSee('class="dashboard-create"', false);
+        ->assertDontSee('class="showroom-primary-action"', false);
+});
+
+test('it separates inventory and sales views and reports sold vehicle totals', function () {
+    CarTransaction::create([
+        'plate_number' => 'B 1111 STK',
+        'brand' => 'Toyota',
+        'model' => 'Avanza',
+        'year' => 2021,
+        'transmission' => 'Automatic',
+        'color' => 'Hitam',
+        'buy_date' => '2026-09-01',
+        'buy_price' => 50000000,
+    ]);
+
+    CarTransaction::create([
+        'plate_number' => 'B 2222 SLD',
+        'brand' => 'Honda',
+        'model' => 'Civic',
+        'year' => 2022,
+        'transmission' => 'Automatic',
+        'color' => 'Putih',
+        'buy_date' => '2026-08-01',
+        'sell_date' => '2026-09-15',
+        'buy_price' => 100000000,
+        'selling_price' => 120000000,
+    ]);
+
+    $response = $this->get(route('transactions.index'));
+
+    $response->assertOk()
+        ->assertSee('data-dashboard-nav="inventory"', false)
+        ->assertSee('data-dashboard-nav="sales"', false)
+        ->assertSee('data-dashboard-nav="reports"', false)
+        ->assertSee('id="inventaris"', false)
+        ->assertSee('id="penjualan"', false)
+        ->assertSee('id="laporan"', false)
+        ->assertSee('data-status="stock"', false)
+        ->assertSee('data-status="sold"', false)
+        ->assertSee('Kendaraan terjual')
+        ->assertSee('Rp 120,000,000')
+        ->assertSee('Rp 100,000,000')
+        ->assertSee('Rp 18,000,000');
 });
 
 test('it keeps purchase fields mapped to separate stored values', function () {
@@ -113,6 +155,187 @@ test('it keeps purchase fields mapped to separate stored values', function () {
     expect(substr_count($content, 'name="buy_price"'))->toBe(1)
         ->and(substr_count($content, 'name="buy_date"'))->toBe(1)
         ->and(substr_count($content, 'name="purchase_operational"'))->toBe(1);
+});
+
+test('it renders the optional primary tax cost empty with a zero placeholder', function () {
+    $response = $this->get(route('transactions.create'));
+
+    $response->assertOk();
+    preg_match('/<input id="tax-price"[^>]*>/', $response->getContent(), $matches);
+
+    expect($matches)->not->toBeEmpty()
+        ->and($matches[0])->toContain('placeholder="Rp 0"')
+        ->not->toContain('value="0"')
+        ->not->toContain('required');
+});
+
+test('it renders empty vehicle and sales fields with illustrative placeholders', function () {
+    $response = $this->get(route('transactions.create'));
+
+    $response->assertOk()
+        ->assertSee('id="leasing-vehicle-name">Lengkapi data kendaraan</strong>', false);
+
+    $content = $response->getContent();
+    $placeholders = [
+        'plate_number' => 'Contoh: B 1234 CD',
+        'brand' => 'Contoh: Toyota',
+        'model' => 'Contoh: Innova Diesel G',
+        'year' => 'Contoh: 2014',
+        'transmission' => 'Contoh: Manual',
+        'color' => 'Contoh: Hitam',
+        'chassis_number' => 'Masukkan nomor rangka',
+        'engine_number' => 'Masukkan nomor mesin',
+        'mileage_km' => 'Contoh: 85000',
+        'owner_name' => 'Nama pemilik pada STNK',
+        'manager_name' => 'Nama penanggung jawab',
+        'buy_price' => 'Rp 0',
+        'purchase_operational' => 'Rp 0',
+        'other_costs' => 'Rp 0',
+        'tax_items[0][cost]' => 'Rp 0',
+        'tax_items[1][cost]' => 'Rp 0',
+        'tax_items[2][cost]' => 'Rp 0',
+        'additional_repairs[0][name]' => 'Nama perbaikan',
+        'additional_repairs[0][cost]' => 'Rp 0',
+        'setor_price' => 'Rp 0',
+        'opening_price' => 'Rp 0',
+        'selling_price' => 'Rp 0',
+        'down_payment' => 'Rp 0',
+        'settlement_amount' => 'Rp 0',
+        'leasing_disbursement' => 'Rp 0',
+        'leasing_ripan' => 'Rp 0',
+        'insurance_ripan' => 'Rp 0',
+        'booster_ripan' => 'Rp 0',
+        'intertine_expenses[0][cost]' => 'Rp 0',
+        'intertine_expenses[1][cost]' => 'Rp 0',
+        'intertine_expenses[2][cost]' => 'Rp 0',
+        'leasing_options[0][disbursement]' => 'Rp 0',
+    ];
+
+    foreach ($placeholders as $name => $placeholder) {
+        preg_match('/<input\b(?=[^>]*\bname="'.preg_quote($name, '/').'")[^>]*>/s', $content, $matches);
+
+        expect($matches)->not->toBeEmpty()
+            ->and($matches[0])->toContain('value=""')
+            ->toContain('placeholder="'.$placeholder.'"');
+    }
+});
+
+test('it stores leasing simulations and restores their values when editing a transaction', function () {
+    $leasingOptions = [
+        [
+            'name' => 'BCA',
+            'disbursement' => 93000000,
+            'selling_price' => 150000000,
+            'dp' => 57000000,
+            'installment_3yr' => 2300000,
+            'installment_4yr' => 2150000,
+            'installment_5yr' => 2000000,
+        ],
+    ];
+
+    $response = $this->post(route('transactions.store'), [
+        'plate_number' => 'B 1234 CD',
+        'brand' => 'TOYOTA',
+        'model' => 'INNOVA',
+        'year' => 2014,
+        'transmission' => 'MANUAL',
+        'color' => 'HITAM',
+        'buy_date' => '2026-10-12',
+        'buy_price' => 500000,
+        'leasing_options' => $leasingOptions,
+    ]);
+
+    $response->assertRedirect(route('transactions.index'));
+
+    $transaction = CarTransaction::query()->firstOrFail();
+    $this->assertModelExists($transaction);
+    expect($transaction->leasing_options)->toBe($leasingOptions);
+
+    $this->get(route('transactions.edit', $transaction))
+        ->assertOk()
+        ->assertSee('name="leasing_options[0][disbursement]"', false)
+        ->assertSee('value="93000000"', false);
+});
+
+test('it renders every leasing option inside a dedicated form card', function () {
+    $response = $this->get(route('transactions.create'));
+
+    $response->assertOk()
+        ->assertSee('class="form-section leasing-card-wrapper"', false)
+        ->assertSee('<h2 id="leasing-card-title">Pilihan leasing</h2>', false)
+        ->assertSee('class="section-number">05</span>', false)
+        ->assertSee('BCA', false)
+        ->assertSee('MUF', false)
+        ->assertSee('BUANA', false)
+        ->assertSee('ADIRA', false)
+        ->assertSee('SINAR MAS', false)
+        ->assertSee('WORI', false)
+        ->assertSee('WOM', false)
+        ->assertSee('id="leasing-vehicle-name"', false)
+        ->assertSee('Lengkapi data kendaraan', false)
+        ->assertSee('data-leasing-disbursement', false)
+        ->assertSee('data-leasing-selling-price', false)
+        ->assertSee('data-leasing-dp', false)
+        ->assertSee('readonly', false)
+        ->assertSee('name="leasing_options[6][installment_5yr]"', false)
+        ->assertDontSee('Simulasi pembiayaan')
+        ->assertDontSee('Data kendaraan akan ditampilkan di sini');
+});
+
+test('it renders the leasing vehicle summary from old vehicle input', function () {
+    $response = $this->withSession([
+        '_old_input' => [
+            'brand' => 'HONDA',
+            'model' => 'CIVIC',
+            'year' => '2022',
+            'transmission' => 'AUTOMATIC',
+            'color' => 'PUTIH',
+            'plate_number' => 'B 5678 EF',
+        ],
+    ])->get(route('transactions.create'));
+
+    $response->assertOk()
+        ->assertSee('HONDA CIVIC 2022 AUTOMATIC PUTIH B 5678 EF', false);
+});
+
+test('it rejects negative leasing amounts without saving a transaction', function () {
+    $response = $this->from(route('transactions.create'))->post(route('transactions.store'), [
+        'plate_number' => 'B 1234 CD',
+        'brand' => 'TOYOTA',
+        'model' => 'INNOVA',
+        'year' => 2014,
+        'transmission' => 'MANUAL',
+        'color' => 'HITAM',
+        'buy_date' => '2026-10-12',
+        'buy_price' => 500000,
+        'leasing_options' => [
+            ['name' => 'BCA', 'dp' => -1],
+        ],
+    ]);
+
+    $response->assertRedirect(route('transactions.create'))
+        ->assertSessionHasErrors('leasing_options.0.dp');
+    $this->assertDatabaseCount('car_transactions', 0);
+});
+
+test('it rejects unrecognized leasing fields without saving a transaction', function () {
+    $response = $this->from(route('transactions.create'))->post(route('transactions.store'), [
+        'plate_number' => 'B 1234 CD',
+        'brand' => 'TOYOTA',
+        'model' => 'INNOVA',
+        'year' => 2014,
+        'transmission' => 'MANUAL',
+        'color' => 'HITAM',
+        'buy_date' => '2026-10-12',
+        'buy_price' => 500000,
+        'leasing_options' => [
+            ['name' => 'BCA', 'dp' => 1000000, 'total_capital' => 999999999],
+        ],
+    ]);
+
+    $response->assertRedirect(route('transactions.create'))
+        ->assertSessionHasErrors('leasing_options.0');
+    $this->assertDatabaseCount('car_transactions', 0);
 });
 
 test('it renders read-only setor profit and percentage calculations', function () {
@@ -133,7 +356,6 @@ test('it renders read-only setor profit and percentage calculations', function (
         ->assertSee('class="form-group selling-price-group"', false)
         ->assertSee('class="selling-price-inputs"', false)
         ->assertSee('id="calculated-sale-profit"', false)
-        ->assertSee('id="calculated-sale-profit-percentage"', false)
         ->assertSee('id="sell-date"', false)
         ->assertSee('name="down_payment_date"', false)
         ->assertSee('name="settlement_date"', false)
@@ -141,10 +363,8 @@ test('it renders read-only setor profit and percentage calculations', function (
         ->assertDontSee('<label for="calculated-sale-profit">')
         ->assertDontSee('<label for="sell-date">')
         ->assertSee('aria-label="Selisih harga setor dengan modal (Rupiah)"', false)
-        ->assertSee('aria-label="Harga setor sebagai persentase dari total pengeluaran"', false)
-        ->assertSee('const saleProfitPercentage = totalCapital === 0 ? 0 : (salePrice / totalCapital) * 100;')
-        ->assertSee('const setorProfitPercentage = totalCapital === 0 ? 0 : (setorPrice / totalCapital) * 100;')
-        ->assertSee('const openingProfitPercentage = totalCapital === 0 ? 0 : (openingPrice / totalCapital) * 100;');
+        ->assertSee('aria-label="Persentase selisih harga setor dari modal"', false)
+        ->assertSee('aria-label="Persentase selisih harga buka dari modal"', false);
 });
 
 test('it ignores the untouched empty repair row when saving a transaction', function () {
@@ -242,6 +462,29 @@ test('it stores zero for empty numeric inputs and costs on populated expense row
         ->and((int) $mileageColumn['default'])->toBe(0);
 });
 
+test('it stores zero when the primary tax cost and date are left empty', function () {
+    $response = $this->post(route('transactions.store'), [
+        'plate_number' => 'B 1234 CD',
+        'brand' => 'TOYOTA',
+        'model' => 'INNOVA',
+        'year' => 2014,
+        'transmission' => 'MANUAL',
+        'color' => 'HITAM',
+        'buy_date' => '2026-10-12',
+        'buy_price' => 500000,
+        'tax_items' => [
+            ['name' => 'Pajak', 'date' => '', 'cost' => ''],
+        ],
+    ]);
+
+    $response->assertRedirect(route('transactions.index'));
+
+    $transaction = CarTransaction::query()->firstOrFail();
+    expect($transaction->tax_items)->toBe([
+        ['name' => 'Pajak', 'date' => null, 'cost' => 0],
+    ]);
+});
+
 test('it stores payment dates and displays them on the transaction receipt', function () {
     $response = $this->post(route('transactions.store'), [
         'plate_number' => 'B 1234 CD',
@@ -275,6 +518,124 @@ test('it stores payment dates and displays them on the transaction receipt', fun
         ->assertSee('2026-10-13')
         ->assertSee('2026-10-14')
         ->assertSee('2026-10-15');
+});
+
+test('it renders the receipt sections in order and displays the selling price references', function () {
+    $transaction = CarTransaction::create([
+        'plate_number' => 'B 1234 CD',
+        'brand' => 'TOYOTA',
+        'model' => 'INNOVA',
+        'year' => 2014,
+        'transmission' => 'MANUAL',
+        'color' => 'HITAM',
+        'buy_date' => '2026-10-12',
+        'buy_price' => 500000,
+        'setor_price' => 1000000,
+        'opening_price' => 1200000,
+        'selling_price' => 1100000,
+        'leasing_ripan' => 20000,
+        'insurance_ripan' => 10000,
+        'booster_ripan' => 5000,
+    ]);
+
+    $response = $this->get(route('transactions.show', $transaction));
+
+    $response->assertOk()
+        ->assertSee('Harga Setor')
+        ->assertSee('Harga Buka')
+        ->assertSee('Kalkulasi Laba Penjualan dan Ripan')
+        ->assertSee('Pengeluaran Intertine')
+        ->assertSee('1,000,000')
+        ->assertSee('1,200,000')
+        ->assertSee('500,000')
+        ->assertSee('635,000');
+
+    $content = $response->getContent();
+    $sectionPositions = [
+        strpos($content, 'class="receipt-body"'),
+        strpos($content, 'class="receipt-price-reference"'),
+        strpos($content, 'class="receipt-dark-section"'),
+        strpos($content, 'class="receipt-profit receipt-profit-calculation"'),
+        strpos($content, 'class="receipt-profit receipt-profit-summary"'),
+    ];
+
+    expect($sectionPositions)->not->toContain(false)
+        ->and($sectionPositions[0])->toBeLessThan($sectionPositions[1])
+        ->and($sectionPositions[1])->toBeLessThan($sectionPositions[2])
+        ->and($sectionPositions[2])->toBeLessThan($sectionPositions[3])
+        ->and($sectionPositions[3])->toBeLessThan($sectionPositions[4]);
+});
+
+test('it displays leasing prices beside the receipt as separate vehicle information', function () {
+    $leasingOptions = [
+        [
+            'name' => 'BCA',
+            'disbursement' => 93000000,
+            'selling_price' => 150000000,
+            'dp' => 57000000,
+            'installment_3yr' => 2300000,
+            'installment_4yr' => 2150000,
+            'installment_5yr' => 2000000,
+        ],
+        [
+            'name' => 'MUF',
+            'disbursement' => null,
+            'selling_price' => null,
+            'dp' => null,
+            'installment_3yr' => null,
+            'installment_4yr' => null,
+            'installment_5yr' => null,
+        ],
+    ];
+    $transaction = CarTransaction::create([
+        'plate_number' => 'B 1234 CD',
+        'brand' => 'TOYOTA',
+        'model' => 'INNOVA',
+        'year' => 2014,
+        'transmission' => 'MANUAL',
+        'color' => 'HITAM',
+        'buy_date' => '2026-10-12',
+        'buy_price' => 500000,
+        'leasing_options' => $leasingOptions,
+    ]);
+
+    $response = $this->get(route('transactions.show', $transaction));
+
+    $response->assertOk()
+        ->assertSee('page-shell--receipt', false)
+        ->assertSee('class="vehicle-detail-layout"', false)
+        ->assertSee('class="vehicle-leasing-panel"', false)
+        ->assertSee('Informasi pelengkap kendaraan')
+        ->assertSee('Harga Leasing')
+        ->assertSee('BCA')
+        ->assertSee('93,000,000')
+        ->assertSee('2,300,000')
+        ->assertSee('MUF')
+        ->assertDontSee('Belum ada detail harga leasing untuk kendaraan ini.')
+        ->assertDontSee('receipt-leasing', false)
+        ->assertDontSee('receipt-leasing-scroll', false);
+
+    preg_match('/<tr>\s*<th scope="row">MUF<\/th>(.*?)<\/tr>/s', $response->getContent(), $emptyOptionRow);
+
+    expect($emptyOptionRow)->not->toBeEmpty()
+        ->and(preg_match_all('/<td[^>]*>\s*-\s*<\/td>/s', $emptyOptionRow[1]))->toBe(6);
+});
+
+test('it shows an empty state when a transaction has no leasing prices', function () {
+    $transaction = CarTransaction::create([
+        'plate_number' => 'B 1234 CD',
+        'brand' => 'TOYOTA',
+        'model' => 'INNOVA',
+        'year' => 2014,
+        'transmission' => 'MANUAL',
+        'color' => 'HITAM',
+        'buy_date' => '2026-10-12',
+        'buy_price' => 500000,
+    ]);
+
+    $this->get(route('transactions.show', $transaction))
+        ->assertOk()
+        ->assertSee('Belum ada detail harga leasing untuk kendaraan ini.');
 });
 
 test('it saves manual intertine expense fields and calculates the net profit', function () {
@@ -499,7 +860,7 @@ test('it displays transaction values under the matching list columns', function 
         ->assertSee('<th class="numeric">Laba stor</th>', false)
         ->assertSee('<th class="numeric">Laba deal</th>', false)
         ->assertSee('<th>Aksi</th>', false)
-        ->assertSee('aria-label="Lihat nota B 9876 XYZ"', false)
+        ->assertSee('aria-label="Lihat detail B 9876 XYZ"', false)
         ->assertSee('aria-label="Edit transaksi B 9876 XYZ"', false)
         ->assertSee('aria-label="Hapus transaksi B 9876 XYZ"', false)
         ->assertSee('B 9876 XYZ')

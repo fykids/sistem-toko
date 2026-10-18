@@ -41,6 +41,7 @@ class CarTransaction extends Model
         'additional_repairs',
         'tax_items',
         'intertine_expenses',
+        'leasing_options',
     ];
 
     protected function casts(): array
@@ -49,6 +50,7 @@ class CarTransaction extends Model
             'additional_repairs' => 'array',
             'tax_items' => 'array',
             'intertine_expenses' => 'array',
+            'leasing_options' => 'array',
         ];
     }
 

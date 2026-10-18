@@ -7,7 +7,7 @@ Aplikasi pencatatan transaksi kendaraan berbasis Laravel. Aplikasi menyediakan d
 - PHP 8.3 atau lebih baru yang didukung proyek, dan Composer 2
 - Laravel 13
 - Node.js 22 dan npm
-- SQLite untuk pengembangan lokal (MySQL dapat dipilih melalui konfigurasi `.env`)
+- SQLite sebagai basis data aplikasi
 
 ## Menyiapkan lingkungan Windows dengan Laragon
 

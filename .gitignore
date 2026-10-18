@@ -15,6 +15,7 @@
 /auth.json
 /.mcp.json
 /node_modules
+/nativephp
 /public/build
 /public/fonts-manifest.dev.json
 /public/hot

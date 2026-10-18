@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreCarTransactionRequest extends FormRequest
 {
@@ -13,6 +14,14 @@ class StoreCarTransactionRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        $leasingOptions = $this->input('leasing_options');
+
+        if ($leasingOptions === null) {
+            $this->merge(['leasing_options' => []]);
+        } elseif (is_array($leasingOptions)) {
+            $this->merge(['leasing_options' => array_values($leasingOptions)]);
+        }
+
         foreach ([
             'additional_repairs' => ['name', 'date', 'cost', 'payment_status', 'payment_note'],
             'tax_items' => ['date', 'cost'],
@@ -38,8 +47,12 @@ class StoreCarTransactionRequest extends FormRequest
                 }
 
                 $this->merge([
-                    $field => array_filter($items, static function ($item) use ($meaningfulKeys): bool {
+                    $field => array_filter($items, static function ($item) use ($field, $meaningfulKeys): bool {
                         if (! is_array($item)) {
+                            return true;
+                        }
+
+                        if ($field === 'tax_items' && strtolower($item['name'] ?? '') === 'pajak') {
                             return true;
                         }
 
@@ -148,6 +161,20 @@ class StoreCarTransactionRequest extends FormRequest
             'intertine_expenses.*' => ['array:name,cost'],
             'intertine_expenses.*.name' => ['required', 'string', 'max:100'],
             'intertine_expenses.*.cost' => ['required', 'numeric', 'min:0'],
+            'leasing_options' => ['nullable', 'array', 'max:7'],
+            'leasing_options.*' => ['array:name,disbursement,selling_price,dp,installment_3yr,installment_4yr,installment_5yr'],
+            'leasing_options.*.name' => [
+                'required',
+                'string',
+                'distinct:strict',
+                Rule::in(['BCA', 'MUF', 'BUANA', 'ADIRA', 'SINAR MAS', 'WORI', 'WOM']),
+            ],
+            'leasing_options.*.disbursement' => ['nullable', 'numeric', 'min:0'],
+            'leasing_options.*.selling_price' => ['nullable', 'numeric', 'min:0'],
+            'leasing_options.*.dp' => ['nullable', 'numeric', 'min:0'],
+            'leasing_options.*.installment_3yr' => ['nullable', 'numeric', 'min:0'],
+            'leasing_options.*.installment_4yr' => ['nullable', 'numeric', 'min:0'],
+            'leasing_options.*.installment_5yr' => ['nullable', 'numeric', 'min:0'],
         ];
     }
 }
