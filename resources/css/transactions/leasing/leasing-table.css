@@ -1,0 +1,228 @@
+.leasing-section-content {
+    padding: 16px 18px 19px;
+}
+
+.leasing-card-wrapper .section-heading {
+    flex-wrap: wrap;
+}
+
+.leasing-vehicle-summary {
+    display: grid;
+    gap: 2px;
+    min-width: min(250px, 100%);
+    max-width: 390px;
+    margin-left: auto;
+    padding: 8px 11px;
+    border: 1px solid var(--color-border-primary-soft);
+    border-radius: var(--radius-summary);
+    background: var(--color-surface);
+}
+
+.leasing-vehicle-summary span {
+    color: var(--leasing-muted);
+    font-size: var(--font-size-caption);
+    font-weight: 800;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+}
+
+.leasing-vehicle-summary strong {
+    overflow-wrap: anywhere;
+    color: var(--leasing-green);
+    font-size: var(--font-size-md);
+    line-height: 1.35;
+}
+
+.leasing-table-responsive {
+    overflow-x: auto;
+    border: 1px solid var(--leasing-line);
+    border-radius: var(--radius-table);
+    overscroll-behavior-inline: contain;
+    scrollbar-color: var(--color-scrollbar-thumb) var(--color-scrollbar-track);
+    scrollbar-width: thin;
+}
+
+.leasing-custom-table {
+    width: 100%;
+    min-width: 890px;
+    border-collapse: separate;
+    border-spacing: 0;
+    color: var(--leasing-ink);
+    font-size: var(--font-size-md);
+}
+
+.leasing-custom-table caption {
+    padding: 0;
+}
+
+.leasing-custom-table th,
+.leasing-custom-table td {
+    height: 53px;
+    padding: 7px 9px;
+    border-right: 1px solid var(--color-border-subtle);
+    border-bottom: 1px solid var(--color-border-subtle);
+    text-align: center;
+    vertical-align: middle;
+}
+
+.leasing-custom-table thead th {
+    background: var(--color-surface-form-heading);
+    color: var(--color-text-strong);
+    font-size: var(--font-size-xs);
+    font-weight: 800;
+    letter-spacing: .045em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.leasing-custom-table thead tr:first-child th {
+    height: 39px;
+}
+
+.leasing-custom-table thead tr:nth-child(2) th {
+    height: 31px;
+    background: var(--color-surface-table-heading);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-caption);
+}
+
+.leasing-custom-table tr > :last-child {
+    border-right: 0;
+}
+
+.leasing-custom-table tbody tr:last-child > * {
+    border-bottom: 0;
+}
+
+.leasing-custom-table tbody tr:nth-child(even) {
+    background: var(--color-surface-muted);
+}
+
+.leasing-custom-table tbody tr:hover {
+    background: var(--color-surface-hover);
+}
+
+.leasing-custom-table .th-leasing-name,
+.leasing-custom-table .td-leasing-label {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    width: 132px;
+    min-width: 132px;
+    text-align: left;
+}
+
+.leasing-custom-table .th-leasing-name {
+    z-index: 2;
+    background: var(--color-surface-primary-muted);
+}
+
+.leasing-custom-table .td-leasing-label {
+    background: var(--color-surface);
+}
+
+.leasing-custom-table tbody tr:nth-child(even) .td-leasing-label {
+    background: var(--color-surface-muted);
+}
+
+.leasing-custom-table tbody tr:hover .td-leasing-label {
+    background: var(--color-surface-hover);
+}
+
+.leasing-company-name {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 4px 8px;
+    border: 1px solid var(--color-border-primary);
+    border-radius: var(--radius-sm);
+    background: var(--color-primary-subtle);
+    color: var(--leasing-green);
+    font-size: var(--font-size-xs);
+    font-weight: 800;
+    letter-spacing: .035em;
+    white-space: nowrap;
+}
+
+.leasing-custom-table .leasing-input {
+    display: block;
+    width: 100%;
+    min-width: 98px;
+    min-height: 36px;
+    padding: 6px 8px;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    outline: none;
+    background: var(--color-surface);
+    color: var(--leasing-ink);
+    font: inherit;
+    font-size: var(--font-size-md);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+
+.leasing-custom-table .leasing-input::placeholder {
+    color: var(--color-placeholder);
+    opacity: 1;
+}
+
+.leasing-custom-table .leasing-input:hover {
+    border-color: var(--color-border-hover);
+}
+
+.leasing-custom-table .leasing-input:focus {
+    border-color: var(--color-primary-focus);
+    outline: 0;
+    background: var(--color-surface);
+    box-shadow: 0 0 0 3px var(--color-primary-focus-ring);
+}
+
+.leasing-custom-table .leasing-input[readonly] {
+    border-color: var(--color-border-muted);
+    background: var(--color-surface-input-readonly);
+    color: var(--color-text-secondary);
+    cursor: default;
+}
+
+.leasing-custom-table .leasing-input[readonly]:focus {
+    border-color: var(--color-border-muted);
+    background: var(--color-surface-input-readonly);
+    box-shadow: none;
+}
+
+.leasing-sr-only {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    clip-path: inset(50%);
+}
+
+@media (max-width: 560px) {
+    .leasing-section-content {
+        padding: 13px;
+    }
+
+    .leasing-vehicle-summary {
+        width: 100%;
+        max-width: none;
+        margin-left: 40px;
+    }
+
+    .leasing-table-responsive {
+        border-radius: var(--radius-control);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .leasing-custom-table .leasing-input {
+        transition: none;
+    }
+}
+

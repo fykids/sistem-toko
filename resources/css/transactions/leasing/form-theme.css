@@ -1,0 +1,173 @@
+.page-shell--transaction-form {
+    --leasing-ink: var(--color-text-primary);
+    --leasing-muted: var(--color-text-secondary);
+    --leasing-line: var(--color-border);
+    --leasing-green: var(--color-primary);
+}
+
+.page-shell--transaction-form .transaction-form .form-section {
+    border: 1px solid var(--color-card-border);
+    border-radius: var(--radius-card);
+    background: var(--color-card-surface);
+    box-shadow: var(--shadow-component-card);
+}
+
+.page-shell--transaction-form .transaction-form .section-heading {
+    border-bottom-color: var(--leasing-line);
+    background: var(--color-surface-form-heading);
+}
+
+.page-shell--transaction-form .transaction-form .section-heading h2 {
+    color: var(--leasing-ink);
+}
+
+.page-shell--transaction-form .transaction-form .section-heading p {
+    color: var(--leasing-muted);
+}
+
+.page-shell--transaction-form .transaction-form .section-number {
+    border-color: var(--color-border-primary);
+    border-radius: var(--radius-control);
+    background: var(--color-primary-subtle);
+    color: var(--leasing-green);
+}
+
+.page-shell--transaction-form .transaction-form .form-group label,
+.page-shell--transaction-form .transaction-form .repair-list-actions {
+    color: var(--color-text-strong);
+}
+
+.page-shell--transaction-form .transaction-form .form-group input:not([type="hidden"]),
+.page-shell--transaction-form .transaction-form .form-group select,
+.page-shell--transaction-form .transaction-form .form-group textarea,
+.page-shell--transaction-form .transaction-form .leasing-custom-table .leasing-input {
+    box-sizing: border-box;
+    min-height: 36px;
+    padding: 6px 8px;
+    border: 1px solid var(--color-control-border);
+    border-radius: var(--radius-input);
+    background-color: var(--color-control-surface);
+    color: var(--leasing-ink);
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-md);
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: normal;
+    transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+
+.page-shell--transaction-form .transaction-form .form-group input:not([type="hidden"]):hover,
+.page-shell--transaction-form .transaction-form .form-group select:hover,
+.page-shell--transaction-form .transaction-form .form-group textarea:hover,
+.page-shell--transaction-form .transaction-form .leasing-custom-table .leasing-input:hover {
+    border-color: var(--color-control-hover-border);
+}
+
+.page-shell--transaction-form .transaction-form .form-group input:not([type="hidden"]):focus,
+.page-shell--transaction-form .transaction-form .form-group select:focus,
+.page-shell--transaction-form .transaction-form .form-group textarea:focus,
+.page-shell--transaction-form .transaction-form .leasing-custom-table .leasing-input:focus {
+    border-color: var(--color-control-focus-border);
+    outline: 0;
+    background: var(--color-surface);
+    box-shadow: 0 0 0 3px var(--color-primary-focus-ring);
+}
+
+.page-shell--transaction-form .transaction-form .form-group input[readonly],
+.page-shell--transaction-form .transaction-form .leasing-custom-table .leasing-input[readonly] {
+    border-color: var(--color-border-muted);
+    background: var(--color-surface-input-readonly);
+    color: var(--color-text-secondary);
+}
+
+.page-shell--transaction-form .transaction-form .form-group input:not([type="hidden"]),
+.page-shell--transaction-form .transaction-form .form-group select,
+.page-shell--transaction-form .transaction-form .form-group textarea,
+.page-shell--transaction-form .transaction-form .leasing-custom-table .leasing-input {
+    font-variant-numeric: tabular-nums;
+}
+
+.page-shell--transaction-form .transaction-form .form-group input::placeholder,
+.page-shell--transaction-form .transaction-form .form-group textarea::placeholder,
+.page-shell--transaction-form .transaction-form .leasing-custom-table .leasing-input::placeholder {
+    font: inherit;
+    color: var(--color-placeholder);
+    opacity: 1;
+}
+
+.page-shell--transaction-form .transaction-form .form-group input[readonly] {
+    font-weight: 500;
+}
+
+.page-shell--transaction-form .transaction-form .form-group input[type="date"]::-webkit-datetime-edit {
+    font: inherit;
+}
+
+.page-shell--transaction-form .transaction-form .form-help {
+    color: var(--leasing-muted);
+}
+
+.page-shell--transaction-form .transaction-form .form-section-title {
+    color: var(--color-text-strong);
+}
+
+.page-shell--transaction-form .transaction-form .repeatable-item {
+    border-color: var(--color-border-subtle);
+    border-top-color: var(--color-primary-border-strong);
+    border-radius: var(--radius-card);
+    background: var(--color-surface-muted);
+}
+
+.page-shell--transaction-form .transaction-form .repeatable-item h5,
+.page-shell--transaction-form .transaction-form .repair-form-labels {
+    color: var(--color-text-strong);
+}
+
+.page-shell--transaction-form .transaction-form .repair-form-row {
+    padding: 8px;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-card);
+    background: var(--color-surface-muted);
+}
+
+.page-shell--transaction-form .transaction-form .repair-row-actions .icon-button {
+    border-color: var(--color-border-strong);
+    border-radius: var(--radius-button);
+    color: var(--leasing-green);
+}
+
+.page-shell--transaction-form .transaction-form .repair-row-actions .icon-button:hover {
+    border-color: var(--color-border-hover);
+    background: var(--color-surface-hover);
+}
+
+.page-shell--transaction-form .transaction-form .form-actions {
+    border-color: var(--leasing-line);
+    border-radius: var(--radius-card);
+    background: var(--color-surface-sticky);
+    box-shadow: var(--shadow-form-sticky);
+}
+
+.page-shell--transaction-form .transaction-form .form-actions .btn:not(.btn-danger):not(.btn-secondary) {
+    border-color: var(--leasing-green);
+    background: var(--leasing-green);
+    color: var(--color-white);
+}
+
+.page-shell--transaction-form .transaction-form .form-actions .btn:not(.btn-danger):not(.btn-secondary):hover {
+    border-color: var(--color-primary-hover);
+    background: var(--color-primary-hover);
+}
+
+.page-shell--transaction-form .transaction-form .form-actions .btn-secondary:not(.btn-danger) {
+    border-color: var(--color-border-strong);
+    background: var(--color-surface);
+    color: var(--color-text-strong);
+}
+
+.page-shell--transaction-form .transaction-form .form-actions .btn-secondary:not(.btn-danger):hover {
+    border-color: var(--color-border-hover);
+    background: var(--color-surface-hover);
+    color: var(--leasing-green);
+}
+

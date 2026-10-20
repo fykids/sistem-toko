@@ -1,0 +1,663 @@
+@media (min-width: 821px) {
+    .page-shell--transaction-form {
+        width: min(100% - 24px, 1480px);
+        padding-top: 8px;
+        padding-bottom: 10px;
+    }
+
+    .page-shell--transaction-form .page-heading {
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+
+    .page-shell--transaction-form .page-eyebrow {
+        margin-bottom: 3px;
+        font-size: var(--font-size-micro);
+    }
+
+    .page-shell--transaction-form h1 {
+        font-size: var(--font-size-display-sm);
+    }
+
+    .page-shell--transaction-form .page-heading .btn {
+        min-height: 32px;
+        padding: 4px 10px;
+        font-size: var(--font-size-sm);
+    }
+
+    .page-shell--transaction-form .transaction-form {
+        width: min(100%, 1400px);
+        gap: 6px;
+    }
+
+    .page-shell--transaction-form .transaction-form .form-section {
+        border-radius: var(--radius-card);
+    }
+
+    .page-shell--transaction-form .transaction-form .section-heading {
+        min-height: 38px;
+        gap: 7px;
+        padding: 6px 10px;
+    }
+
+    .page-shell--transaction-form .transaction-form .section-number {
+        width: 24px;
+        height: 24px;
+        border-radius: var(--radius-compact);
+        font-size: var(--font-size-caption);
+    }
+
+    .page-shell--transaction-form .transaction-form .section-heading h2 {
+        font-size: var(--font-size-body-sm);
+    }
+
+    .page-shell--transaction-form .transaction-form .section-heading p {
+        margin-top: 1px;
+        font-size: var(--font-size-caption);
+        line-height: 1.25;
+    }
+
+    .page-shell--transaction-form .transaction-form .section-content,
+    .page-shell--transaction-form .transaction-form .leasing-section-content {
+        padding: 7px 10px;
+    }
+
+    .page-shell--transaction-form .transaction-form .vehicle-section .section-content {
+        padding: 6px 10px 4px;
+    }
+
+    .page-shell--transaction-form .transaction-form .form-group {
+        margin-bottom: 1px;
+        column-gap: 7px;
+    }
+
+    .page-shell--transaction-form .transaction-form .form-group label,
+    .page-shell--transaction-form .transaction-form .repair-list-actions {
+        font-size: var(--font-size-xs);
+        line-height: 1.2;
+    }
+
+    .page-shell--transaction-form .transaction-form .form-group input:not([type="hidden"]),
+    .page-shell--transaction-form .transaction-form .form-group select,
+    .page-shell--transaction-form .transaction-form .form-group textarea,
+    .page-shell--transaction-form .transaction-form .leasing-custom-table .leasing-input {
+        min-height: 25px;
+        padding: 2px 5px;
+        border-radius: var(--radius-input);
+        font-size: var(--font-size-xs);
+        line-height: 1.2;
+    }
+
+    .page-shell--transaction-form .transaction-form .vehicle-fields .form-group {
+        margin-bottom: 1px;
+    }
+
+    .page-shell--transaction-form .transaction-form .marketing-fields .setor-price-group,
+    .page-shell--transaction-form .transaction-form .marketing-fields .opening-price-group,
+    .page-shell--transaction-form .transaction-form .marketing-fields .selling-price-group {
+        grid-template-columns: minmax(90px, 0.7fr) minmax(0, 1.3fr);
+        column-gap: 7px;
+    }
+
+    .page-shell--transaction-form .transaction-form .setor-price-inputs,
+    .page-shell--transaction-form .transaction-form .opening-price-inputs,
+    .page-shell--transaction-form .transaction-form .selling-price-inputs,
+    .page-shell--transaction-form .transaction-form .marketing-section .sales-fields-row .payment-inputs {
+        gap: 4px;
+    }
+
+    .page-shell--transaction-form .transaction-form .marketing-section .sales-fields-row .form-group {
+        grid-template-columns: minmax(90px, 0.7fr) minmax(0, 1.3fr) !important;
+        column-gap: 7px !important;
+        margin-bottom: 3px !important;
+    }
+
+    .page-shell--transaction-form .transaction-form .marketing-section .sales-fields-row .payment-inputs {
+        grid-template-columns: minmax(0, 1.4fr) minmax(95px, 1fr) !important;
+    }
+
+    .page-shell--transaction-form .transaction-form .repair-list-actions {
+        gap: 6px;
+        margin: 4px 0 5px;
+    }
+
+    .page-shell--transaction-form .transaction-form .repair-form-labels,
+    .page-shell--transaction-form .transaction-form .repair-form-row {
+        gap: 4px;
+    }
+
+    .page-shell--transaction-form .transaction-form .repair-form-row {
+        padding-bottom: 3px;
+    }
+
+    .page-shell--transaction-form .transaction-form .repair-row-actions .icon-button {
+        width: 28px;
+        height: 28px;
+        padding: 5px;
+    }
+
+    .page-shell--transaction-form .transaction-form .leasing-vehicle-summary {
+        gap: 1px;
+        padding: 4px 7px;
+    }
+
+    .page-shell--transaction-form .transaction-form .leasing-vehicle-summary strong {
+        font-size: var(--font-size-xs);
+    }
+
+    .page-shell--transaction-form .transaction-form .leasing-custom-table {
+        font-size: var(--font-size-xs);
+    }
+
+    .page-shell--transaction-form .transaction-form .leasing-custom-table th,
+    .page-shell--transaction-form .transaction-form .leasing-custom-table td {
+        height: 27px;
+        padding: 2px 4px;
+    }
+
+    .page-shell--transaction-form .transaction-form .leasing-custom-table thead tr:first-child th {
+        height: 27px;
+    }
+
+    .page-shell--transaction-form .transaction-form .leasing-custom-table thead tr:nth-child(2) th {
+        height: 22px;
+    }
+
+    .page-shell--transaction-form .transaction-form .leasing-custom-table .td-leasing-label {
+        width: 95px;
+        min-width: 95px;
+    }
+
+    .page-shell--transaction-form .transaction-form .leasing-company-name {
+        min-height: 22px;
+        padding: 2px 5px;
+        font-size: var(--font-size-caption);
+    }
+
+    .page-shell--transaction-form .transaction-form .form-actions {
+        bottom: 6px;
+        gap: 6px;
+        padding: 5px 7px;
+        border-radius: var(--radius-control);
+    }
+
+    .page-shell--transaction-form .transaction-form .form-actions .btn {
+        min-height: 30px;
+        padding: 4px 10px;
+        font-size: var(--font-size-sm);
+    }
+}
+
+@media (min-width: 1101px) {
+    .page-shell--transaction-form .transaction-form {
+        grid-template-columns: minmax(0, .9fr) minmax(0, 1.3fr) minmax(0, 1.15fr) minmax(0, .9fr);
+        align-items: stretch;
+    }
+
+    .page-shell--transaction-form .transaction-form > .vehicle-section,
+    .page-shell--transaction-form .transaction-form > .costs-section,
+    .page-shell--transaction-form .transaction-form > .marketing-section,
+    .page-shell--transaction-form .transaction-form > .sales-section {
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    .page-shell--transaction-form .leasing-custom-table {
+        min-width: 0;
+        table-layout: fixed;
+        font-size: var(--font-size-caption);
+    }
+
+    .page-shell--transaction-form .leasing-custom-table th,
+    .page-shell--transaction-form .leasing-custom-table td {
+        padding-inline: 3px;
+    }
+
+    .page-shell--transaction-form .leasing-custom-table thead th {
+        font-size: var(--font-size-micro);
+        white-space: normal;
+    }
+
+    .page-shell--transaction-form .leasing-custom-table .th-leasing-name,
+    .page-shell--transaction-form .leasing-custom-table .td-leasing-label {
+        width: 14%;
+        min-width: 0;
+    }
+
+    .page-shell--transaction-form .leasing-custom-table .th-disbursement,
+    .page-shell--transaction-form .leasing-custom-table .th-sale-price,
+    .page-shell--transaction-form .leasing-custom-table .th-dp {
+        width: 12%;
+    }
+
+    .page-shell--transaction-form .leasing-custom-table .th-installment-group {
+        width: 50%;
+    }
+
+    .page-shell--transaction-form .leasing-custom-table .leasing-input {
+        min-width: 0;
+        padding-inline: 3px;
+        font-size: var(--font-size-caption);
+    }
+
+    .page-shell--transaction-form .transaction-form > .vehicle-section {
+        grid-column: 1;
+        grid-row: 1;
+        width: 100%;
+        max-width: none;
+    }
+
+    .page-shell--transaction-form .transaction-form > .costs-section {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .page-shell--transaction-form .transaction-form > .marketing-section {
+        grid-column: 3;
+        grid-row: 1;
+    }
+
+    .page-shell--transaction-form .transaction-form > .sales-section {
+        grid-column: 4;
+        grid-row: 1;
+    }
+
+    .page-shell--transaction-form .transaction-form > .leasing-photo-layout {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        align-items: stretch;
+    }
+
+    .page-shell--transaction-form .leasing-photo-layout > .vehicle-photo-card {
+        display: grid;
+        align-self: stretch;
+        height: auto;
+        grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    .page-shell--transaction-form .vehicle-photo-preview-frame {
+        margin-top: auto;
+    }
+
+    .page-shell--transaction-form .transaction-form > .form-actions {
+        grid-column: 1 / -1;
+        grid-row: 3;
+    }
+
+    .page-shell--transaction-form .transaction-form .vehicle-fields {
+        grid-template-columns: minmax(0, 1fr);
+        row-gap: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form .vehicle-fields .form-group {
+        grid-template-columns: 90px minmax(0, 220px);
+        max-width: 316px;
+        column-gap: 6px;
+    }
+
+    .page-shell--transaction-form .transaction-form .vehicle-fields .form-group input:not([type="hidden"]),
+    .page-shell--transaction-form .transaction-form .vehicle-fields .form-group select {
+        width: 100%;
+        max-width: 220px;
+        min-width: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form .vehicle-fields .form-group label {
+        font-size: var(--font-size-caption);
+        line-height: 1.2;
+    }
+
+    .page-shell--transaction-form .transaction-form .section-heading {
+        min-height: 30px;
+        padding: 2px 8px;
+    }
+
+    .page-shell--transaction-form .transaction-form .section-number {
+        width: 19px;
+        height: 19px;
+    }
+
+    .page-shell--transaction-form .transaction-form .section-content,
+    .page-shell--transaction-form .transaction-form .leasing-section-content {
+        padding: 3px 7px;
+    }
+
+    .page-shell--transaction-form .transaction-form .vehicle-section .section-content {
+        padding: 3px 8px 2px;
+    }
+
+    .page-shell--transaction-form .transaction-form .form-group label,
+    .page-shell--transaction-form .transaction-form .repair-list-actions {
+        font-size: var(--font-size-caption);
+        line-height: 1.1;
+    }
+
+    .page-shell--transaction-form .transaction-form .form-group input:not([type="hidden"]),
+    .page-shell--transaction-form .transaction-form .form-group select,
+    .page-shell--transaction-form .transaction-form .form-group textarea {
+        min-height: 20px;
+        padding: 1px 4px;
+        font-size: var(--font-size-xs);
+        line-height: 1.1;
+    }
+
+    .page-shell--transaction-form .transaction-form .leasing-custom-table .leasing-input {
+        min-height: 23px;
+        padding: 2px 4px;
+        font-size: var(--font-size-caption);
+        line-height: 1.2;
+    }
+
+    .page-shell--transaction-form .transaction-form .form-group {
+        margin-bottom: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .field-grid.two-column > .form-group {
+        grid-template-columns: minmax(68px, .85fr) minmax(0, 1fr);
+        column-gap: 4px;
+    }
+
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .field-grid.two-column > .form-group input:not([type="hidden"]),
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .field-grid.two-column > .form-group select {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .field-grid.two-column > .form-group:has(> input[type="date"]) {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .page-shell--transaction-form .transaction-form .marketing-section .sales-fields-row .payment-inputs {
+        grid-template-columns: minmax(0, 1.3fr) minmax(82px, 1fr) !important;
+    }
+
+    .page-shell--transaction-form .transaction-form .marketing-section .sales-fields-row .form-group {
+        grid-template-columns: minmax(86px, .72fr) minmax(0, 1.28fr) !important;
+    }
+
+    .page-shell--transaction-form .transaction-form .repair-form-labels,
+    .page-shell--transaction-form .transaction-form .repair-form-row {
+        gap: 3px;
+    }
+
+    .page-shell--transaction-form .transaction-form .repair-form-labels {
+        font-size: var(--font-size-micro);
+    }
+
+    .page-shell--transaction-form .transaction-form .repair-form-labels .repair-label-actions {
+        width: 24px;
+    }
+
+    .page-shell--transaction-form .transaction-form .repair-row-actions .icon-button {
+        width: 22px;
+        height: 22px;
+        padding: 4px;
+    }
+
+    .page-shell--transaction-form .transaction-form .leasing-table-responsive {
+        overflow-x: hidden;
+    }
+
+    .page-shell--transaction-form .transaction-form .leasing-custom-table {
+        min-width: 0;
+        table-layout: fixed;
+        font-size: var(--font-size-caption);
+    }
+
+    .page-shell--transaction-form .transaction-form .leasing-custom-table .td-leasing-label {
+        width: 78px;
+        min-width: 78px;
+    }
+
+    .page-shell--transaction-form .transaction-form .leasing-custom-table .leasing-input {
+        min-width: 0;
+        font-size: var(--font-size-caption);
+    }
+
+    .page-shell--transaction-form .transaction-form .leasing-company-name {
+        min-height: 19px;
+        padding: 2px 4px;
+        font-size: var(--font-size-micro);
+    }
+}
+
+@media (min-width: 1101px) and (max-height: 900px) {
+    .page-shell--transaction-form {
+        padding-top: 4px;
+        padding-bottom: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form .section-heading h2 {
+        font-size: var(--font-size-md);
+    }
+
+    .page-shell--transaction-form .transaction-form .section-heading p {
+        font-size: var(--font-size-caption);
+        line-height: 1.05;
+    }
+
+    .page-shell--transaction-form .transaction-form .section-number {
+        width: 17px;
+        height: 17px;
+    }
+
+    .page-shell--transaction-form .transaction-form .vehicle-fields .form-group input:not([type="hidden"]),
+    .page-shell--transaction-form .transaction-form .vehicle-fields .form-group select {
+        min-height: 20px;
+        padding: 1px 4px;
+        font-size: var(--font-size-xs);
+    }
+
+    .page-shell--transaction-form .transaction-form > .form-section {
+        border-radius: var(--radius-card);
+    }
+}
+
+@media (min-width: 1280px) {
+    .page-shell--transaction-form .transaction-form .form-group input:not([type="hidden"]),
+    .page-shell--transaction-form .transaction-form .form-group select,
+    .page-shell--transaction-form .transaction-form .form-group textarea {
+        min-height: 30px;
+        padding: 4px 7px;
+        font-size: var(--font-size-sm);
+        line-height: 1.25;
+    }
+
+    .page-shell--transaction-form .transaction-form .vehicle-fields {
+        row-gap: 1px;
+    }
+
+    .page-shell--transaction-form .transaction-form > .costs-section,
+    .page-shell--transaction-form .transaction-form > .marketing-section,
+    .page-shell--transaction-form .transaction-form > .sales-section {
+        min-width: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form .marketing-section .sales-fields-row .form-group {
+        grid-template-columns: minmax(70px, .6fr) minmax(0, 1.4fr) !important;
+    }
+
+    .page-shell--transaction-form .transaction-form .marketing-section .sales-fields-row .payment-inputs {
+        grid-template-columns: minmax(0, 1fr) minmax(55px, .8fr) !important;
+    }
+
+    .page-shell--transaction-form .transaction-form .repair-form-labels {
+        gap: 2px;
+        padding-inline: 2px;
+    }
+
+    .page-shell--transaction-form .costs-section .repair-form-labels,
+    .page-shell--transaction-form .costs-section .repair-form-row {
+        display: grid;
+        grid-template-columns:
+            minmax(0, 1.3fr)
+            minmax(0, 0.9fr)
+            minmax(0, 0.85fr)
+            minmax(0, 1fr)
+            26px;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .page-shell--transaction-form .costs-section .repair-form-row .form-group {
+        min-width: 0;
+    }
+
+    .page-shell--transaction-form .costs-section .repair-row-actions {
+        width: 26px;
+    }
+
+    .page-shell--transaction-form .costs-section .repair-form-list:has(.remove-item[hidden]) .repair-form-labels,
+    .page-shell--transaction-form .costs-section .repair-form-row:has(.remove-item[hidden]) {
+        grid-template-columns:
+            minmax(0, 1.3fr)
+            minmax(0, 0.9fr)
+            minmax(0, 0.85fr)
+            minmax(0, 1fr)
+            0;
+    }
+
+    .page-shell--transaction-form .transaction-form .repair-form-row {
+        gap: 2px;
+        padding: 3px;
+    }
+
+    .page-shell--transaction-form .transaction-form .repair-form-row .form-group {
+        min-width: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form .repair-form-row .form-group input,
+    .page-shell--transaction-form .transaction-form .repair-form-row .form-group select {
+        width: 100%;
+        min-width: 0;
+        padding-inline: 3px;
+        font-size: var(--font-size-caption);
+    }
+
+    .page-shell--transaction-form .transaction-form .repair-form-row label.sr-only {
+        position: fixed;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+    }
+
+    .page-shell--transaction-form .transaction-form .repair-row-actions {
+        align-self: center;
+    }
+}
+
+@media (min-width: 1101px) and (max-width: 1279px) {
+    .page-shell--transaction-form .transaction-form {
+        grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.2fr) repeat(2, minmax(0, 1.05fr));
+    }
+
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .field-grid.two-column {
+        grid-template-columns: minmax(0, 1fr);
+        row-gap: 1px;
+    }
+}
+
+@media (min-width: 1600px) {
+    .page-shell--transaction-form {
+        width: min(calc(100% - 64px), 1760px);
+        margin-inline: auto;
+    }
+
+    .page-shell--transaction-form .transaction-form {
+        width: min(100%, 1680px);
+        grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.25fr) minmax(0, 1.15fr) minmax(0, 1.05fr);
+        gap: clamp(12px, 0.8vw, 18px);
+        margin-inline: auto;
+    }
+
+    .page-shell--transaction-form .transaction-form .vehicle-fields {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 3px 12px;
+    }
+
+    .page-shell--transaction-form .transaction-form .vehicle-fields .form-group {
+        grid-template-columns: minmax(0, 1fr);
+        max-width: none;
+        row-gap: 2px;
+    }
+
+    .page-shell--transaction-form .transaction-form .vehicle-fields .form-group label {
+        font-size: var(--font-size-xs);
+    }
+
+    .page-shell--transaction-form .transaction-form .form-group input:not([type="hidden"]),
+    .page-shell--transaction-form .transaction-form .form-group select,
+    .page-shell--transaction-form .transaction-form .form-group textarea,
+    .page-shell--transaction-form .transaction-form .leasing-custom-table .leasing-input {
+        min-height: 26px;
+        padding: 3px 6px;
+        font-size: var(--font-size-sm);
+    }
+
+    .page-shell--transaction-form .transaction-form .form-group label,
+    .page-shell--transaction-form .transaction-form .repair-list-actions {
+        font-size: var(--font-size-xs);
+    }
+
+    .page-shell--transaction-form .transaction-form .section-heading h2 {
+        font-size: var(--font-size-body);
+    }
+
+    .page-shell--transaction-form .leasing-photo-layout {
+        grid-template-columns: minmax(0, 2fr) minmax(320px, 0.9fr);
+        align-items: stretch;
+        gap: clamp(12px, 0.8vw, 18px);
+    }
+
+    .page-shell--transaction-form .vehicle-photo-card {
+        align-self: stretch;
+        height: auto;
+    }
+}
+
+@media (min-width: 1920px) {
+    .page-shell--transaction-form {
+        width: min(calc(100% - 96px), 2240px);
+    }
+
+    .page-shell--transaction-form .transaction-form {
+        width: min(100%, 2144px);
+        gap: clamp(18px, 1vw, 24px);
+    }
+
+    .page-shell--transaction-form .transaction-form .form-group input:not([type="hidden"]),
+    .page-shell--transaction-form .transaction-form .form-group select,
+    .page-shell--transaction-form .transaction-form .form-group textarea,
+    .page-shell--transaction-form .transaction-form .leasing-custom-table .leasing-input {
+        min-height: 30px;
+        padding: 4px 7px;
+        font-size: var(--font-size-md);
+    }
+
+    .page-shell--transaction-form .transaction-form .form-group label,
+    .page-shell--transaction-form .transaction-form .repair-list-actions {
+        font-size: var(--font-size-sm);
+    }
+}
+
+@media (min-width: 2560px) {
+    .page-shell--transaction-form {
+        width: min(calc(100% - 160px), 2400px);
+    }
+
+    .page-shell--transaction-form .transaction-form {
+        width: min(100%, 2304px);
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.15fr) minmax(0, 1fr);
+        gap: 24px;
+    }
+
+    .page-shell--transaction-form .leasing-photo-layout {
+        grid-template-columns: minmax(0, 2.2fr) minmax(360px, 0.9fr);
+        gap: 24px;
+    }
+}
+
+

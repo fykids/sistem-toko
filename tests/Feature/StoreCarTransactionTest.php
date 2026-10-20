@@ -67,12 +67,18 @@ test('it renders fixed intertine expense fields and totals', function () {
         ->assertDontSee('Pengeluaran Internal');
 
     $content = $response->getContent();
-    $salesSectionStart = strpos($content, '<section class="form-section sales-section">');
+    $vehicleSectionStart = strpos($content, '<section class="form-section vehicle-section">');
     $costSectionStart = strpos($content, '<section class="form-section costs-section">');
+    $marketingSectionStart = strpos($content, '<section class="form-section marketing-section">');
+    $salesSectionStart = strpos($content, '<section class="form-section sales-section">');
+    $salesSectionEnd = strpos($content, '</section>', $salesSectionStart);
+    $salesSection = substr($content, $salesSectionStart, $salesSectionEnd - $salesSectionStart);
 
-    expect($salesSectionStart)->not->toBeFalse()
-        ->and($costSectionStart)->not->toBeFalse()
-        ->and(substr($content, $salesSectionStart, $costSectionStart - $salesSectionStart))
+    expect($vehicleSectionStart)->not->toBeFalse()
+        ->and($costSectionStart)->toBeGreaterThan($vehicleSectionStart)
+        ->and($marketingSectionStart)->toBeGreaterThan($costSectionStart)
+        ->and($salesSectionStart)->toBeGreaterThan($marketingSectionStart)
+        ->and($salesSection)
         ->toContain('id="intertine-expenses"')
         ->toContain('id="calculated-total-intertine-expenses"')
         ->toContain('id="calculated-net-profit"');

@@ -101,36 +101,9 @@
             </header>
 
             <div class="showroom-content">
-                <section class="showroom-hero" id="dashboard" data-dashboard-page="dashboard"
+                <section class="showroom-dashboard-heading" id="dashboard" data-dashboard-page="dashboard"
                     aria-labelledby="dashboard-title">
-                    <div class="showroom-hero-copy">
-                        <p class="showroom-hero-badge"><span aria-hidden="true"></span> Operasional showroom</p>
-                        <h1 id="dashboard-title">Dashboard Showroom</h1>
-                        <p>Pantau inventaris, penjualan, dan modal kendaraan dari satu tempat.</p>
-                    </div>
-                    <a class="showroom-primary-action" href="{{ route('transactions.create') }}">
-                        <span aria-hidden="true">+</span>
-                        Transaksi baru
-                    </a>
-                </section>
-
-                <section class="stats-grid" id="ringkasan" data-dashboard-page="dashboard"
-                    aria-label="Ringkasan transaksi">
-                    <div class="stat-panel">
-                        <span class="stat-label">Kendaraan tercatat</span>
-                        <strong class="stat-value">{{ $transactions->count() }}</strong>
-                        <span class="stat-note">Seluruh transaksi showroom</span>
-                    </div>
-                    <div class="stat-panel">
-                        <span class="stat-label">Tersedia di stok</span>
-                        <strong class="stat-value">{{ $stockCount }}</strong>
-                        <span class="stat-note">Belum memiliki tanggal penjualan</span>
-                    </div>
-                    <div class="stat-panel">
-                        <span class="stat-label">Total modal kendaraan</span>
-                        <strong class="stat-value green">Rp {{ number_format($recordedCapital) }}</strong>
-                        <span class="stat-note">Akumulasi modal seluruh kendaraan</span>
-                    </div>
+                    <h1 id="dashboard-title">Dashboard Showroom</h1>
                 </section>
 
                 <section class="showroom-page-header" id="inventaris" data-dashboard-page="inventory"
@@ -161,6 +134,25 @@
                         <p>Ringkasan modal, omzet, dan laba bersih dari kendaraan yang sudah terjual.</p>
                     </div>
                     <span class="showroom-page-count">Berdasarkan data transaksi</span>
+                </section>
+
+                <section class="stats-grid" id="ringkasan" data-dashboard-page="reports"
+                    aria-label="Ringkasan transaksi" hidden>
+                    <div class="stat-panel">
+                        <span class="stat-label">Kendaraan tercatat</span>
+                        <strong class="stat-value">{{ $transactions->count() }}</strong>
+                        <span class="stat-note">Seluruh transaksi showroom</span>
+                    </div>
+                    <div class="stat-panel">
+                        <span class="stat-label">Tersedia di stok</span>
+                        <strong class="stat-value">{{ $stockCount }}</strong>
+                        <span class="stat-note">Belum memiliki tanggal penjualan</span>
+                    </div>
+                    <div class="stat-panel">
+                        <span class="stat-label">Total modal kendaraan</span>
+                        <strong class="stat-value green">Rp {{ number_format($recordedCapital) }}</strong>
+                        <span class="stat-note">Akumulasi modal seluruh kendaraan</span>
+                    </div>
                 </section>
 
                 <section class="showroom-report-grid" data-dashboard-page="reports"
@@ -238,6 +230,11 @@
                                 <button type="button" data-filter="inventory" aria-pressed="false">Stok</button>
                                 <button type="button" data-filter="sales" aria-pressed="false">Terjual</button>
                             </div>
+                            <a class="showroom-primary-action" href="{{ route('transactions.create') }}"
+                                data-dashboard-page="dashboard">
+                                <span aria-hidden="true">+</span>
+                                Transaksi baru
+                            </a>
                         </div>
                     </div>
                     <div class="table-scroll">

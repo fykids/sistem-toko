@@ -1,0 +1,32 @@
+.leasing-card-wrapper {
+    --leasing-ink: var(--color-text-primary);
+    --leasing-muted: var(--color-text-secondary);
+    --leasing-line: var(--color-border);
+    --leasing-green: var(--color-primary);
+}
+
+.leasing-card-wrapper,
+.leasing-card-wrapper * {
+    box-sizing: border-box;
+}
+
+.leasing-photo-layout {
+    --leasing-ink: var(--color-text-primary);
+    --leasing-muted: var(--color-text-secondary);
+
+    display: grid;
+    align-items: start;
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 17px;
+    min-width: 0;
+}
+
+.transaction-form .leasing-card-wrapper {
+    grid-column: 1 / -1;
+}
+
+.transaction-form .leasing-photo-layout > .leasing-card-wrapper {
+    grid-column: auto;
+}
+

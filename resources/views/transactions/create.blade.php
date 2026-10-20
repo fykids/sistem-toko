@@ -25,9 +25,9 @@
         </div>
     @endif
     @include('transactions.partials.vehicle-fields', ['transaction' => $transaction])
+    @include('transactions.partials.costs-fields', ['transaction' => $transaction])
     @include('transactions.partials.marketing-fields', ['transaction' => $transaction])
     @include('transactions.partials.sales-fields', ['transaction' => $transaction])
-    @include('transactions.partials.costs-fields', ['transaction' => $transaction])
 
     <div class="leasing-photo-layout">
         @include('transactions.partials.leasing-options', ['transaction' => $transaction])

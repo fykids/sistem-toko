@@ -1,0 +1,9 @@
+@media (prefers-reduced-motion: reduce) {
+    .page-shell--transaction-form .transaction-form .form-group input,
+    .page-shell--transaction-form .transaction-form .form-group select,
+    .page-shell--transaction-form .transaction-form .form-group textarea,
+    .page-shell--transaction-form .transaction-form .leasing-custom-table .leasing-input,
+    .page-shell--transaction-form .transaction-form .repair-row-actions .icon-button {
+        transition: none;
+    }
+}
