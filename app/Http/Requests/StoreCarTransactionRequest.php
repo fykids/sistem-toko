@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Models\CarTransaction;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -9,7 +11,18 @@ class StoreCarTransactionRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        $user = $this->user();
+        $transaction = $this->route('transaction');
+
+        if (! $user instanceof User) {
+            return false;
+        }
+
+        if ($transaction instanceof CarTransaction) {
+            return $user->can('update', $transaction);
+        }
+
+        return $user->can('create', CarTransaction::class);
     }
 
     protected function prepareForValidation(): void

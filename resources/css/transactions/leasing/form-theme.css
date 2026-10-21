@@ -3,6 +3,9 @@
     --leasing-muted: var(--color-text-secondary);
     --leasing-line: var(--color-border);
     --leasing-green: var(--color-primary);
+    --transaction-field-label-width: 110px;
+    --transaction-money-input-width: clamp(88px, 8vw, 120px);
+    --transaction-date-input-width: clamp(96px, 8vw, 130px);
 }
 
 .page-shell--transaction-form .transaction-form .form-section {
@@ -170,4 +173,3 @@
     background: var(--color-surface-hover);
     color: var(--leasing-green);
 }
-

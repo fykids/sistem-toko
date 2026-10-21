@@ -204,16 +204,36 @@
         const totalIntertineExpenses = showroomFee + intertineExpenses;
         const netProfit = saleProfit - totalIntertineExpenses;
 
-        calculatedSaleProfitInput.value = rupiahFormatter.format(saleProfit);
-        calculatedTotalProfitInput.value = rupiahFormatter.format(totalProfit);
-        calculatedTotalCapitalInput.value = rupiahFormatter.format(totalCapital);
-        calculatedSetorProfitInput.value = rupiahFormatter.format(setorProfit);
-        calculatedSetorProfitPercentageInput.value = `${rupiahFormatter.format(setorProfitPercentage)}%`;
-        calculatedOpeningProfitInput.value = rupiahFormatter.format(openingProfit);
-        calculatedOpeningProfitPercentageInput.value = `${rupiahFormatter.format(openingProfitPercentage)}%`;
-        calculatedShowroomFeeInput.value = rupiahFormatter.format(showroomFee);
-        calculatedTotalIntertineExpensesInput.value = rupiahFormatter.format(totalIntertineExpenses);
-        calculatedNetProfitInput.value = rupiahFormatter.format(netProfit);
+        if (calculatedSaleProfitInput) {
+            calculatedSaleProfitInput.value = rupiahFormatter.format(saleProfit);
+        }
+        if (calculatedTotalProfitInput) {
+            calculatedTotalProfitInput.value = rupiahFormatter.format(totalProfit);
+        }
+        if (calculatedTotalCapitalInput) {
+            calculatedTotalCapitalInput.value = rupiahFormatter.format(totalCapital);
+        }
+        if (calculatedSetorProfitInput) {
+            calculatedSetorProfitInput.value = rupiahFormatter.format(setorProfit);
+        }
+        if (calculatedSetorProfitPercentageInput) {
+            calculatedSetorProfitPercentageInput.value = `${rupiahFormatter.format(setorProfitPercentage)}%`;
+        }
+        if (calculatedOpeningProfitInput) {
+            calculatedOpeningProfitInput.value = rupiahFormatter.format(openingProfit);
+        }
+        if (calculatedOpeningProfitPercentageInput) {
+            calculatedOpeningProfitPercentageInput.value = `${rupiahFormatter.format(openingProfitPercentage)}%`;
+        }
+        if (calculatedShowroomFeeInput) {
+            calculatedShowroomFeeInput.value = rupiahFormatter.format(showroomFee);
+        }
+        if (calculatedTotalIntertineExpensesInput) {
+            calculatedTotalIntertineExpensesInput.value = rupiahFormatter.format(totalIntertineExpenses);
+        }
+        if (calculatedNetProfitInput) {
+            calculatedNetProfitInput.value = rupiahFormatter.format(netProfit);
+        }
     }
 
     sellingPriceInput.addEventListener('input', updateRemainingPayment);

@@ -1,10 +1,15 @@
 <?php
 
 use App\Models\CarTransaction;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 
 uses(RefreshDatabase::class);
+
+beforeEach(function () {
+    $this->actingAs(User::factory()->master()->create());
+});
 
 test('it renders repair items with a next index after the highest existing index', function () {
     $response = $this->withSession([

@@ -71,6 +71,125 @@
         column-gap: 7px;
     }
 
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .costs-primary-grid,
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .costs-vertical-grid {
+        grid-template-columns: minmax(0, 1fr);
+        row-gap: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .costs-primary-grid > .form-group,
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .costs-vertical-grid > .form-group:not(.tax-cost-group),
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields > .form-group,
+    .page-shell--transaction-form .transaction-form > .marketing-section .sales-fields-row > .form-group {
+        display: grid;
+        grid-template-columns: var(--transaction-field-label-width) minmax(0, 1fr) !important;
+        align-items: center;
+        column-gap: 8px;
+    }
+
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .field-grid > .form-group label,
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields > .form-group > label,
+    .page-shell--transaction-form .transaction-form > .marketing-section .sales-fields-row > .form-group > label {
+        width: var(--transaction-field-label-width);
+        min-width: var(--transaction-field-label-width);
+        margin: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .field-grid > .form-group {
+        margin-bottom: 8px;
+    }
+
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .field-grid > .form-group input:not([type="hidden"]),
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .field-grid > .form-group select {
+        width: var(--transaction-money-input-width);
+        max-width: 100%;
+        min-width: 0;
+        margin-left: auto;
+        justify-self: end;
+    }
+
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .costs-primary-grid > .buy-date-group input[type="date"],
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .costs-vertical-grid > .tax-cost-group input[type="date"],
+    .page-shell--transaction-form .transaction-form > .marketing-section .selling-price-inputs > input[type="date"],
+    .page-shell--transaction-form .transaction-form > .marketing-section .payment-inputs > input[type="date"] {
+        width: var(--transaction-date-input-width) !important;
+        max-width: 100%;
+        min-width: 0;
+        justify-self: end;
+    }
+
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .costs-primary-grid > .buy-date-group:has(input[name="buy_price"]) {
+        grid-template-columns: var(--transaction-field-label-width) minmax(0, 1fr) var(--transaction-date-input-width) !important;
+    }
+
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .costs-vertical-grid > .tax-cost-group {
+        display: grid;
+        grid-template-columns: var(--transaction-field-label-width) minmax(0, 1fr) var(--transaction-date-input-width);
+        align-items: center;
+        gap: 6px;
+    }
+
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .costs-vertical-grid > .tax-cost-group label {
+        width: var(--transaction-field-label-width);
+        min-width: var(--transaction-field-label-width);
+    }
+
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .costs-vertical-grid > .tax-cost-group input:not([type="hidden"]) {
+        width: var(--transaction-money-input-width);
+        max-width: 100%;
+        min-width: 0;
+        justify-self: end;
+    }
+
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .setor-price-inputs,
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .opening-price-inputs,
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .selling-price-inputs {
+        grid-template-columns: var(--transaction-money-input-width) minmax(0, 1fr) minmax(40px, .55fr) !important;
+        align-items: center;
+        justify-content: end;
+        width: 100%;
+        min-width: 0;
+        margin-left: auto;
+    }
+
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .selling-price-inputs {
+        grid-template-columns: var(--transaction-money-input-width) minmax(0, 1fr) var(--transaction-date-input-width) !important;
+    }
+
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .price-inputs--restricted {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .selling-price-inputs--restricted {
+        grid-template-columns: var(--transaction-money-input-width) var(--transaction-date-input-width) !important;
+    }
+
+    .page-shell--transaction-form .transaction-form > .marketing-section .sales-fields-row .payment-inputs {
+        grid-template-columns: var(--transaction-money-input-width) var(--transaction-date-input-width) !important;
+        align-items: center;
+        justify-content: end;
+        width: 100%;
+        min-width: 0;
+        margin-left: auto;
+    }
+
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .setor-price-inputs > input:first-child,
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .opening-price-inputs > input:first-child,
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .selling-price-inputs > input:first-child,
+    .page-shell--transaction-form .transaction-form > .marketing-section .sales-fields-row .payment-inputs > input:first-child {
+        width: var(--transaction-money-input-width) !important;
+        max-width: 100%;
+        min-width: 0;
+        justify-self: end;
+    }
+
+    .page-shell--transaction-form .transaction-form > .marketing-section .sales-fields-row > .form-group > input[data-rupiah-input] {
+        width: var(--transaction-money-input-width) !important;
+        max-width: 100%;
+        min-width: 0;
+        justify-self: end;
+    }
+
     .page-shell--transaction-form .transaction-form .form-group label,
     .page-shell--transaction-form .transaction-form .repair-list-actions {
         font-size: var(--font-size-xs);
@@ -352,21 +471,6 @@
         margin-bottom: 0;
     }
 
-    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .field-grid.two-column > .form-group {
-        grid-template-columns: minmax(68px, .85fr) minmax(0, 1fr);
-        column-gap: 4px;
-    }
-
-    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .field-grid.two-column > .form-group input:not([type="hidden"]),
-    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .field-grid.two-column > .form-group select {
-        width: 100%;
-        min-width: 0;
-    }
-
-    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .field-grid.two-column > .form-group:has(> input[type="date"]) {
-        grid-template-columns: minmax(0, 1fr);
-    }
-
     .page-shell--transaction-form .transaction-form .marketing-section .sales-fields-row .payment-inputs {
         grid-template-columns: minmax(0, 1.3fr) minmax(82px, 1fr) !important;
     }
@@ -562,102 +666,43 @@
 
 @media (min-width: 1600px) {
     .page-shell--transaction-form {
-        width: min(calc(100% - 64px), 1760px);
+        width: min(calc(100% - 24px), 1480px);
         margin-inline: auto;
     }
 
     .page-shell--transaction-form .transaction-form {
-        width: min(100%, 1680px);
-        grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.25fr) minmax(0, 1.15fr) minmax(0, 1.05fr);
-        gap: clamp(12px, 0.8vw, 18px);
+        width: min(100%, 1400px);
+        grid-template-columns: minmax(0, .9fr) minmax(0, 1.3fr) minmax(0, 1.15fr) minmax(0, .9fr);
+        gap: 6px;
         margin-inline: auto;
     }
 
     .page-shell--transaction-form .transaction-form .vehicle-fields {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 3px 12px;
-    }
-
-    .page-shell--transaction-form .transaction-form .vehicle-fields .form-group {
         grid-template-columns: minmax(0, 1fr);
-        max-width: none;
-        row-gap: 2px;
-    }
-
-    .page-shell--transaction-form .transaction-form .vehicle-fields .form-group label {
-        font-size: var(--font-size-xs);
-    }
-
-    .page-shell--transaction-form .transaction-form .form-group input:not([type="hidden"]),
-    .page-shell--transaction-form .transaction-form .form-group select,
-    .page-shell--transaction-form .transaction-form .form-group textarea,
-    .page-shell--transaction-form .transaction-form .leasing-custom-table .leasing-input {
-        min-height: 26px;
-        padding: 3px 6px;
-        font-size: var(--font-size-sm);
-    }
-
-    .page-shell--transaction-form .transaction-form .form-group label,
-    .page-shell--transaction-form .transaction-form .repair-list-actions {
-        font-size: var(--font-size-xs);
-    }
-
-    .page-shell--transaction-form .transaction-form .section-heading h2 {
-        font-size: var(--font-size-body);
-    }
-
-    .page-shell--transaction-form .leasing-photo-layout {
-        grid-template-columns: minmax(0, 2fr) minmax(320px, 0.9fr);
-        align-items: stretch;
-        gap: clamp(12px, 0.8vw, 18px);
-    }
-
-    .page-shell--transaction-form .vehicle-photo-card {
-        align-self: stretch;
-        height: auto;
+        row-gap: 1px;
     }
 }
 
-@media (min-width: 1920px) {
-    .page-shell--transaction-form {
-        width: min(calc(100% - 96px), 2240px);
+@media (min-width: 821px) and (max-width: 1279px) {
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .costs-vertical-grid > .tax-cost-group {
+        grid-template-columns: var(--transaction-field-label-width) minmax(0, 1fr);
     }
 
-    .page-shell--transaction-form .transaction-form {
-        width: min(100%, 2144px);
-        gap: clamp(18px, 1vw, 24px);
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .costs-vertical-grid > .tax-cost-group input[type="date"] {
+        grid-column: 2;
+        justify-self: end;
     }
 
-    .page-shell--transaction-form .transaction-form .form-group input:not([type="hidden"]),
-    .page-shell--transaction-form .transaction-form .form-group select,
-    .page-shell--transaction-form .transaction-form .form-group textarea,
-    .page-shell--transaction-form .transaction-form .leasing-custom-table .leasing-input {
-        min-height: 30px;
-        padding: 4px 7px;
-        font-size: var(--font-size-md);
+    .page-shell--transaction-form .transaction-form > .marketing-section .sales-fields-row .payment-inputs {
+        grid-template-columns: minmax(0, 1fr) !important;
+        justify-items: end;
     }
 
-    .page-shell--transaction-form .transaction-form .form-group label,
-    .page-shell--transaction-form .transaction-form .repair-list-actions {
-        font-size: var(--font-size-sm);
-    }
-}
-
-@media (min-width: 2560px) {
-    .page-shell--transaction-form {
-        width: min(calc(100% - 160px), 2400px);
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .selling-price-inputs {
+        grid-template-columns: var(--transaction-money-input-width) minmax(0, 1fr) !important;
     }
 
-    .page-shell--transaction-form .transaction-form {
-        width: min(100%, 2304px);
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.15fr) minmax(0, 1fr);
-        gap: 24px;
-    }
-
-    .page-shell--transaction-form .leasing-photo-layout {
-        grid-template-columns: minmax(0, 2.2fr) minmax(360px, 0.9fr);
-        gap: 24px;
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .selling-price-inputs > input[type="date"] {
+        grid-column: 1 / -1;
     }
 }
-
-

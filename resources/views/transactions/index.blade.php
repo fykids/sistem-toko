@@ -58,14 +58,27 @@
 
             <div class="showroom-sidebar-divider"></div>
             <p class="showroom-nav-heading">Pengaturan</p>
-            <button class="showroom-nav-link showroom-nav-button" type="button" data-database-open>
-                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <ellipse cx="12" cy="5" rx="8" ry="3" />
-                    <path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" />
-                </svg>
-                <span>Manajemen Database</span>
-            </button>
+            @can('viewAny', \App\Models\User::class)
+                <a class="showroom-nav-link" href="{{ route('users.index') }}">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="10" cy="7" r="4" />
+                        <path d="M20 8v6m3-3h-6" />
+                    </svg>
+                    <span>Manajemen Akun</span>
+                </a>
+            @endcan
+            @can('viewSensitiveData', \App\Models\CarTransaction::class)
+                <button class="showroom-nav-link showroom-nav-button" type="button" data-database-open>
+                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <ellipse cx="12" cy="5" rx="8" ry="3" />
+                        <path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" />
+                    </svg>
+                    <span>Manajemen Database</span>
+                </button>
+            @endcan
 
             <div class="showroom-sidebar-footer">
                 <span class="showroom-status-dot" aria-hidden="true"></span>
@@ -78,26 +91,47 @@
 
         <div class="showroom-main">
             <header class="showroom-topbar">
-                <button class="showroom-menu-toggle" type="button" aria-label="Buka navigasi" aria-expanded="false"
-                    aria-controls="showroom-sidebar" data-sidebar-toggle>
-                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                        stroke-linecap="round">
-                        <path d="M4 7h16M4 12h16M4 17h16" />
-                    </svg>
-                </button>
-                <div class="showroom-topbar-context">
-                    <span>Showroom</span>
-                    <span aria-hidden="true">/</span>
-                    <strong data-current-view-title>Dashboard</strong>
+                <div class="showroom-topbar-inner">
+                    <button class="showroom-menu-toggle" type="button" aria-label="Buka navigasi" aria-expanded="false"
+                        aria-controls="showroom-sidebar" data-sidebar-toggle>
+                        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round">
+                            <path d="M4 7h16M4 12h16M4 17h16" />
+                        </svg>
+                    </button>
+                    <div class="showroom-topbar-context">
+                        <span>Showroom</span>
+                        <span aria-hidden="true">/</span>
+                        <strong data-current-view-title>Dashboard</strong>
+                    </div>
+                    @can('viewSensitiveData', \App\Models\CarTransaction::class)
+                        <button class="showroom-topbar-database" type="button" data-database-open>
+                            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <ellipse cx="12" cy="5" rx="8" ry="3" />
+                                <path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" />
+                            </svg>
+                            <span>Database</span>
+                        </button>
+                    @endcan
+                    <div class="showroom-topbar-account">
+                        <div class="session-user">
+                            <strong>{{ auth()->user()->name }}</strong>
+                            <span class="session-role session-role--{{ auth()->user()->role }}">{{ ucfirst(auth()->user()->role) }}</span>
+                        </div>
+                        <form action="{{ route('logout') }}" method="POST">
+                            @csrf
+                            <button class="session-logout" type="submit" aria-label="Logout">
+                                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M10 17l5-5-5-5M15 12H3" />
+                                    <path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" />
+                                </svg>
+                                <span>Logout</span>
+                            </button>
+                        </form>
+                    </div>
                 </div>
-                <button class="showroom-topbar-database" type="button" data-database-open>
-                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <ellipse cx="12" cy="5" rx="8" ry="3" />
-                        <path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" />
-                    </svg>
-                    <span>Database</span>
-                </button>
             </header>
 
             <div class="showroom-content">
@@ -148,11 +182,13 @@
                         <strong class="stat-value">{{ $stockCount }}</strong>
                         <span class="stat-note">Belum memiliki tanggal penjualan</span>
                     </div>
-                    <div class="stat-panel">
-                        <span class="stat-label">Total modal kendaraan</span>
-                        <strong class="stat-value green">Rp {{ number_format($recordedCapital) }}</strong>
-                        <span class="stat-note">Akumulasi modal seluruh kendaraan</span>
-                    </div>
+                    @can('viewSensitiveData', \App\Models\CarTransaction::class)
+                        <div class="stat-panel">
+                            <span class="stat-label">Total modal kendaraan</span>
+                            <strong class="stat-value green">Rp {{ number_format($recordedCapital) }}</strong>
+                            <span class="stat-note">Akumulasi modal seluruh kendaraan</span>
+                        </div>
+                    @endcan
                 </section>
 
                 <section class="showroom-report-grid" data-dashboard-page="reports"
@@ -181,33 +217,35 @@
                         <strong>Rp {{ number_format($soldRevenue) }}</strong>
                         <span class="showroom-report-note">Akumulasi harga jual kendaraan terjual</span>
                     </article>
-                    <article class="showroom-report-card">
-                        <span class="showroom-report-icon showroom-report-icon--capital" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <ellipse cx="12" cy="5" rx="8" ry="3" />
-                                <path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" />
-                            </svg>
-                        </span>
-                        <span class="showroom-report-label">Modal kendaraan terjual</span>
-                        <strong>Rp {{ number_format($soldCapital) }}</strong>
-                        <span class="showroom-report-note">Modal pembelian dan biaya kendaraan</span>
-                    </article>
-                    <article class="showroom-report-card">
-                        <span class="showroom-report-icon showroom-report-icon--profit" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <path d="m4 16 6-6 4 4 6-8" />
-                                <path d="M14 6h6v6" />
-                                <path d="M4 20h16" />
-                            </svg>
-                        </span>
-                        <span class="showroom-report-label">Laba bersih</span>
-                        <strong class="{{ $soldNetProfit >= 0 ? 'is-positive' : 'is-negative' }}">
-                            Rp {{ number_format($soldNetProfit) }}
-                        </strong>
-                        <span class="showroom-report-note">Setelah biaya internal showroom</span>
-                    </article>
+                    @can('viewSensitiveData', \App\Models\CarTransaction::class)
+                        <article class="showroom-report-card">
+                            <span class="showroom-report-icon showroom-report-icon--capital" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <ellipse cx="12" cy="5" rx="8" ry="3" />
+                                    <path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" />
+                                </svg>
+                            </span>
+                            <span class="showroom-report-label">Modal kendaraan terjual</span>
+                            <strong>Rp {{ number_format($soldCapital) }}</strong>
+                            <span class="showroom-report-note">Modal pembelian dan biaya kendaraan</span>
+                        </article>
+                        <article class="showroom-report-card">
+                            <span class="showroom-report-icon showroom-report-icon--profit" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m4 16 6-6 4 4 6-8" />
+                                    <path d="M14 6h6v6" />
+                                    <path d="M4 20h16" />
+                                </svg>
+                            </span>
+                            <span class="showroom-report-label">Laba bersih</span>
+                            <strong class="{{ $soldNetProfit >= 0 ? 'is-positive' : 'is-negative' }}">
+                                Rp {{ number_format($soldNetProfit) }}
+                            </strong>
+                            <span class="showroom-report-note">Setelah biaya internal showroom</span>
+                        </article>
+                    @endcan
                 </section>
 
                 <section class="panel showroom-inventory" id="transaction-list"
@@ -230,11 +268,13 @@
                                 <button type="button" data-filter="inventory" aria-pressed="false">Stok</button>
                                 <button type="button" data-filter="sales" aria-pressed="false">Terjual</button>
                             </div>
-                            <a class="showroom-primary-action" href="{{ route('transactions.create') }}"
-                                data-dashboard-page="dashboard">
-                                <span aria-hidden="true">+</span>
-                                Transaksi baru
-                            </a>
+                            @can('create', \App\Models\CarTransaction::class)
+                                <a class="showroom-primary-action" href="{{ route('transactions.create') }}"
+                                    data-dashboard-page="dashboard">
+                                    <span aria-hidden="true">+</span>
+                                    Transaksi baru
+                                </a>
+                            @endcan
                         </div>
                     </div>
                     <div class="table-scroll">
@@ -244,14 +284,18 @@
                                     <th>Kendaraan</th>
                                     <th>Status</th>
                                     <th>Tanggal beli</th>
-                                    <th class="numeric">Modal beli</th>
-                                    <th class="numeric">Total modal</th>
+                                    @can('viewSensitiveData', \App\Models\CarTransaction::class)
+                                        <th class="numeric">Modal beli</th>
+                                        <th class="numeric">Total modal</th>
+                                    @endcan
                                     <th class="numeric">Harga jual</th>
                                     <th class="numeric">Harga stor</th>
                                     <th class="numeric">Harga deal</th>
-                                    <th class="numeric">Laba jual</th>
-                                    <th class="numeric">Laba stor</th>
-                                    <th class="numeric">Laba deal</th>
+                                    @can('viewSensitiveData', \App\Models\CarTransaction::class)
+                                        <th class="numeric">Laba jual</th>
+                                        <th class="numeric">Laba stor</th>
+                                        <th class="numeric">Laba deal</th>
+                                    @endcan
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
@@ -268,25 +312,29 @@
                                                 class="status-badge {{ $transaction->sell_date ? '' : 'pending' }}">{{ $transaction->sell_date ? 'Terjual' : 'Stok' }}</span>
                                         </td>
                                         <td data-label="Tanggal beli">{{ $transaction->buy_date }}</td>
-                                        <td class="numeric" data-label="Modal beli">Rp {{ number_format($transaction->buy_price) }}</td>
-                                        <td class="numeric" data-label="Total modal"><strong>Rp {{ number_format($transaction->total_capital) }}</strong>
-                                        </td>
+                                        @can('viewSensitiveData', \App\Models\CarTransaction::class)
+                                            <td class="numeric" data-label="Modal beli">Rp {{ number_format($transaction->buy_price) }}</td>
+                                            <td class="numeric" data-label="Total modal"><strong>Rp {{ number_format($transaction->total_capital) }}</strong>
+                                            </td>
+                                        @endcan
                                         <td class="numeric" data-label="Harga jual">Rp {{ number_format($transaction->selling_price) }}</td>
                                         <td class="numeric" data-label="Harga stor">Rp {{ number_format($transaction->setor_price) }}</td>
                                         <td class="numeric" data-label="Harga deal">Rp {{ number_format($transaction->opening_price) }}</td>
-                                        <td
-                                            class="numeric {{ $transaction->gross_profit >= 0 ? 'profit-positive' : 'profit-negative' }}"
-                                            data-label="Laba jual">
-                                            Rp {{ number_format($transaction->gross_profit) }}</td>
-                                        <td
-                                            class="numeric {{ ($transaction->setor_price - $transaction->total_capital) >= 0 ? 'profit-positive' : 'profit-negative' }}"
-                                            data-label="Laba stor">
-                                            Rp {{ number_format($transaction->setor_price - $transaction->total_capital) }}
-                                        </td>
-                                        <td
-                                            class="numeric {{ $transaction->calculatedTotalProfit() >= 0 ? 'profit-positive' : 'profit-negative' }}"
-                                            data-label="Laba deal">
-                                            Rp {{ number_format($transaction->calculatedTotalProfit()) }}</td>
+                                        @can('viewSensitiveData', \App\Models\CarTransaction::class)
+                                            <td
+                                                class="numeric {{ $transaction->gross_profit >= 0 ? 'profit-positive' : 'profit-negative' }}"
+                                                data-label="Laba jual">
+                                                Rp {{ number_format($transaction->gross_profit) }}</td>
+                                            <td
+                                                class="numeric {{ ($transaction->setor_price - $transaction->total_capital) >= 0 ? 'profit-positive' : 'profit-negative' }}"
+                                                data-label="Laba stor">
+                                                Rp {{ number_format($transaction->setor_price - $transaction->total_capital) }}
+                                            </td>
+                                            <td
+                                                class="numeric {{ $transaction->calculatedTotalProfit() >= 0 ? 'profit-positive' : 'profit-negative' }}"
+                                                data-label="Laba deal">
+                                                Rp {{ number_format($transaction->calculatedTotalProfit()) }}</td>
+                                        @endcan
                                         <td data-label="Aksi">
                                             <div class="row-actions">
                                                 <a class="transaction-action-icon"
@@ -300,38 +348,40 @@
                                                         <path d="M14 3.75v4h4M8.5 12h7M8.5 15.5h7" />
                                                     </svg>
                                                 </a>
-                                                <a class="transaction-action-icon"
-                                                    href="{{ route('transactions.edit', $transaction) }}"
-                                                    aria-label="Edit transaksi {{ $transaction->plate_number }}" title="Edit">
-                                                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"
-                                                        stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                                                        stroke-linejoin="round">
-                                                        <path
-                                                            d="m14 5 5 5M4 20l4.5-1 10.75-10.75a2.12 2.12 0 0 0-3-3L5.5 16 4 20Z" />
-                                                    </svg>
-                                                </a>
-                                                <form action="{{ route('transactions.destroy', $transaction) }}"
-                                                    method="POST"
-                                                    onsubmit="return confirm('Hapus transaksi {{ $transaction->plate_number }}? Data yang dihapus tidak dapat dikembalikan.');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="transaction-action-icon danger"
-                                                        aria-label="Hapus transaksi {{ $transaction->plate_number }}"
-                                                        title="Hapus">
+                                                @can('update', $transaction)
+                                                    <a class="transaction-action-icon"
+                                                        href="{{ route('transactions.edit', $transaction) }}"
+                                                        aria-label="Edit transaksi {{ $transaction->plate_number }}" title="Edit">
                                                         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"
-                                                            stroke="currentColor" stroke-width="1.8"
-                                                            stroke-linecap="round" stroke-linejoin="round">
+                                                            stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                                            stroke-linejoin="round">
                                                             <path
-                                                                d="M4 7h16M10 11v6m4-6v6M5.5 7l1 13h11l1-13M9 7V4h6v3" />
+                                                                d="m14 5 5 5M4 20l4.5-1 10.75-10.75a2.12 2.12 0 0 0-3-3L5.5 16 4 20Z" />
                                                         </svg>
-                                                    </button>
-                                                </form>
+                                                    </a>
+                                                    <form action="{{ route('transactions.destroy', $transaction) }}"
+                                                        method="POST"
+                                                        onsubmit="return confirm('Hapus transaksi {{ $transaction->plate_number }}? Data yang dihapus tidak dapat dikembalikan.');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="transaction-action-icon danger"
+                                                            aria-label="Hapus transaksi {{ $transaction->plate_number }}"
+                                                            title="Hapus">
+                                                            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="1.8"
+                                                                stroke-linecap="round" stroke-linejoin="round">
+                                                                <path
+                                                                    d="M4 7h16M10 11v6m4-6v6M5.5 7l1 13h11l1-13M9 7V4h6v3" />
+                                                            </svg>
+                                                        </button>
+                                                    </form>
+                                                @endcan
                                             </div>
                                         </td>
                                     </tr>
                                 @endforeach
                                 <tr class="empty-row" data-empty-state @if ($transactions->isNotEmpty()) hidden @endif>
-                                    <td colspan="12" class="table-empty">
+                                    <td colspan="{{ $tableColumnCount }}" class="table-empty">
                                         <strong data-empty-title>Tidak ada kendaraan</strong>
                                         <span data-empty-description>Belum ada data yang sesuai.</span>
                                     </td>
@@ -347,6 +397,7 @@
         </div>
     </div>
 
+    @can('viewSensitiveData', \App\Models\CarTransaction::class)
     <div class="showroom-modal" data-database-modal hidden aria-hidden="true">
         <section class="showroom-modal-dialog" role="dialog" aria-modal="true"
             aria-labelledby="database-modal-title" aria-describedby="database-modal-description">
@@ -419,5 +470,6 @@
             </div>
         </section>
     </div>
+    @endcan
 
 @endsection

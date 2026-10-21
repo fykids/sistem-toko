@@ -1,11 +1,16 @@
 <?php
 
 use App\Models\CarTransaction;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
+
+beforeEach(function () {
+    $this->actingAs(User::factory()->master()->create());
+});
 
 function validVehiclePhotoTransactionData(): array
 {

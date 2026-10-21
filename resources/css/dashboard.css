@@ -122,11 +122,19 @@
     display: flex;
     height: 66px;
     align-items: center;
-    gap: 16px;
-    padding: 0 34px;
     border-bottom: 1px solid var(--palette-e8edea);
     background: var(--palette-rgb-255-255-255-94);
     backdrop-filter: blur(14px);
+}
+
+.showroom-topbar-inner {
+    display: flex;
+    width: min(100%, 1580px);
+    min-width: 0;
+    align-items: center;
+    gap: 16px;
+    margin-inline: auto;
+    padding: 0 34px;
 }
 
 .showroom-menu-toggle,
@@ -149,8 +157,13 @@
 .showroom-modal-close:hover { border-color: var(--palette-b9cfc0); background: var(--palette-f4f8f5); color: var(--showroom-green); }
 .showroom-topbar-context { display: flex; align-items: center; gap: 9px; color: var(--palette-95a19b); font-size: var(--font-size-sm); }
 .showroom-topbar-context strong { color: var(--palette-40564c); font-weight: 750; }
-.showroom-topbar-database { min-height: 36px; gap: 8px; margin-left: auto; padding: 0 11px; border-radius: var(--radius-control); font: inherit; font-size: var(--font-size-sm); font-weight: 700; }
+.showroom-topbar-database { min-height: 36px; gap: 8px; margin-left: 0; padding: 0 11px; border-radius: var(--radius-control); font: inherit; font-size: var(--font-size-sm); font-weight: 700; }
 .showroom-topbar-database svg { width: 16px; height: 16px; }
+.showroom-topbar-account { display: flex; min-width: 0; align-items: center; gap: 13px; margin-left: auto; padding-left: 16px; border-left: 1px solid var(--palette-e6ece8); }
+.showroom-topbar-account .session-user { gap: 9px; }
+.showroom-topbar-account .session-user strong { color: var(--showroom-ink); }
+.showroom-topbar-account .session-logout { min-height: 36px; }
+.showroom-topbar-account .session-logout svg { width: 15px; height: 15px; }
 .showroom-content { width: min(100%, 1580px); margin: 0 auto; padding: 30px 34px 48px; }
 .showroom-layout [data-dashboard-page][hidden],
 .showroom-layout [data-dashboard-filters][hidden],
@@ -299,7 +312,7 @@ body.showroom-modal-open { overflow: hidden; }
 
 @media (max-width: 1100px) {
     .showroom-content { padding-right: 24px; padding-left: 24px; }
-    .showroom-topbar { padding-right: 24px; padding-left: 24px; }
+    .showroom-topbar-inner { padding-right: 24px; padding-left: 24px; }
     .showroom-inventory .toolbar { align-items: flex-start; flex-direction: column; }
     .showroom-inventory .toolbar-actions { width: 100%; justify-content: space-between; }
     .showroom-inventory .search-wrap { min-width: min(255px, 45vw); }
@@ -326,7 +339,13 @@ body.showroom-modal-open { overflow: hidden; }
 }
 
 @media (max-width: 560px) {
-    .showroom-topbar { gap: 11px; padding-right: 15px; padding-left: 15px; }
+    .showroom-topbar-inner { gap: 9px; padding-right: 13px; padding-left: 13px; }
+    .showroom-topbar-account { gap: 6px; padding-left: 7px; }
+    .showroom-topbar-account .session-user { gap: 0; }
+    .showroom-topbar-account .session-user strong,
+    .showroom-topbar-account .session-logout span,
+    .showroom-topbar-context > span { display: none; }
+    .showroom-topbar-account .session-logout { width: 36px; padding: 0; }
     .showroom-topbar-database { width: 36px; height: 36px; padding: 0; }
     .showroom-topbar-database span { display: none; }
     .showroom-content { padding: 17px 13px 30px; }
@@ -375,7 +394,8 @@ body.showroom-modal-open { overflow: hidden; }
         padding-left: clamp(36px, 2vw, 48px);
     }
 
-    .showroom-topbar {
+    .showroom-topbar-inner {
+        width: min(100%, 1760px);
         padding-right: clamp(36px, 2vw, 48px);
         padding-left: clamp(36px, 2vw, 48px);
     }
@@ -386,7 +406,8 @@ body.showroom-modal-open { overflow: hidden; }
         width: min(100%, 2048px);
     }
 
-    .showroom-topbar {
+    .showroom-topbar-inner {
+        width: min(100%, 2048px);
         padding-right: 52px;
         padding-left: 52px;
     }
@@ -407,7 +428,8 @@ body.showroom-modal-open { overflow: hidden; }
         width: min(100%, 2320px);
     }
 
-    .showroom-topbar {
+    .showroom-topbar-inner {
+        width: min(100%, 2320px);
         padding-right: 64px;
         padding-left: 64px;
     }

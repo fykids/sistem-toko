@@ -5,41 +5,58 @@
         </div>
     </header>
     <div class="section-content marketing-fields">
-        <div class="form-group"><label for="calculated-total-capital">Total pengeluaran
-            </label><input type="text" id="calculated-total-capital" value="0" readonly
-                aria-label="Total pengeluaran modal kendaraan (Rupiah)"></div>
+        @can('viewSensitiveData', \App\Models\CarTransaction::class)
+            <div class="form-group"><label for="calculated-total-capital">Total pengeluaran
+                </label><input type="text" id="calculated-total-capital" value="0" readonly
+                    aria-label="Total pengeluaran modal kendaraan (Rupiah)"></div>
+        @endcan
         <div class="form-group setor-price-group">
             <label for="setor-price">Harga setor (Rp)</label>
-            <div class="setor-price-inputs">
+            <div @class([
+                'setor-price-inputs',
+                'price-inputs--restricted' => ! $canViewSensitiveData,
+            ])>
                 <input type="text" name="setor_price" id="setor-price" aria-label="Harga setor (Rupiah)"
                     value="{{ old('setor_price', $transaction?->setor_price) }}" placeholder="Rp 0" inputmode="decimal"
                     data-rupiah-input>
-                <input type="text" id="calculated-setor-profit" value="0" readonly
-                    aria-label="Selisih harga setor dengan modal (Rupiah)">
-                <input type="text" id="calculated-setor-profit-percentage" value="0%" readonly
-                    aria-label="Persentase selisih harga setor dari modal">
+                @can('viewSensitiveData', \App\Models\CarTransaction::class)
+                    <input type="text" id="calculated-setor-profit" value="0" readonly
+                        aria-label="Selisih harga setor dengan modal (Rupiah)">
+                    <input type="text" id="calculated-setor-profit-percentage" value="0%" readonly
+                        aria-label="Persentase selisih harga setor dari modal">
+                @endcan
             </div>
         </div>
         <div class="form-group opening-price-group">
             <label for="opening-price">Harga buka (Rp)</label>
-            <div class="opening-price-inputs">
+            <div @class([
+                'opening-price-inputs',
+                'price-inputs--restricted' => ! $canViewSensitiveData,
+            ])>
                 <input type="text" name="opening_price" id="opening-price" aria-label="Harga buka (Rupiah)"
                     value="{{ old('opening_price', $transaction?->opening_price) }}" placeholder="Rp 0" inputmode="decimal"
                     data-rupiah-input>
-                <input type="text" id="calculated-opening-profit" value="0" readonly
-                    aria-label="Selisih harga buka dengan modal (Rupiah)">
-                <input type="text" id="calculated-opening-profit-percentage" value="0%" readonly
-                    aria-label="Persentase selisih harga buka dari modal">
+                @can('viewSensitiveData', \App\Models\CarTransaction::class)
+                    <input type="text" id="calculated-opening-profit" value="0" readonly
+                        aria-label="Selisih harga buka dengan modal (Rupiah)">
+                    <input type="text" id="calculated-opening-profit-percentage" value="0%" readonly
+                        aria-label="Persentase selisih harga buka dari modal">
+                @endcan
             </div>
         </div>
         <div class="form-group selling-price-group">
             <label for="selling-price">Harga jual (Rp)</label>
-            <div class="selling-price-inputs">
+            <div @class([
+                'selling-price-inputs',
+                'selling-price-inputs--restricted' => ! $canViewSensitiveData,
+            ])>
                 <input type="text" name="selling_price" id="selling-price"
                     value="{{ old('selling_price', $transaction?->selling_price) }}" placeholder="Rp 0" inputmode="decimal"
                     data-rupiah-input aria-label="Harga jual (Rupiah)">
-                <input type="text" id="calculated-sale-profit" value="0" inputmode="decimal" data-rupiah-input
-                    readonly aria-label="Laba jual (Rupiah)">
+                @can('viewSensitiveData', \App\Models\CarTransaction::class)
+                    <input type="text" id="calculated-sale-profit" value="0" inputmode="decimal" data-rupiah-input
+                        readonly aria-label="Laba jual (Rupiah)">
+                @endcan
                 <input id="sell-date" type="date" name="sell_date"
                     value="{{ old('sell_date', $transaction?->sell_date) }}" aria-label="Tanggal jual">
             </div>

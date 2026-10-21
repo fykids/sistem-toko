@@ -3,6 +3,7 @@
 @section('page_class', 'page-shell--receipt')
 
 @section('content')
+    @can('viewSensitiveData', \App\Models\CarTransaction::class)
     @php
         $daysHeld = \Illuminate\Support\Carbon::parse($transaction->buy_date)
             ->diffInDays($transaction->sell_date ?? now());
@@ -198,4 +199,49 @@
             @endif
         </aside>
     </div>
+    @else
+        <div class="page-heading receipt-page-heading">
+            <div>
+                <p class="page-eyebrow">Informasi kendaraan</p>
+                <h1>{{ $transaction->plate_number }}</h1>
+                <span class="cell-secondary">{{ $transaction->brand }} {{ $transaction->model }} · {{ $transaction->year }}</span>
+            </div>
+            <a href="{{ route('transactions.index') }}" class="btn btn-secondary receipt-back">← Kembali</a>
+        </div>
+
+        <div class="vehicle-detail-layout">
+            <section class="receipt">
+                <div class="receipt-header">
+                    <table class="identity-table">
+                        <tr><td>Plat</td><td>:</td><td>{{ $transaction->plate_number }}</td></tr>
+                        <tr><td>Merek</td><td>:</td><td>{{ $transaction->brand }}</td></tr>
+                        <tr><td>Model</td><td>:</td><td>{{ $transaction->model }}</td></tr>
+                        <tr><td>Tahun</td><td>:</td><td>{{ $transaction->year }}</td></tr>
+                        <tr><td>Transmisi</td><td>:</td><td>{{ $transaction->transmission }}</td></tr>
+                        <tr><td>Warna</td><td>:</td><td>{{ $transaction->color }}</td></tr>
+                        <tr><td>Nomor Rangka</td><td>:</td><td>{{ $transaction->chassis_number ?: '-' }}</td></tr>
+                        <tr><td>Nomor Mesin</td><td>:</td><td>{{ $transaction->engine_number ?: '-' }}</td></tr>
+                        <tr><td>Atas Nama</td><td>:</td><td>{{ $transaction->owner_name ?: '-' }}</td></tr>
+                        <tr><td>Km</td><td>:</td><td>{{ $transaction->mileage_km !== null ? number_format($transaction->mileage_km) : '-' }}</td></tr>
+                    </table>
+                    <table class="meta-table">
+                        <tr><td>Pengurus</td><td>:</td><td>{{ $transaction->manager_name ?: '-' }}</td></tr>
+                        <tr><td>Tanggal beli</td><td>:</td><td>{{ $transaction->buy_date }}</td></tr>
+                        <tr><td>Tanggal jual</td><td>:</td><td>{{ $transaction->sell_date ?? '-' }}</td></tr>
+                    </table>
+                </div>
+                <p class="receipt-back">Rincian finansial transaksi hanya tersedia untuk role Master.</p>
+            </section>
+
+            @if ($transaction->vehicle_photo_path)
+                <aside class="vehicle-leasing-panel">
+                    <img
+                        class="vehicle-photo-detail"
+                        src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($transaction->vehicle_photo_path) }}"
+                        alt="Foto {{ $transaction->brand }} {{ $transaction->model }}"
+                    >
+                </aside>
+            @endif
+        </div>
+    @endcan
 @endsection

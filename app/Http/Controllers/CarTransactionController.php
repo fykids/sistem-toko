@@ -4,9 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCarTransactionRequest;
 use App\Models\CarTransaction;
+use App\Models\User;
+use App\Presenters\TransactionPresenter;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -14,41 +19,50 @@ use Throwable;
 
 class CarTransactionController extends Controller
 {
-    public function index(): View
+    public function index(Request $request, TransactionPresenter $presenter): View
     {
-        $transactions = CarTransaction::latest()->get();
-        $stockCount = $transactions->whereNull('sell_date')->count();
-        $soldTransactions = $transactions->whereNotNull('sell_date');
-        $soldCount = $soldTransactions->count();
-        $recordedCapital = $transactions->sum('total_capital');
-        $soldRevenue = $soldTransactions->sum('selling_price');
-        $soldCapital = $soldTransactions->sum('total_capital');
-        $soldNetProfit = $soldTransactions->sum('net_profit');
-
-        return view('transactions.index', compact(
-            'transactions',
-            'stockCount',
-            'soldCount',
-            'recordedCapital',
-            'soldRevenue',
-            'soldCapital',
-            'soldNetProfit',
-        ));
+        return view(
+            'transactions.index',
+            $presenter->dashboard($this->authenticatedUser($request)),
+        );
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
-        return view('transactions.create');
+        Gate::authorize('create', CarTransaction::class);
+
+        return view('transactions.create', [
+            'transaction' => null,
+            'canViewSensitiveData' => $this->authenticatedUser($request)
+                ->can('viewSensitiveData', CarTransaction::class),
+        ]);
     }
 
-    public function edit(CarTransaction $transaction): View
+    public function edit(CarTransaction $transaction, Request $request): View
     {
-        return view('transactions.create', compact('transaction'));
+        Gate::authorize('update', $transaction);
+
+        return view('transactions.create', [
+            'transaction' => $transaction,
+            'canViewSensitiveData' => $this->authenticatedUser($request)
+                ->can('viewSensitiveData', CarTransaction::class),
+        ]);
     }
 
     public function store(StoreCarTransactionRequest $request): RedirectResponse
     {
         $validated = $request->validated();
+        $user = $this->authenticatedUser($request);
+
+        if ($user->cannot('viewSensitiveData', CarTransaction::class)) {
+            $validated = array_replace($validated, [
+                'buy_price' => 0,
+                'leasing_ripan' => 0,
+                'insurance_ripan' => 0,
+                'booster_ripan' => 0,
+            ]);
+        }
+
         $photo = $request->file('vehicle_photo');
         unset($validated['vehicle_photo']);
 
@@ -109,6 +123,8 @@ class CarTransactionController extends Controller
 
     public function destroy(CarTransaction $transaction): RedirectResponse
     {
+        Gate::authorize('delete', $transaction);
+
         $photoPath = $transaction->vehicle_photo_path;
         $transaction->delete();
 
@@ -119,9 +135,28 @@ class CarTransactionController extends Controller
         return redirect()->route('transactions.index')->with('success', 'Data transaksi berhasil dihapus!');
     }
 
-    public function show(CarTransaction $transaction): View
+    public function show(
+        CarTransaction $transaction,
+        Request $request,
+        TransactionPresenter $presenter,
+    ): View {
+        return view('transactions.show', [
+            'transaction' => $presenter->transactionDetail(
+                $transaction,
+                $this->authenticatedUser($request),
+            ),
+        ]);
+    }
+
+    private function authenticatedUser(Request $request): User
     {
-        return view('transactions.show', compact('transaction'));
+        $user = $request->user();
+
+        if (! $user instanceof User) {
+            throw new AuthenticationException;
+        }
+
+        return $user;
     }
 
     private function storeVehiclePhoto(UploadedFile $photo): string

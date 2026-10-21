@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\CarTransaction;
+use App\Models\User;
 use App\Services\TransactionBackupService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -8,6 +9,10 @@ use Illuminate\Support\Facades\Schema;
 use SQLite3;
 
 uses(RefreshDatabase::class);
+
+beforeEach(function () {
+    $this->actingAs(User::factory()->master()->create());
+});
 
 test('it renders SQLite backup and import actions on the dashboard', function () {
     $response = $this->get(route('transactions.index'));
