@@ -1,10 +1,14 @@
 {
+  "$schema": "node_modules/wrangler/config-schema.json",
   "name": "sistem-toko",
   "compatibility_date": "2026-10-19",
+  "pages_build_output_dir": "public/build",
   "observability": {
     "enabled": true
   },
   "assets": {
+    "directory": "public/build",
+    "binding": "ASSETS",
     "not_found_handling": "single-page-application"
   },
   "d1_databases": [
