@@ -27,12 +27,12 @@ class UpdateProfileRequest extends FormRequest
 
         return [
             'name' => ['required', 'string', 'max:255'],
-            'email' => [
+            'username' => [
                 'required',
                 'string',
-                'email',
+                'regex:/^[A-Za-z0-9._-]+$/',
                 'max:255',
-                Rule::unique(User::class, 'email')->ignore($user),
+                Rule::unique(User::class, 'username')->ignore($user),
             ],
             'current_password' => $this->filled('password')
                 ? ['required', 'string', 'current_password']

@@ -237,6 +237,12 @@
     }
 
     sellingPriceInput.addEventListener('input', updateRemainingPayment);
+    sellingPriceInput.addEventListener('change', () => {
+        formatRupiahInput(sellingPriceInput);
+        updateRemainingPayment();
+        syncLeasingSellingPrices();
+        updateLeasingDownPayments();
+    });
     downPaymentInput.addEventListener('input', updateRemainingPayment);
     settlementAmountInput.addEventListener('input', updateRemainingPayment);
     leasingDisbursementInput.addEventListener('input', updateRemainingPayment);

@@ -49,7 +49,7 @@ if (userManagement) {
             editForm.action = button.dataset.updateUrl;
             editForm.querySelector('[name="_user_id"]').value = button.dataset.userId;
             editForm.querySelector('[name="name"]').value = button.dataset.name;
-            editForm.querySelector('[name="email"]').value = button.dataset.email;
+            editForm.querySelector('[name="username"]').value = button.dataset.username;
             editForm.querySelector('[name="role"]').value = button.dataset.role;
             editForm.querySelector('[name="password"]').value = '';
             editDialog.showModal();

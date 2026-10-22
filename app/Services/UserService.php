@@ -11,7 +11,7 @@ use Illuminate\Validation\ValidationException;
 class UserService
 {
     /**
-     * @param  array{name: string, email: string, password: string, role: string}  $data
+     * @param  array{name: string, username: string, password: string, role: string}  $data
      */
     public function createUser(array $data): User
     {
@@ -19,7 +19,7 @@ class UserService
             $user = new User;
             $user->forceFill([
                 'name' => $data['name'],
-                'email' => $data['email'],
+                'username' => $data['username'],
                 'password' => Hash::make($data['password']),
                 'role' => $data['role'],
             ])->save();
@@ -29,7 +29,7 @@ class UserService
     }
 
     /**
-     * @param  array{name: string, email: string, password?: string|null, role: string}  $data
+     * @param  array{name: string, username: string, password?: string|null, role: string}  $data
      */
     public function updateUser(User $user, array $data): User
     {
@@ -50,7 +50,7 @@ class UserService
 
             $attributes = [
                 'name' => $data['name'],
-                'email' => $data['email'],
+                'username' => $data['username'],
                 'role' => $data['role'],
             ];
 

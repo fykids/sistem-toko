@@ -91,6 +91,17 @@ class CarTransactionController extends Controller
     public function update(StoreCarTransactionRequest $request, CarTransaction $transaction): RedirectResponse
     {
         $validated = $request->validated();
+        $user = $this->authenticatedUser($request);
+
+        if ($user->cannot('viewSensitiveData', CarTransaction::class)) {
+            $validated = array_replace($validated, [
+                'buy_price' => $transaction->buy_price,
+                'leasing_ripan' => $transaction->leasing_ripan,
+                'insurance_ripan' => $transaction->insurance_ripan,
+                'booster_ripan' => $transaction->booster_ripan,
+            ]);
+        }
+
         $photo = $request->file('vehicle_photo');
         $previousPhotoPath = $transaction->vehicle_photo_path;
         unset($validated['vehicle_photo']);
@@ -140,6 +151,8 @@ class CarTransactionController extends Controller
         Request $request,
         TransactionPresenter $presenter,
     ): View {
+        Gate::authorize('view', $transaction);
+
         return view('transactions.show', [
             'transaction' => $presenter->transactionDetail(
                 $transaction,

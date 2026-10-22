@@ -870,7 +870,7 @@ test('it displays transaction values under the matching list columns', function 
 
     $this->get(route('transactions.index'))
         ->assertOk()
-        ->assertSee('class="data-table transaction-list-table"', false)
+        ->assertSee('class="data-table transaction-list-table transaction-list-table--sensitive"', false)
         ->assertSee('<th>Kendaraan</th>', false)
         ->assertSee('<th>Status</th>', false)
         ->assertSee('<th>Tanggal beli</th>', false)

@@ -29,12 +29,12 @@ class UpdateUserRequest extends FormRequest
 
         return [
             'name' => ['required', 'string', 'max:255'],
-            'email' => [
+            'username' => [
                 'required',
                 'string',
-                'email',
+                'regex:/^[A-Za-z0-9._-]+$/',
                 'max:255',
-                Rule::unique(User::class, 'email')->ignore($managedUser),
+                Rule::unique(User::class, 'username')->ignore($managedUser),
             ],
             'password' => ['nullable', 'string', 'min:8'],
             'role' => ['required', 'string', Rule::in(['master', 'admin'])],

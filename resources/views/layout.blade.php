@@ -30,7 +30,8 @@
     <main @class([
         'page-shell',
         trim($__env->yieldContent('page_class')),
-        'page-shell--app' => auth()->check() && ! request()->routeIs('transactions.create'),
+        'page-shell--app' => auth()->check()
+            && ! request()->routeIs('transactions.create', 'transactions.edit'),
     ]) @if (request()->routeIs('dashboard', 'transactions.index')) data-showroom-layout data-showroom-view="dashboard" @endif>
         @auth
             @php
@@ -73,7 +74,7 @@
                 </ul>
             </div>
         @endif
-        @if (request()->routeIs('dashboard', 'transactions.index', 'users.index', 'profile.edit', 'transactions.create'))
+        @if (request()->routeIs('dashboard', 'transactions.index', 'users.index', 'profile.edit', 'transactions.create', 'transactions.edit'))
             @yield('content')
         @else
             <div class="showroom-content">

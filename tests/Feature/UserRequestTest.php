@@ -13,7 +13,7 @@ uses(RefreshDatabase::class);
 test('user creation rejects roles outside the supported roles', function () {
     $validator = Validator::make([
         'name' => 'Test User',
-        'email' => 'test@example.com',
+        'username' => 'test_user',
         'password' => 'secure-password',
         'role' => 'superuser',
     ], (new StoreUserRequest)->rules());

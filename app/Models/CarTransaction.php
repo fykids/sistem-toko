@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -55,6 +56,55 @@ class CarTransaction extends Model
         ];
     }
 
+    /** @return array{label: string, badgeClass: string} */
+    public function taxStatus(): array
+    {
+        $dueDate = $this->taxDueDate();
+
+        if ($dueDate === null) {
+            return [
+                'label' => 'Mati',
+                'badgeClass' => 'status-badge--danger',
+            ];
+        }
+
+        $isActive = $dueDate->greaterThanOrEqualTo(CarbonImmutable::today());
+
+        return [
+            'label' => $isActive ? 'Hidup' : 'Mati',
+            'badgeClass' => $isActive ? 'status-badge--success' : 'status-badge--danger',
+        ];
+    }
+
+    /** @return array{days: int|null, badgeClass: string} */
+    public function showroomAgeStatus(): array
+    {
+        if (! is_string($this->buy_date) || trim($this->buy_date) === '') {
+            return [
+                'days' => null,
+                'badgeClass' => 'status-badge--neutral',
+            ];
+        }
+
+        $buyDate = CarbonImmutable::parse($this->buy_date)->startOfDay();
+        $today = CarbonImmutable::today();
+        $days = $buyDate->greaterThan($today)
+            ? 0
+            : (int) $buyDate->diffInDays($today);
+
+        return match (true) {
+            $days <= 25 => ['days' => $days, 'badgeClass' => 'status-badge--success'],
+            $days <= 45 => [
+                'days' => $days,
+                'badgeClass' => 'status-badge--warning',
+            ],
+            default => [
+                'days' => $days,
+                'badgeClass' => 'status-badge--danger',
+            ],
+        };
+    }
+
     public function calculatedSaleProfit(): float
     {
         return round((float) $this->selling_price - (float) $this->total_capital, 2);
@@ -73,6 +123,26 @@ class CarTransaction extends Model
         static::saving(static function (CarTransaction $transaction): void {
             $transaction->calculateFinancials();
         });
+    }
+
+    private function taxDueDate(): ?CarbonImmutable
+    {
+        $taxItems = array_values(array_filter($this->tax_items ?? [], 'is_array'));
+        $primaryTaxItem = null;
+
+        foreach ($taxItems as $taxItem) {
+            if (mb_strtolower(trim((string) ($taxItem['name'] ?? ''))) === 'pajak') {
+                $primaryTaxItem = $taxItem;
+                break;
+            }
+        }
+
+        $primaryTaxItem ??= $taxItems[0] ?? null;
+        $date = $primaryTaxItem['date'] ?? null;
+
+        return is_string($date) && trim($date) !== ''
+            ? CarbonImmutable::parse($date)->startOfDay()
+            : null;
     }
 
     private function calculateFinancials(): void

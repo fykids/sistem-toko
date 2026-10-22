@@ -99,19 +99,32 @@
 .showroom-inventory .filter-tabs { padding: 3px; border-color: var(--palette-e8eeea); background: var(--palette-f5f8f6); }
 .showroom-inventory .filter-tabs button { padding: 6px 10px; border-radius: var(--radius-compact); color: var(--palette-77877f); font-size: var(--font-size-xs); }
 .showroom-inventory .filter-tabs button[aria-pressed="true"] { color: var(--color-primary); }
-.showroom-inventory .table-scroll { overflow: hidden; }
-.showroom-inventory .data-table.transaction-list-table { width: 100%; min-width: 0; table-layout: fixed; }
+.showroom-inventory .table-scroll { overflow-x: auto; }
+.showroom-inventory .data-table.transaction-list-table { width: 100%; min-width: 1280px; table-layout: fixed; }
 .showroom-inventory .data-table.transaction-list-table th { padding: 10px 4px; background: var(--palette-f4f7f5); color: var(--palette-64766d); font-size: var(--font-size-table-header); white-space: normal; overflow-wrap: anywhere; }
-.showroom-inventory .data-table.transaction-list-table th:nth-child(1) { width: 12%; }
-.showroom-inventory .data-table.transaction-list-table th:nth-child(2) { width: 6%; }
-.showroom-inventory .data-table.transaction-list-table th:nth-child(3) { width: 8%; }
-.showroom-inventory .data-table.transaction-list-table th:nth-child(n+4):nth-child(-n+11) { width: 7.875%; }
-.showroom-inventory .data-table.transaction-list-table th:nth-child(12) { width: 11%; }
+.showroom-inventory .transaction-list-table--sensitive th:nth-child(1) { width: 12%; }
+.showroom-inventory .transaction-list-table--sensitive th:nth-child(2) { width: 6%; }
+.showroom-inventory .transaction-list-table--sensitive th:nth-child(3) { width: 7%; }
+.showroom-inventory .transaction-list-table--sensitive th:nth-child(4) { width: 5%; }
+.showroom-inventory .transaction-list-table--sensitive th:nth-child(5) { width: 5%; }
+.showroom-inventory .transaction-list-table--sensitive th:nth-child(n+6):nth-child(-n+13) { width: 6.875%; }
+.showroom-inventory .transaction-list-table--sensitive th:nth-child(14) { width: 10%; }
+.showroom-inventory .transaction-list-table--restricted th:nth-child(1) { width: 16%; }
+.showroom-inventory .transaction-list-table--restricted th:nth-child(2) { width: 7%; }
+.showroom-inventory .transaction-list-table--restricted th:nth-child(3) { width: 9%; }
+.showroom-inventory .transaction-list-table--restricted th:nth-child(4) { width: 8%; }
+.showroom-inventory .transaction-list-table--restricted th:nth-child(5) { width: 8%; }
+.showroom-inventory .transaction-list-table--restricted th:nth-child(n+6):nth-child(-n+8) { width: 13.333%; }
+.showroom-inventory .transaction-list-table--restricted th:nth-child(9) { width: 12%; }
 .showroom-inventory .data-table.transaction-list-table td { padding: 9px 4px; color: var(--palette-3d5148); font-size: var(--font-size-table-cell); overflow-wrap: anywhere; word-break: break-word; }
 .showroom-inventory .data-table.transaction-list-table td.numeric { white-space: normal; }
 .showroom-inventory .data-table.transaction-list-table .cell-primary { color: var(--palette-263d33); font-size: var(--font-size-table-primary); }
 .showroom-inventory .data-table.transaction-list-table .cell-secondary { color: var(--palette-8a9891); font-size: var(--font-size-table-secondary); overflow-wrap: anywhere; }
 .showroom-inventory .data-table.transaction-list-table .status-badge { max-width: 100%; padding: 3px 5px; font-size: var(--font-size-table-header); overflow-wrap: anywhere; }
+.showroom-inventory .data-table.transaction-list-table .status-badge--success { border-color: var(--palette-d4e8da); background: var(--green-soft); color: var(--green); }
+.showroom-inventory .data-table.transaction-list-table .status-badge--warning { border-color: var(--color-warning-border); background: var(--color-surface-warning); color: var(--color-warning); }
+.showroom-inventory .data-table.transaction-list-table .status-badge--danger { border-color: var(--color-danger-border); background: var(--color-danger-soft); color: var(--color-danger); }
+.showroom-inventory .data-table.transaction-list-table .status-badge--neutral { border-color: var(--color-border); background: var(--color-surface-muted); color: var(--color-text-secondary); }
 .showroom-inventory .data-table.transaction-list-table .row-actions { gap: 2px; }
 .showroom-inventory .transaction-action-icon { width: clamp(12px, 1.85vw, 25px); height: clamp(12px, 1.85vw, 25px); flex-basis: clamp(12px, 1.85vw, 25px); border-radius: var(--radius-xs); padding: 2px; }
 .showroom-inventory .transaction-action-icon svg { width: 80%; height: 80%; }

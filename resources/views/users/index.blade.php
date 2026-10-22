@@ -19,8 +19,8 @@
                 <div class="toolbar-actions">
                     <label class="search-wrap">
                         <span class="search-symbol" aria-hidden="true">⌕</span>
-                        <span class="sr-only">Cari nama, email, atau role pengguna</span>
-                        <input id="users-search" type="search" placeholder="Cari nama, email, role..."
+                        <span class="sr-only">Cari nama, username, atau role pengguna</span>
+                        <input id="users-search" type="search" placeholder="Cari nama, username, role..."
                             autocomplete="off" data-user-search>
                     </label>
                     <button class="showroom-primary-action" type="button" data-open-create-user>
@@ -34,7 +34,7 @@
                     <thead>
                         <tr>
                             <th scope="col">Nama</th>
-                            <th scope="col">Email</th>
+                            <th scope="col">Username</th>
                             <th scope="col">Peran (Role)</th>
                             <th scope="col">Tanggal dibuat</th>
                             <th scope="col">Aksi</th>
@@ -49,7 +49,7 @@
                                         <span class="users-current-account">Anda</span>
                                     @endif
                                 </td>
-                                <td data-label="Email">{{ $user->email }}</td>
+                                <td data-label="Username">{{ $user->username }}</td>
                                 <td data-label="Role">
                                     <span class="session-role session-role--{{ $user->role }}">
                                         {{ ucfirst($user->role) }}
@@ -65,7 +65,7 @@
                                             data-user-id="{{ $user->getKey() }}"
                                             data-update-url="{{ route('users.update', $user) }}"
                                             data-name="{{ $user->name }}"
-                                            data-email="{{ $user->email }}"
+                                            data-username="{{ $user->username }}"
                                             data-role="{{ $user->role }}"
                                         >Edit</button>
                                         <form action="{{ route('users.destroy', $user) }}" method="POST"
@@ -124,9 +124,9 @@
                         @error('name')<span class="users-field-error">{{ $message }}</span>@enderror
                     </div>
                     <div class="form-group">
-                        <label for="create-user-email">Email</label>
-                        <input id="create-user-email" type="email" name="email" value="{{ old('_form') === 'create' ? old('email') : '' }}" required maxlength="255" autocomplete="email">
-                        @error('email')<span class="users-field-error">{{ $message }}</span>@enderror
+                        <label for="create-user-username">Username</label>
+                        <input id="create-user-username" type="text" name="username" value="{{ old('_form') === 'create' ? old('username') : '' }}" required maxlength="255" autocomplete="username">
+                        @error('username')<span class="users-field-error">{{ $message }}</span>@enderror
                     </div>
                     <div class="form-group">
                         <label for="create-user-password">Password</label>
@@ -171,9 +171,9 @@
                         @error('name')<span class="users-field-error">{{ $message }}</span>@enderror
                     </div>
                     <div class="form-group">
-                        <label for="edit-user-email">Email</label>
-                        <input id="edit-user-email" type="email" name="email" value="{{ old('_form') === 'edit' ? old('email') : '' }}" required maxlength="255" autocomplete="email">
-                        @error('email')<span class="users-field-error">{{ $message }}</span>@enderror
+                        <label for="edit-user-username">Username</label>
+                        <input id="edit-user-username" type="text" name="username" value="{{ old('_form') === 'edit' ? old('username') : '' }}" required maxlength="255" autocomplete="username">
+                        @error('username')<span class="users-field-error">{{ $message }}</span>@enderror
                     </div>
                     <div class="form-group">
                         <label for="edit-user-password">Password baru <span>(opsional)</span></label>

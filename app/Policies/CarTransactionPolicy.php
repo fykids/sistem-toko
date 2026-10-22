@@ -29,7 +29,7 @@ class CarTransactionPolicy
 
     public function update(User $user, CarTransaction $carTransaction): bool
     {
-        return $this->viewSensitiveData($user);
+        return $this->canManageTransactions($user);
     }
 
     public function delete(User $user, CarTransaction $carTransaction): bool

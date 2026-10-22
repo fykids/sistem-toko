@@ -102,5 +102,8 @@
                     value="{{ max((float) old('selling_price', $transaction?->selling_price ?? 0) - (float) old('down_payment', $transaction?->down_payment ?? 0) - (float) old('settlement_amount', $transaction?->settlement_amount ?? 0) - (float) old('leasing_disbursement', $transaction?->leasing_disbursement ?? 0), 0) }}"
                     inputmode="decimal" data-rupiah-input readonly></div>
         </div>
+        @if (auth()->user()->role === 'admin')
+            @include('transactions.partials.intertine-expense-fields')
+        @endif
     </div>
 </section>

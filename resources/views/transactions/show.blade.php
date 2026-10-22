@@ -34,7 +34,12 @@
 
     <div class="page-heading receipt-page-heading">
         <div><p class="page-eyebrow">Dokumen transaksi</p><h1>Nota Kendaraan</h1><span class="cell-secondary">{{ $transaction->plate_number }} · {{ $transaction->brand }} {{ $transaction->model }}</span></div>
-        <a href="{{ route('transactions.index') }}" class="btn btn-secondary receipt-back">← Kembali</a>
+        <div class="receipt-page-actions">
+            @can('update', $transaction)
+                <a href="{{ route('transactions.edit', $transaction) }}" class="btn btn-accent">Edit data</a>
+            @endcan
+            <a href="{{ route('transactions.index') }}" class="btn btn-secondary receipt-back">← Kembali</a>
+        </div>
     </div>
 
     <div class="vehicle-detail-layout">
@@ -206,7 +211,12 @@
                 <h1>{{ $transaction->plate_number }}</h1>
                 <span class="cell-secondary">{{ $transaction->brand }} {{ $transaction->model }} · {{ $transaction->year }}</span>
             </div>
-            <a href="{{ route('transactions.index') }}" class="btn btn-secondary receipt-back">← Kembali</a>
+            <div class="receipt-page-actions">
+                @can('update', $transaction)
+                    <a href="{{ route('transactions.edit', $transaction) }}" class="btn btn-accent">Edit data</a>
+                @endcan
+                <a href="{{ route('transactions.index') }}" class="btn btn-secondary receipt-back">← Kembali</a>
+            </div>
         </div>
 
         <div class="vehicle-detail-layout">

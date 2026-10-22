@@ -18,7 +18,7 @@
         aria-labelledby="profile-menu-trigger-{{ $user->getKey() }}" data-profile-menu-panel hidden>
         <div class="profile-menu-identity">
             <strong>{{ $user->name }}</strong>
-            <span>{{ $user->email }}</span>
+            <span>{{ $user->username }}</span>
         </div>
 
         <div class="profile-menu-divider" aria-hidden="true"></div>

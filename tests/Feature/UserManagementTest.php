@@ -34,13 +34,13 @@ test('master can list users and create an account with an explicitly selected ro
 
     $this->post(route('users.store'), [
         'name' => 'Admin Baru',
-        'email' => 'admin-baru@example.com',
+        'username' => 'admin_baru',
         'password' => 'secure-password',
         'role' => 'admin',
     ])->assertRedirect(route('users.index'))
         ->assertSessionHas('success', 'Akun berhasil dibuat.');
 
-    $user = User::query()->where('email', 'admin-baru@example.com')->sole();
+    $user = User::query()->where('username', 'admin_baru')->sole();
 
     expect($user->role)->toBe('admin')
         ->and(Hash::check('secure-password', $user->password))->toBeTrue();
@@ -60,7 +60,7 @@ test('master can update account details and leave its password unchanged', funct
 
     $this->put(route('users.update', $managedUser), [
         'name' => 'Nama Diperbarui',
-        'email' => $managedUser->email,
+        'username' => $managedUser->username,
         'password' => '',
         'role' => 'admin',
         '_form' => 'edit',
@@ -105,14 +105,14 @@ test('admin receives forbidden responses for user management endpoints', functio
 
     $this->post(route('users.store'), [
         'name' => 'Tidak Diizinkan',
-        'email' => 'no-access@example.com',
+        'username' => 'no_access',
         'password' => 'secure-password',
         'role' => 'master',
     ])->assertForbidden();
 
     $this->put(route('users.update', $managedUser), [
         'name' => 'Tidak Diizinkan',
-        'email' => $managedUser->email,
+        'username' => $managedUser->username,
         'password' => '',
         'role' => 'admin',
     ])->assertForbidden();
@@ -144,7 +144,7 @@ test('final master cannot be demoted to admin', function () {
 
     $this->from(route('users.index'))->followingRedirects()->put(route('users.update', $master), [
         'name' => $master->name,
-        'email' => $master->email,
+        'username' => $master->username,
         'password' => '',
         'role' => 'admin',
         '_form' => 'edit',

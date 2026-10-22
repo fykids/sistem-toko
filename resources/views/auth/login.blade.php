@@ -11,12 +11,12 @@
         <form action="{{ route('login.store') }}" method="POST" class="auth-form">
             @csrf
             <div class="form-group">
-                <label for="email">Email</label>
+                <label for="username">Username</label>
                 <input
-                    id="email"
-                    type="email"
-                    name="email"
-                    value="{{ old('email') }}"
+                    id="username"
+                    type="text"
+                    name="username"
+                    value="{{ old('username') }}"
                     autocomplete="username"
                     required
                     autofocus

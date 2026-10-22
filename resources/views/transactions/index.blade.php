@@ -149,12 +149,15 @@
                         </div>
                     </div>
                     <div class="table-scroll">
-                        <table class="data-table transaction-list-table">
+                        <table
+                            class="data-table transaction-list-table {{ $canViewSensitiveData ? 'transaction-list-table--sensitive' : 'transaction-list-table--restricted' }}">
                             <thead>
                                 <tr>
                                     <th>Kendaraan</th>
                                     <th>Status</th>
                                     <th>Tanggal beli</th>
+                                    <th>Pajak</th>
+                                    <th>Hari</th>
                                     @can('viewSensitiveData', \App\Models\CarTransaction::class)
                                         <th class="numeric">Modal beli</th>
                                         <th class="numeric">Total modal</th>
@@ -172,6 +175,8 @@
                             </thead>
                             <tbody id="transaction-rows">
                                 @foreach ($transactions as $transaction)
+                                    @php($taxStatus = $transaction->taxStatus())
+                                    @php($showroomAgeStatus = $transaction->showroomAgeStatus())
                                     <tr data-status="{{ $transaction->sell_date ? 'sold' : 'stock' }}"
                                         data-search="{{ strtolower($transaction->plate_number . ' ' . $transaction->brand . ' ' . $transaction->model . ' ' . $transaction->year) }}">
                                         <td data-label="Kendaraan">
@@ -183,6 +188,12 @@
                                                 class="status-badge {{ $transaction->sell_date ? '' : 'pending' }}">{{ $transaction->sell_date ? 'Terjual' : 'Stok' }}</span>
                                         </td>
                                         <td data-label="Tanggal beli">{{ $transaction->buy_date }}</td>
+                                        <td data-label="Pajak">
+                                            <span class="status-badge {{ $taxStatus['badgeClass'] }}">{{ $taxStatus['label'] }}</span>
+                                        </td>
+                                        <td data-label="Hari">
+                                            <span class="status-badge {{ $showroomAgeStatus['badgeClass'] }}">{{ $showroomAgeStatus['days'] === null ? '—' : $showroomAgeStatus['days'].' hari' }}</span>
+                                        </td>
                                         @can('viewSensitiveData', \App\Models\CarTransaction::class)
                                             <td class="numeric" data-label="Modal beli">Rp {{ number_format($transaction->buy_price) }}</td>
                                             <td class="numeric" data-label="Total modal"><strong>Rp {{ number_format($transaction->total_capital) }}</strong>
@@ -230,6 +241,8 @@
                                                                 d="m14 5 5 5M4 20l4.5-1 10.75-10.75a2.12 2.12 0 0 0-3-3L5.5 16 4 20Z" />
                                                         </svg>
                                                     </a>
+                                                @endcan
+                                                @can('delete', $transaction)
                                                     <form action="{{ route('transactions.destroy', $transaction) }}"
                                                         method="POST"
                                                         onsubmit="return confirm('Hapus transaksi {{ $transaction->plate_number }}? Data yang dihapus tidak dapat dikembalikan.');">

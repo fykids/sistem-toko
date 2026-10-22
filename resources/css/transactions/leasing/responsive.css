@@ -186,6 +186,316 @@
 }
 
 @media (min-width: 821px) {
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) {
+        --transaction-admin-label-width: 110px;
+    }
+
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .costs-section .section-content > .costs-primary-grid > .form-group,
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .costs-section .section-content > .costs-vertical-grid > .form-group,
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .marketing-section .marketing-fields > .form-group,
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .marketing-section .sales-fields-row > .form-group {
+        display: grid !important;
+        grid-template-columns: var(--transaction-admin-label-width) minmax(0, 1fr) !important;
+        align-items: center;
+        column-gap: 8px;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .costs-section .section-content > .field-grid > .form-group > label,
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .marketing-section .marketing-fields > .form-group > label,
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .marketing-section .sales-fields-row > .form-group > label {
+        width: auto;
+        min-width: 0;
+        margin: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .costs-section .section-content > .field-grid > .form-group > .cost-inputs {
+        display: grid;
+        grid-column: 2;
+        grid-template-columns: minmax(0, 1fr);
+        width: 100%;
+        max-width: none;
+        min-width: 0;
+        margin: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .costs-section .section-content > .field-grid > .form-group > .cost-inputs--dated {
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    }
+
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .costs-section .section-content > .field-grid > .form-group > .cost-inputs > input:not([type="hidden"]),
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .marketing-section .marketing-fields > .form-group > input,
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .marketing-section .sales-fields-row > .form-group > input {
+        width: 100% !important;
+        max-width: none;
+        min-width: 0;
+        margin: 0 !important;
+    }
+
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .marketing-section .marketing-fields > .form-group > .setor-price-inputs,
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .marketing-section .marketing-fields > .form-group > .opening-price-inputs,
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .marketing-section .marketing-fields > .form-group > .selling-price-inputs,
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .marketing-section .sales-fields-row > .form-group > .payment-inputs {
+        display: grid !important;
+        grid-column: 2;
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) !important;
+        align-items: center;
+        gap: 8px !important;
+        width: 100% !important;
+        max-width: none;
+        min-width: 0;
+        margin: 0 !important;
+        justify-self: stretch;
+        white-space: normal;
+    }
+
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .marketing-section .marketing-fields > .form-group > .price-inputs--restricted {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .marketing-section .marketing-fields .selling-price-amounts {
+        display: contents;
+    }
+
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .marketing-section .marketing-fields .selling-price-inputs > input,
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .marketing-section .sales-fields-row .payment-inputs > input {
+        width: 100% !important;
+        max-width: none;
+        min-width: 0;
+        margin: 0 !important;
+        justify-self: stretch;
+    }
+}
+
+@media (max-width: 820px) {
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .costs-section .section-content > .field-grid > .form-group > .cost-inputs,
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .marketing-section .marketing-fields > .form-group > input,
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .marketing-section .marketing-fields > .form-group > .setor-price-inputs,
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .marketing-section .marketing-fields > .form-group > .opening-price-inputs,
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .marketing-section .marketing-fields > .form-group > .selling-price-inputs,
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .marketing-section .sales-fields-row > .form-group > input,
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .marketing-section .sales-fields-row > .form-group > .payment-inputs {
+        width: 100% !important;
+        max-width: none;
+        min-width: 0;
+        margin: 0 !important;
+    }
+
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .marketing-section .marketing-fields .selling-price-inputs,
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .marketing-section .sales-fields-row .payment-inputs {
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) !important;
+        gap: 8px !important;
+    }
+}
+
+@media (max-width: 380px) {
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .marketing-section .marketing-fields .selling-price-inputs,
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .marketing-section .sales-fields-row .payment-inputs {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    .page-shell--transaction-form .transaction-form:not(.transaction-form--master) > .marketing-section .marketing-fields .selling-price-inputs > input[type="date"] {
+        grid-column: 1;
+    }
+}
+
+@media (min-width: 821px) {
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .marketing-section .marketing-fields,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .marketing-section .sales-fields-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        align-content: start;
+        row-gap: 4px;
+        min-width: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .marketing-section .marketing-fields > .form-group,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .marketing-section .sales-fields-row > .form-group {
+        display: grid !important;
+        grid-template-columns: var(--transaction-field-label-width) minmax(0, 1fr) !important;
+        align-items: center;
+        column-gap: 8px;
+        width: 100%;
+        min-width: 0;
+        margin: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .marketing-section .marketing-fields > .form-group > label,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .marketing-section .sales-fields-row > .form-group > label {
+        grid-column: 1;
+        width: var(--transaction-field-label-width);
+        min-width: 0;
+        margin: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .marketing-section .marketing-fields > .form-group > input,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .marketing-section .marketing-fields > .form-group > .setor-price-inputs,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .marketing-section .marketing-fields > .form-group > .opening-price-inputs,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .marketing-section .marketing-fields > .form-group > .selling-price-inputs,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .marketing-section .sales-fields-row > .form-group > input,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .marketing-section .sales-fields-row > .form-group > .payment-inputs {
+        grid-column: 2;
+        width: 100%;
+        max-width: none;
+        min-width: 0;
+        margin: 0;
+        justify-self: stretch;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .marketing-section .marketing-fields .setor-price-inputs,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .marketing-section .marketing-fields .opening-price-inputs {
+        display: grid !important;
+        grid-template-columns: minmax(0, 45fr) minmax(0, 35fr) minmax(0, 20fr) !important;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .marketing-section .marketing-fields .selling-price-inputs {
+        display: grid !important;
+        grid-template-columns: minmax(0, 40fr) minmax(0, 25fr) minmax(0, 35fr) !important;
+        align-items: center;
+        gap: 6px;
+        white-space: normal;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master .selling-price-amounts {
+        display: contents !important;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master .payment-inputs {
+        display: grid !important;
+        grid-template-columns: minmax(0, 60fr) minmax(0, 40fr) !important;
+        align-items: center;
+        gap: 6px !important;
+        white-space: normal;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .marketing-section .marketing-fields .setor-price-inputs > input,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .marketing-section .marketing-fields .opening-price-inputs > input,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .marketing-section .marketing-fields .selling-price-inputs > input,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .marketing-section .sales-fields-row > .form-group > input,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .marketing-section .sales-fields-row .payment-inputs > input {
+        justify-self: stretch;
+        width: 100% !important;
+        max-width: none !important;
+        min-width: 0;
+        margin: 0 !important;
+    }
+}
+
+.page-shell--transaction-form .transaction-form.transaction-form--admin .marketing-section .marketing-fields > .form-group > .setor-price-inputs.price-inputs--restricted,
+.page-shell--transaction-form .transaction-form.transaction-form--admin .marketing-section .marketing-fields > .form-group > .opening-price-inputs.price-inputs--restricted {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    justify-content: stretch;
+    width: 100% !important;
+    max-width: none;
+    min-width: 0;
+    margin: 0 !important;
+}
+
+.page-shell--transaction-form .transaction-form.transaction-form--admin .marketing-section .marketing-fields > .form-group > .setor-price-inputs.price-inputs--restricted > input,
+.page-shell--transaction-form .transaction-form.transaction-form--admin .marketing-section .marketing-fields > .form-group > .opening-price-inputs.price-inputs--restricted > input {
+    justify-self: stretch;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0;
+    margin: 0 !important;
+}
+
+.page-shell--transaction-form .transaction-form.transaction-form--admin > .vehicle-section .vehicle-fields > .form-group {
+    grid-template-columns: var(--transaction-admin-label-width, 110px) minmax(0, 1fr) !important;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+}
+
+.page-shell--transaction-form .transaction-form.transaction-form--admin > .vehicle-section .vehicle-fields > .form-group > label {
+    width: auto;
+    min-width: 0;
+    margin: 0;
+}
+
+.page-shell--transaction-form .transaction-form.transaction-form--admin > .vehicle-section .vehicle-fields > .form-group > input:not([type="hidden"]),
+.page-shell--transaction-form .transaction-form.transaction-form--admin > .vehicle-section .vehicle-fields > .form-group > select {
+    justify-self: stretch;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0;
+    margin: 0 !important;
+}
+
+.page-shell--transaction-form .transaction-form.transaction-form--admin > .costs-section #additional-repairs {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+}
+
+@media (max-width: 820px) {
+    .page-shell--transaction-form .transaction-form.transaction-form--admin > .vehicle-section .vehicle-fields > .form-group {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (min-width: 821px) {
+    .page-shell--transaction-form .transaction-form.transaction-form--admin .marketing-section .intertine-expense-fields {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 4px;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--admin .marketing-section .intertine-expense-item {
+        display: grid;
+        grid-template-columns: var(--transaction-admin-label-width, 110px) minmax(0, 1fr);
+        align-items: center;
+        column-gap: 8px;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--admin .marketing-section .intertine-expense-item > label {
+        min-width: 0;
+        margin: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--admin .marketing-section .intertine-expense-item > input:not([type="hidden"]) {
+        grid-column: 2;
+        width: 100%;
+        max-width: none;
+        min-width: 0;
+        margin: 0;
+    }
+}
+
+@media (max-width: 820px) {
+    .page-shell--transaction-form .transaction-form.transaction-form--admin .marketing-section .intertine-expense-fields {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 6px;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--admin .marketing-section .intertine-expense-item {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        row-gap: 6px;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--admin .marketing-section .intertine-expense-item > input:not([type="hidden"]) {
+        width: 100%;
+        max-width: none;
+        min-width: 0;
+        margin: 0;
+    }
+}
+
+@media (min-width: 821px) {
     .page-shell--transaction-form .transaction-form .marketing-fields > .form-group,
     .page-shell--transaction-form .transaction-form .marketing-fields > .sales-fields-row > .form-group {
         grid-template-columns: minmax(90px, 0.4fr) minmax(0, 1fr) !important;
@@ -199,3 +509,636 @@
     }
 }
 
+@media (min-width: 821px) {
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .costs-primary-grid > .form-group,
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .costs-vertical-grid > .form-group,
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields > .form-group,
+    .page-shell--transaction-form .transaction-form > .marketing-section .sales-fields-row > .form-group {
+        display: grid !important;
+        grid-template-columns: var(--transaction-field-label-width) minmax(0, 1fr) !important;
+        align-items: center;
+        column-gap: 8px;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .field-grid > .form-group > label,
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields > .form-group > label,
+    .page-shell--transaction-form .transaction-form > .marketing-section .sales-fields-row > .form-group > label {
+        width: auto;
+        min-width: 0;
+        margin: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .field-grid > .form-group > .cost-inputs {
+        display: grid;
+        grid-column: 2;
+        grid-template-columns: minmax(0, 1fr);
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        justify-self: stretch;
+        margin: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .field-grid > .form-group > .cost-inputs--dated {
+        grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    }
+
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .field-grid > .form-group > .cost-inputs > input:not([type="hidden"]) {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        margin: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields > .form-group > input,
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields > .form-group > .setor-price-inputs,
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields > .form-group > .opening-price-inputs,
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields > .form-group > .selling-price-inputs,
+    .page-shell--transaction-form .transaction-form > .marketing-section .sales-fields-row > .form-group > input,
+    .page-shell--transaction-form .transaction-form > .marketing-section .sales-fields-row > .form-group > .payment-inputs {
+        grid-column: 2;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0;
+        margin: 0 !important;
+        justify-self: stretch;
+    }
+
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields > .form-group > input,
+    .page-shell--transaction-form .transaction-form > .marketing-section .sales-fields-row > .form-group > input {
+        justify-self: stretch;
+    }
+
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .setor-price-inputs,
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .opening-price-inputs {
+        grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(64px, .65fr) !important;
+        justify-content: stretch;
+        margin-left: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .price-inputs--restricted {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .selling-price-inputs,
+    .page-shell--transaction-form .transaction-form > .marketing-section .sales-fields-row .payment-inputs {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1.5fr) minmax(112px, 1fr) !important;
+        align-items: center;
+        justify-content: stretch;
+        gap: 8px !important;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        margin: 0;
+        white-space: normal;
+    }
+
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .selling-price-inputs > input[type="date"],
+    .page-shell--transaction-form .transaction-form > .marketing-section .sales-fields-row .payment-inputs > input[type="date"] {
+        width: 100% !important;
+        max-width: 100%;
+        min-width: 0;
+        margin: 0;
+        justify-self: stretch;
+    }
+
+    .page-shell--transaction-form .transaction-form > .marketing-section .sales-fields-row .payment-inputs > input:first-child {
+        width: 100%;
+        min-width: 0;
+        margin: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .selling-price-amounts {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+        min-width: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .selling-price-amounts > input {
+        width: 100%;
+        min-width: 0;
+        margin: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .selling-price-inputs--restricted {
+        grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) !important;
+    }
+
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .setor-price-inputs > input,
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .opening-price-inputs > input,
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .selling-price-inputs input,
+    .page-shell--transaction-form .transaction-form > .marketing-section .sales-fields-row .payment-inputs > input {
+        width: 100% !important;
+        max-width: 100%;
+        min-width: 0;
+        margin: 0;
+    }
+}
+
+@media (max-width: 820px) {
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .field-grid > .form-group,
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields > .form-group,
+    .page-shell--transaction-form .transaction-form > .marketing-section .sales-fields-row > .form-group {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        row-gap: 6px;
+        min-width: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .field-grid > .form-group > label,
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields > .form-group > label,
+    .page-shell--transaction-form .transaction-form > .marketing-section .sales-fields-row > .form-group > label {
+        width: auto;
+        min-width: 0;
+        margin: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .field-grid > .form-group > .cost-inputs {
+        display: grid;
+        grid-column: 1;
+        grid-template-columns: minmax(0, 1fr);
+        width: 100%;
+        min-width: 0;
+        margin: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .field-grid > .form-group > .cost-inputs--dated {
+        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    }
+
+    .page-shell--transaction-form .transaction-form > .costs-section .section-content > .field-grid > .form-group > .cost-inputs > input:not([type="hidden"]) {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        margin: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields > .form-group > input,
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields > .form-group > .setor-price-inputs,
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields > .form-group > .opening-price-inputs,
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields > .form-group > .selling-price-inputs,
+    .page-shell--transaction-form .transaction-form > .marketing-section .sales-fields-row > .form-group > input,
+    .page-shell--transaction-form .transaction-form > .marketing-section .sales-fields-row > .form-group > .payment-inputs {
+        grid-column: 1;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        margin: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .setor-price-inputs,
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .opening-price-inputs,
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .selling-price-inputs,
+    .page-shell--transaction-form .transaction-form > .marketing-section .sales-fields-row .payment-inputs {
+        grid-template-columns: minmax(0, 1fr) minmax(0, .7fr) !important;
+        gap: 8px;
+    }
+
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .price-inputs--restricted {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .setor-price-inputs > :first-child,
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .opening-price-inputs > :first-child,
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .selling-price-inputs > :first-child {
+        grid-column: 1 / -1;
+    }
+
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .selling-price-inputs > input[type="date"] {
+        grid-column: 1 / -1;
+    }
+
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .selling-price-inputs > input[type="date"],
+    .page-shell--transaction-form .transaction-form > .marketing-section .sales-fields-row .payment-inputs > input[type="date"] {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+@media (max-width: 380px) {
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .setor-price-inputs,
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .opening-price-inputs,
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .selling-price-inputs,
+    .page-shell--transaction-form .transaction-form > .marketing-section .sales-fields-row .payment-inputs {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .setor-price-inputs > :first-child,
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .opening-price-inputs > :first-child,
+    .page-shell--transaction-form .transaction-form > .marketing-section .marketing-fields .selling-price-inputs > :first-child {
+        grid-column: 1;
+    }
+}
+
+.page-shell--transaction-form .transaction-form.transaction-form--master > .vehicle-section .vehicle-fields {
+    width: 100%;
+    min-width: 0;
+}
+
+.page-shell--transaction-form .transaction-form.transaction-form--master > .vehicle-section .vehicle-fields > .form-group {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+}
+
+.page-shell--transaction-form .transaction-form.transaction-form--master > .vehicle-section .vehicle-fields > .form-group > input:not([type="hidden"]),
+.page-shell--transaction-form .transaction-form.transaction-form--master > .vehicle-section .vehicle-fields > .form-group > select {
+    justify-self: stretch;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0;
+    margin-inline: 0 !important;
+}
+
+@media (min-width: 821px) {
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .vehicle-section .vehicle-fields > .form-group {
+        grid-template-columns: var(--transaction-field-label-width) minmax(0, 1fr) !important;
+        column-gap: 8px;
+    }
+}
+
+.page-shell--transaction-form .transaction-form.transaction-form--admin > .vehicle-section .vehicle-fields,
+.page-shell--transaction-form .transaction-form.transaction-form--admin > .marketing-section .marketing-fields,
+.page-shell--transaction-form .transaction-form.transaction-form--admin > .marketing-section .sales-fields-row {
+    align-content: start;
+    align-items: start;
+    grid-auto-rows: max-content;
+    row-gap: 4px;
+}
+
+.page-shell--transaction-form .transaction-form.transaction-form--admin > .vehicle-section .vehicle-fields > .form-group,
+.page-shell--transaction-form .transaction-form.transaction-form--admin > .marketing-section .marketing-fields > .form-group,
+.page-shell--transaction-form .transaction-form.transaction-form--admin > .marketing-section .sales-fields-row > .form-group {
+    align-self: start;
+    margin-block: 0;
+}
+
+.page-shell--transaction-form .transaction-form.transaction-form--admin > .vehicle-section .vehicle-fields input:not([type="hidden"]),
+.page-shell--transaction-form .transaction-form.transaction-form--admin > .vehicle-section .vehicle-fields select,
+.page-shell--transaction-form .transaction-form.transaction-form--admin > .costs-section .section-content input:not([type="hidden"]),
+.page-shell--transaction-form .transaction-form.transaction-form--admin > .costs-section .section-content select,
+.page-shell--transaction-form .transaction-form.transaction-form--admin > .marketing-section .marketing-fields input:not([type="hidden"]),
+.page-shell--transaction-form .transaction-form.transaction-form--admin > .marketing-section .marketing-fields select {
+    box-sizing: border-box;
+    height: 36px;
+    min-height: 36px;
+    padding: 6px 8px;
+    font-size: var(--font-size-md);
+    line-height: 1.4;
+}
+
+@media (min-width: 821px) {
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section .costs-primary-grid,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section .costs-vertical-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        align-content: start;
+        row-gap: 4px;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section .costs-primary-grid > .form-group,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section .costs-vertical-grid > .form-group {
+        display: grid !important;
+        grid-template-columns: var(--transaction-field-label-width) minmax(0, 1fr) !important;
+        align-items: center;
+        column-gap: 8px;
+        width: 100%;
+        min-width: 0;
+        margin: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section .section-content > .costs-primary-grid > .buy-date-group:has(input[name="buy_price"]) {
+        grid-template-columns: var(--transaction-field-label-width) minmax(0, 1fr) !important;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section .costs-primary-grid > .form-group > label,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section .costs-vertical-grid > .form-group > label {
+        grid-column: 1;
+        width: var(--transaction-field-label-width);
+        min-width: 0;
+        margin: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section .costs-primary-grid > .form-group > .cost-inputs,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section .costs-vertical-grid > .form-group > .cost-inputs {
+        display: grid;
+        grid-column: 2;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 6px;
+        width: 100%;
+        max-width: none;
+        min-width: 0;
+        margin: 0;
+        justify-self: stretch;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section .costs-primary-grid > .form-group > .cost-inputs--dated,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section .costs-vertical-grid > .form-group > .cost-inputs--dated {
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section .section-content > .field-grid > .form-group > .cost-inputs > input:not([type="hidden"]),
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section .section-content > .field-grid > .form-group > .cost-inputs > input[type="date"] {
+        justify-self: stretch;
+        width: 100% !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+    }
+}
+
+@media (max-width: 820px) {
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section .costs-primary-grid,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section .costs-vertical-grid {
+        grid-template-columns: minmax(0, 1fr);
+        row-gap: 4px;
+        min-width: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section .costs-primary-grid > .form-group,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section .costs-vertical-grid > .form-group {
+        grid-template-columns: minmax(0, 1fr) !important;
+        row-gap: 6px;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section .costs-primary-grid > .form-group > .cost-inputs,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section .costs-vertical-grid > .form-group > .cost-inputs {
+        display: grid;
+        grid-column: 1;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 6px;
+        width: 100%;
+        max-width: none;
+        min-width: 0;
+        margin: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section .costs-primary-grid > .form-group > .cost-inputs--dated,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section .costs-vertical-grid > .form-group > .cost-inputs--dated {
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section .section-content > .field-grid > .form-group > .cost-inputs > input:not([type="hidden"]),
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section .section-content > .field-grid > .form-group > .cost-inputs > input[type="date"] {
+        justify-self: stretch !important;
+        width: 100% !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+    }
+}
+
+.page-shell--transaction-form .transaction-form.transaction-form--master {
+    align-content: start;
+    align-items: stretch;
+    grid-auto-rows: auto;
+    width: 100%;
+    max-width: none;
+}
+
+.page-shell--transaction-form .transaction-form.transaction-form--master > .vehicle-section,
+.page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section,
+.page-shell--transaction-form .transaction-form.transaction-form--master > .marketing-section,
+.page-shell--transaction-form .transaction-form.transaction-form--master > .sales-section {
+    align-self: stretch;
+    align-content: stretch;
+    height: auto;
+    min-width: 0;
+    grid-template-rows: auto minmax(0, 1fr);
+}
+
+.page-shell--transaction-form .transaction-form.transaction-form--master > .vehicle-section .section-content,
+.page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section .section-content,
+.page-shell--transaction-form .transaction-form.transaction-form--master > .marketing-section .section-content,
+.page-shell--transaction-form .transaction-form.transaction-form--master > .sales-section .section-content {
+    align-self: stretch;
+    align-content: start;
+    min-width: 0;
+}
+
+.page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section #additional-repairs {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+}
+
+@media (min-width: 821px) {
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .vehicle-section .vehicle-fields,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .sales-section .section-content.field-grid,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .sales-section .sales-fields,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .sales-section .intertine-expense-fields {
+        align-content: start;
+        grid-template-columns: minmax(0, 1fr);
+        row-gap: 4px;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .vehicle-section .vehicle-fields > .form-group,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .sales-section .form-group {
+        align-self: start;
+        display: grid;
+        grid-template-columns: var(--transaction-field-label-width) minmax(0, 1fr);
+        align-items: center;
+        column-gap: 8px;
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+        margin: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .vehicle-section .vehicle-fields > .form-group > label,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .sales-section .form-group > label {
+        grid-column: 1;
+        min-width: 0;
+        margin: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .vehicle-section .vehicle-fields > .form-group > input:not([type="hidden"]),
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .vehicle-section .vehicle-fields > .form-group > select,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section .cost-inputs,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .marketing-section .marketing-fields > .form-group > input,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .marketing-section .marketing-fields > .form-group > .setor-price-inputs,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .marketing-section .marketing-fields > .form-group > .opening-price-inputs,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .marketing-section .marketing-fields > .form-group > .selling-price-inputs,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .marketing-section .sales-fields-row > .form-group > input,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .marketing-section .sales-fields-row > .form-group > .payment-inputs,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .sales-section .form-group > input:not([type="hidden"]),
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .sales-section .form-group > select {
+        justify-self: stretch;
+        width: 100%;
+        max-width: none;
+        min-width: 0;
+        margin-inline: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .sales-section .form-group > input:not([type="hidden"]),
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .sales-section .form-group > select {
+        grid-column: 2;
+    }
+}
+
+@media (min-width: 821px) and (max-width: 1100px) {
+    .page-shell--transaction-form .transaction-form.transaction-form--master {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .vehicle-section {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .marketing-section {
+        grid-column: 1;
+        grid-row: 2;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .sales-section {
+        grid-column: 2;
+        grid-row: 2;
+    }
+}
+
+@media (min-width: 1101px) {
+    .page-shell--transaction-form:has(.transaction-form--master) {
+        width: min(calc(100% - 24px), 1840px);
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .vehicle-section {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .marketing-section {
+        grid-column: 3;
+        grid-row: 1;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .sales-section {
+        grid-column: 4;
+        grid-row: 1;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .leasing-photo-layout,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .form-actions {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 820px) {
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .vehicle-section .vehicle-fields,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .sales-section .section-content.field-grid,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .sales-section .sales-fields,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .sales-section .intertine-expense-fields {
+        align-content: start;
+        grid-template-columns: minmax(0, 1fr);
+        row-gap: 6px;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .vehicle-section .vehicle-fields > .form-group,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .sales-section .form-group {
+        align-self: start;
+        grid-template-columns: minmax(0, 1fr);
+        width: 100%;
+        max-width: none;
+        margin: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .vehicle-section .vehicle-fields > .form-group > input:not([type="hidden"]),
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .vehicle-section .vehicle-fields > .form-group > select,
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .sales-section .form-group > input:not([type="hidden"]),
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .sales-section .form-group > select {
+        grid-column: 1;
+        justify-self: stretch;
+        width: 100%;
+        max-width: none;
+        min-width: 0;
+        margin: 0;
+    }
+}
+
+.page-shell--transaction-form .transaction-form.transaction-form--master > .vehicle-section .vehicle-fields {
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    min-width: 0;
+}
+
+.page-shell--transaction-form .transaction-form.transaction-form--master > .vehicle-section .vehicle-fields > .form-group {
+    width: 100%;
+    max-width: none !important;
+    min-width: 0;
+}
+
+.page-shell--transaction-form .transaction-form.transaction-form--master > .vehicle-section .vehicle-fields > .form-group > input:not([type="hidden"]),
+.page-shell--transaction-form .transaction-form.transaction-form--master > .vehicle-section .vehicle-fields > .form-group > select {
+    justify-self: stretch;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    padding: 6px 8px !important;
+    font-size: var(--font-size-md) !important;
+    line-height: 1.4 !important;
+    margin-inline: 0 !important;
+}
+
+@media (min-width: 821px) {
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .vehicle-section .vehicle-fields > .form-group {
+        grid-template-columns: var(--transaction-field-label-width, 110px) minmax(0, 1fr) !important;
+        column-gap: 8px;
+    }
+}
+
+@media (max-width: 820px) {
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .vehicle-section .vehicle-fields > .form-group {
+        grid-template-columns: minmax(0, 1fr) !important;
+        row-gap: 6px;
+    }
+}
+
+@media (min-width: 821px) and (max-width: 1279px) {
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .vehicle-section .vehicle-fields > .form-group > input:not([type="hidden"]),
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .vehicle-section .vehicle-fields > .form-group > select {
+        height: 20px !important;
+        min-height: 20px !important;
+        padding: 1px 4px !important;
+        font-size: var(--font-size-xs) !important;
+        line-height: 1.1 !important;
+    }
+}
+
+@media (min-width: 1280px) {
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .vehicle-section .vehicle-fields > .form-group > input:not([type="hidden"]),
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .vehicle-section .vehicle-fields > .form-group > select {
+        height: 30px !important;
+        min-height: 30px !important;
+        padding: 4px 7px !important;
+        font-size: var(--font-size-sm) !important;
+        line-height: 1.25 !important;
+    }
+}

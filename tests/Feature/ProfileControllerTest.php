@@ -14,7 +14,7 @@ test('masters and admins can render account settings in the shared application s
         ->assertOk()
         ->assertViewIs('settings.index')
         ->assertSee('Pengaturan Akun Master')
-        ->assertSee('Kelola informasi profil, email, dan kata sandi akses akun Anda.')
+        ->assertSee('Kelola informasi username dan kata sandi akses akun Anda.')
         ->assertSee('data-app-menu-toggle', false)
         ->assertSee('id="app-navigation"', false)
         ->assertSee('data-profile-menu', false)
@@ -24,14 +24,14 @@ test('masters and admins can render account settings in the shared application s
 test('users can update their profile without changing the existing password', function () {
     $user = User::factory()->master()->create([
         'name' => 'Nama Lama',
-        'email' => 'old@example.com',
+        'username' => 'old_user',
         'password' => 'existing-password',
     ]);
 
     $this->actingAs($user)
         ->put(route('profile.update'), [
             'name' => 'Nama Baru',
-            'email' => 'new@example.com',
+            'username' => 'new_user',
             'current_password' => '',
             'password' => '',
             'password_confirmation' => '',
@@ -42,26 +42,26 @@ test('users can update their profile without changing the existing password', fu
     $this->assertDatabaseHas('users', [
         'id' => $user->id,
         'name' => 'Nama Baru',
-        'email' => 'new@example.com',
+        'username' => 'new_user',
     ]);
     expect(Hash::check('existing-password', $user->fresh()->password))->toBeTrue();
 });
 
-test('users can keep their existing email when updating their profile', function () {
+test('users can keep their existing username when updating their profile', function () {
     $user = User::factory()->create([
         'name' => 'Nama Lama',
-        'email' => 'same@example.com',
+        'username' => 'same_user',
     ]);
 
     $this->actingAs($user)
         ->put(route('profile.update'), [
             'name' => 'Nama Baru',
-            'email' => 'same@example.com',
+            'username' => 'same_user',
         ])
         ->assertRedirect(route('profile.edit'));
 
     expect($user->fresh()->name)->toBe('Nama Baru')
-        ->and($user->fresh()->email)->toBe('same@example.com');
+        ->and($user->fresh()->username)->toBe('same_user');
 });
 
 test('users can change their password after confirming their current password', function () {
@@ -70,7 +70,7 @@ test('users can change their password after confirming their current password', 
     $this->actingAs($user)
         ->put(route('profile.update'), [
             'name' => $user->name,
-            'email' => $user->email,
+            'username' => $user->username,
             'current_password' => 'existing-password',
             'password' => 'new-secure-password',
             'password_confirmation' => 'new-secure-password',
@@ -88,7 +88,7 @@ test('users cannot change their password with an incorrect current password', fu
         ->from(route('profile.edit'))
         ->put(route('profile.update'), [
             'name' => $user->name,
-            'email' => $user->email,
+            'username' => $user->username,
             'current_password' => 'incorrect-password',
             'password' => 'new-secure-password',
             'password_confirmation' => 'new-secure-password',
@@ -106,7 +106,7 @@ test('users must confirm a new password before it is saved', function () {
         ->from(route('profile.edit'))
         ->put(route('profile.update'), [
             'name' => $user->name,
-            'email' => $user->email,
+            'username' => $user->username,
             'current_password' => 'existing-password',
             'password' => 'new-secure-password',
             'password_confirmation' => 'different-password',
@@ -117,20 +117,20 @@ test('users must confirm a new password before it is saved', function () {
     expect(Hash::check('existing-password', $user->fresh()->password))->toBeTrue();
 });
 
-test('users cannot change their email to an address owned by another account', function () {
-    $user = User::factory()->create(['email' => 'user@example.com']);
-    User::factory()->create(['email' => 'taken@example.com']);
+test('users cannot change their username to one owned by another account', function () {
+    $user = User::factory()->create(['username' => 'user_account']);
+    User::factory()->create(['username' => 'taken_account']);
 
     $this->actingAs($user)
         ->from(route('profile.edit'))
         ->put(route('profile.update'), [
             'name' => $user->name,
-            'email' => 'taken@example.com',
+            'username' => 'taken_account',
         ])
         ->assertRedirect(route('profile.edit'))
-        ->assertSessionHasErrors('email');
+        ->assertSessionHasErrors('username');
 
-    expect($user->fresh()->email)->toBe('user@example.com');
+    expect($user->fresh()->username)->toBe('user_account');
 });
 
 test('guests are redirected from account settings', function () {
@@ -138,6 +138,6 @@ test('guests are redirected from account settings', function () {
 
     $this->put(route('profile.update'), [
         'name' => 'Nama',
-        'email' => 'user@example.com',
+        'username' => 'user_account',
     ])->assertRedirect(route('login'));
 });

@@ -6,6 +6,7 @@ use App\Services\DatabaseSetupService;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 it('creates and migrates a missing SQLite database before handling requests', function () {
     $databasePath = sys_get_temp_dir().DIRECTORY_SEPARATOR.'sistemtoko-startup-'.bin2hex(random_bytes(8)).DIRECTORY_SEPARATOR.'database.sqlite';
@@ -21,7 +22,7 @@ it('creates and migrates a missing SQLite database before handling requests', fu
         (new AppServiceProvider(app()))->boot(app(DatabaseSetupService::class));
 
         $this->from(route('login'))->post(route('login.store'), [
-            'email' => 'missing@example.com',
+            'username' => 'missing_user',
             'password' => 'incorrect-password',
         ])->assertRedirect(route('login'));
 
@@ -51,7 +52,7 @@ it('runs pending migrations without deleting existing database records', functio
 
         DB::table('users')->insert([
             'name' => 'Existing User',
-            'email' => 'existing@example.com',
+            'username' => 'existing_user',
             'password' => 'hashed-password',
             'created_at' => now(),
             'updated_at' => now(),
@@ -60,8 +61,53 @@ it('runs pending migrations without deleting existing database records', functio
 
         $databaseSetupService->setup();
 
-        expect(DB::table('users')->where('email', 'existing@example.com')->exists())->toBeTrue()
+        expect(DB::table('users')->where('username', 'existing_user')->exists())->toBeTrue()
             ->and(DB::table('migrations')->count())->toBe($migrationCount);
+    } finally {
+        DB::purge('sqlite');
+        @unlink($databasePath);
+        @unlink($databasePath.'-shm');
+        @unlink($databasePath.'-wal');
+    }
+});
+
+it('replaces existing user emails with unique usernames during migration', function () {
+    $databasePath = tempnam(sys_get_temp_dir(), 'sistemtoko-usernames-');
+    config(['database.connections.sqlite.database' => $databasePath]);
+    DB::purge('sqlite');
+
+    try {
+        expect(Artisan::call('migrate', [
+            '--force' => true,
+            '--path' => 'database/migrations/0001_01_01_000000_create_users_table.php',
+        ]))->toBe(0);
+
+        DB::table('users')->insert([
+            [
+                'name' => 'Jane A',
+                'email' => 'jane@example.com',
+                'password' => 'hashed-password',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Jane B',
+                'email' => 'jane@another-domain.com',
+                'password' => 'hashed-password',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+
+        expect(Artisan::call('migrate', [
+            '--force' => true,
+            '--path' => 'database/migrations/2026_10_22_105615_replace_user_email_with_username.php',
+        ]))->toBe(0)
+            ->and(DB::table('users')->orderBy('id')->pluck('username')->all())
+            ->toBe(['jane', 'jane_1'])
+            ->and(Schema::hasColumn('users', 'email'))->toBeFalse()
+            ->and(Schema::hasColumn('users', 'email_verified_at'))->toBeFalse()
+            ->and(Schema::hasTable('password_reset_tokens'))->toBeFalse();
     } finally {
         DB::purge('sqlite');
         @unlink($databasePath);

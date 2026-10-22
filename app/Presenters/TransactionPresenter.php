@@ -34,6 +34,7 @@ class TransactionPresenter
                 'year',
                 'sell_date',
                 'buy_date',
+                'tax_items',
                 'selling_price',
                 'setor_price',
                 'opening_price',
@@ -49,7 +50,7 @@ class TransactionPresenter
             'soldRevenue' => $soldTransactions->sum('selling_price'),
             'soldCapital' => $canViewSensitiveData ? $soldTransactions->sum('total_capital') : null,
             'soldNetProfit' => $canViewSensitiveData ? $soldTransactions->sum('net_profit') : null,
-            'tableColumnCount' => $canViewSensitiveData ? 12 : 7,
+            'tableColumnCount' => $canViewSensitiveData ? 14 : 9,
             'canViewSensitiveData' => $canViewSensitiveData,
         ];
     }
