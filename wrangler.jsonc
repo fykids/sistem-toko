@@ -1,0 +1,17 @@
+{
+  "name": "sistem-toko",
+  "compatibility_date": "2026-10-19",
+  "observability": {
+    "enabled": true
+  },
+  "assets": {
+    "not_found_handling": "single-page-application"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "showroom_cjb",
+      "database_id": "835f8820-a412-4aea-8966-b6af2ee5fbdd"
+    }
+  ]
+}
