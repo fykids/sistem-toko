@@ -6,7 +6,7 @@
     "enabled": true
   },
   "assets": {
-    "directory": "public/build",
+    "directory": "public",
     "not_found_handling": "single-page-application"
   },
   "d1_databases": [
