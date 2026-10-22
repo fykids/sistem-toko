@@ -15,13 +15,22 @@
         <div class="field-grid costs-primary-grid">
             @can('viewSensitiveData', \App\Models\CarTransaction::class)
                 <div class="form-group buy-date-group"><label for="buy-price">Modal Beli (Rp) <span
-                            aria-hidden="true">*</span></label><input id="buy-price" type="text" name="buy_price"
-                        value="{{ old('buy_price', $transaction?->buy_price) }}" placeholder="Rp 0"
-                        inputmode="decimal" data-rupiah-input required><input id="buy-date" type="date" name="buy_date"
-                        value="{{ old('buy_date', $transaction?->buy_date) }}" aria-label="Tanggal beli" required></div>
+                            aria-hidden="true">*</span></label>
+                    <div class="cost-inputs cost-inputs--dated">
+                        <input id="buy-price" type="text" name="buy_price"
+                            value="{{ old('buy_price', $transaction?->buy_price) }}" placeholder="Rp 0"
+                            inputmode="decimal" data-rupiah-input required>
+                        <input id="buy-date" type="date" name="buy_date"
+                            value="{{ old('buy_date', $transaction?->buy_date) }}" aria-label="Tanggal beli" required>
+                    </div>
+                </div>
             @else
-                <div class="form-group buy-date-group"><label for="buy-date">Tanggal beli</label><input id="buy-date"
-                        type="date" name="buy_date" value="{{ old('buy_date', $transaction?->buy_date) }}" required></div>
+                <div class="form-group buy-date-group"><label for="buy-date">Tanggal beli</label>
+                    <div class="cost-inputs cost-inputs--date-only">
+                        <input id="buy-date" type="date" name="buy_date"
+                            value="{{ old('buy_date', $transaction?->buy_date) }}" required>
+                    </div>
+                </div>
             @endcan
         </div>
         @php($taxInput = old('tax_items', $transaction?->tax_items ?? []))
@@ -30,43 +39,61 @@
         @php($primaryTaxItem = $taxItemsByName->get('pajak') ?? $taxItemsForForm->first())
         @php($otherTaxItems = $taxItemsForForm->reject(fn($taxItem) => $taxItem === $primaryTaxItem || in_array(strtolower($taxItem['name'] ?? ''), ['pajak', 'bbn', 'etle'], true))->values())
         <div class="field-grid costs-vertical-grid">
-            <div class="form-group"><label for="purchase-operational">OPS (Rp)</label><input
-                    id="purchase-operational" type="text" name="purchase_operational"
-                    value="{{ old('purchase_operational', $transaction?->purchase_operational) }}" placeholder="Rp 0"
-                    inputmode="decimal" data-rupiah-input></div>
-            <div class="form-group"><label for="other-costs">KR Beli (Rp)</label><input id="other-costs" type="text"
-                    name="other_costs" value="{{ old('other_costs', $transaction?->other_costs) }}" placeholder="Rp 0"
-                    inputmode="decimal" data-rupiah-input></div>
+            <div class="form-group"><label for="purchase-operational">OPS (Rp)</label>
+                <div class="cost-inputs">
+                    <input id="purchase-operational" type="text" name="purchase_operational"
+                        value="{{ old('purchase_operational', $transaction?->purchase_operational) }}"
+                        placeholder="Rp 0" inputmode="decimal" data-rupiah-input>
+                </div>
+            </div>
+            <div class="form-group"><label for="other-costs">KR Beli (Rp)</label>
+                <div class="cost-inputs">
+                    <input id="other-costs" type="text" name="other_costs"
+                        value="{{ old('other_costs', $transaction?->other_costs) }}" placeholder="Rp 0"
+                        inputmode="decimal" data-rupiah-input>
+                </div>
+            </div>
             <input type="hidden" name="tax_items[0][name]"
                 value="{{ old('tax_items.0.name', data_get($primaryTaxItem, 'name', 'Pajak')) }}">
             <input type="hidden" name="tax_items[0][payment_status]"
                 value="{{ old('tax_items.0.payment_status', data_get($primaryTaxItem, 'payment_status')) }}">
             <input type="hidden" name="tax_items[0][payment_note]"
                 value="{{ old('tax_items.0.payment_note', data_get($primaryTaxItem, 'payment_note')) }}">
-            <div class="form-group tax-cost-group"><label for="tax-price">Biaya Pajak</label><input id="tax-price" type="text"
-                    name="tax_items[0][cost]"
-                    value="{{ old('tax_items.0.cost') ?? data_get($primaryTaxItem, 'cost') }}" placeholder="Rp 0"
-                    inputmode="decimal" data-rupiah-input><input id="tax-date" type="date" name="tax_items[0][date]"
-                    value="{{ old('tax_items.0.date', data_get($primaryTaxItem, 'date')) }}"></div>
+            <div class="form-group tax-cost-group"><label for="tax-price">Biaya Pajak</label>
+                <div class="cost-inputs cost-inputs--dated">
+                    <input id="tax-price" type="text" name="tax_items[0][cost]"
+                        value="{{ old('tax_items.0.cost') ?? data_get($primaryTaxItem, 'cost') }}" placeholder="Rp 0"
+                        inputmode="decimal" data-rupiah-input>
+                    <input id="tax-date" type="date" name="tax_items[0][date]"
+                        value="{{ old('tax_items.0.date', data_get($primaryTaxItem, 'date')) }}">
+                </div>
+            </div>
             <input type="hidden" name="tax_items[1][name]" value="BBN">
             <input type="hidden" name="tax_items[1][payment_status]"
                 value="{{ old('tax_items.1.payment_status', data_get($taxItemsByName->get('bbn'), 'payment_status')) }}">
             <input type="hidden" name="tax_items[1][payment_note]"
                 value="{{ old('tax_items.1.payment_note', data_get($taxItemsByName->get('bbn'), 'payment_note')) }}">
-            <div class="form-group tax-cost-group"><label for="bbn-price">Biaya BBN</label><input id="bbn-price" type="text"
-                    name="tax_items[1][cost]"
-                    value="{{ old('tax_items.1.cost', data_get($taxItemsByName->get('bbn'), 'cost')) }}"
-                    placeholder="Rp 0" inputmode="decimal" data-rupiah-input><input id="bbn-date" type="date" name="tax_items[1][date]"
-                    value="{{ old('tax_items.1.date', data_get($taxItemsByName->get('bbn'), 'date')) }}"></div>
+            <div class="form-group tax-cost-group"><label for="bbn-price">Biaya BBN</label>
+                <div class="cost-inputs cost-inputs--dated">
+                    <input id="bbn-price" type="text" name="tax_items[1][cost]"
+                        value="{{ old('tax_items.1.cost', data_get($taxItemsByName->get('bbn'), 'cost')) }}"
+                        placeholder="Rp 0" inputmode="decimal" data-rupiah-input>
+                    <input id="bbn-date" type="date" name="tax_items[1][date]"
+                        value="{{ old('tax_items.1.date', data_get($taxItemsByName->get('bbn'), 'date')) }}">
+                </div>
+            </div>
             <input type="hidden" name="tax_items[2][name]" value="ETLE">
             <input type="hidden" name="tax_items[2][payment_status]"
                 value="{{ old('tax_items.2.payment_status', data_get($taxItemsByName->get('etle'), 'payment_status')) }}">
             <input type="hidden" name="tax_items[2][payment_note]"
                 value="{{ old('tax_items.2.payment_note', data_get($taxItemsByName->get('etle'), 'payment_note')) }}">
-            <div class="form-group tax-cost-group"><label for="etle-price">Biaya ETLE</label><input id="etle-price" type="text"
-                    name="tax_items[2][cost]"
-                    value="{{ old('tax_items.2.cost', data_get($taxItemsByName->get('etle'), 'cost')) }}"
-                    placeholder="Rp 0" inputmode="decimal" data-rupiah-input></div>
+            <div class="form-group tax-cost-group"><label for="etle-price">Biaya ETLE</label>
+                <div class="cost-inputs">
+                    <input id="etle-price" type="text" name="tax_items[2][cost]"
+                        value="{{ old('tax_items.2.cost', data_get($taxItemsByName->get('etle'), 'cost')) }}"
+                        placeholder="Rp 0" inputmode="decimal" data-rupiah-input>
+                </div>
+            </div>
             @foreach ($otherTaxItems as $index => $taxItem)
             @php($taxItemIndex = $index + 3)
             <input type="hidden" name="tax_items[{{ $taxItemIndex }}][name]" value="{{ $taxItem['name'] ?? '' }}">

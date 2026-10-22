@@ -5,6 +5,36 @@ if (userManagement) {
     const editDialog = document.getElementById('edit-user-dialog');
     const editForm = document.getElementById('edit-user-form');
     const updateUrlTemplate = editDialog?.dataset.updateUrlTemplate;
+    const searchInput = userManagement.querySelector('[data-user-search]');
+    const userRows = [...userManagement.querySelectorAll('[data-user-row]')].map((row) => ({
+        element: row,
+        searchText: [...row.cells]
+            .slice(0, 3)
+            .map((cell) => cell.textContent)
+            .join(' ')
+            .toLocaleLowerCase(),
+    }));
+    const emptySearchRow = userManagement.querySelector('[data-user-search-empty]');
+    const userCount = userManagement.querySelector('[data-user-count]');
+
+    searchInput?.addEventListener('input', () => {
+        const query = searchInput.value.trim().toLocaleLowerCase();
+        let visibleCount = 0;
+
+        userRows.forEach(({ element, searchText }) => {
+            const matchesQuery = searchText.includes(query);
+            element.hidden = !matchesQuery;
+            visibleCount += matchesQuery ? 1 : 0;
+        });
+
+        if (emptySearchRow) {
+            emptySearchRow.hidden = userRows.length === 0 || visibleCount > 0;
+        }
+
+        if (userCount) {
+            userCount.textContent = `Menampilkan ${visibleCount} pengguna`;
+        }
+    });
 
     userManagement.querySelector('[data-open-create-user]')?.addEventListener('click', () => {
         createDialog?.showModal();

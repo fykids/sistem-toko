@@ -7,30 +7,62 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>
-    <main class="page-shell @yield('page_class')">
+    <div class="toast-stack" data-toast-stack>
         @if (session('success'))
-            <div class="flash-message" role="status">{{ session('success') }}</div>
+            <div class="toast toast--success" data-toast role="status">
+                <span>{{ session('success') }}</span>
+                <button class="toast-close" type="button" data-toast-close aria-label="Tutup pemberitahuan">&times;</button>
+            </div>
+        @endif
+        @if (session('error'))
+            <div class="toast toast--error" data-toast role="alert">
+                <span>{{ session('error') }}</span>
+                <button class="toast-close" type="button" data-toast-close aria-label="Tutup pemberitahuan">&times;</button>
+            </div>
         @endif
         @if (session('info'))
-            <div class="flash-message flash-message--info" role="status">{{ session('info') }}</div>
+            <div class="toast toast--info" data-toast role="status">
+                <span>{{ session('info') }}</span>
+                <button class="toast-close" type="button" data-toast-close aria-label="Tutup pemberitahuan">&times;</button>
+            </div>
         @endif
+    </div>
+    <main @class([
+        'page-shell',
+        trim($__env->yieldContent('page_class')),
+        'page-shell--app' => auth()->check() && ! request()->routeIs('transactions.create'),
+    ]) @if (request()->routeIs('dashboard', 'transactions.index')) data-showroom-layout data-showroom-view="dashboard" @endif>
         @auth
-            @unless (request()->routeIs('dashboard', 'transactions.index'))
-            <header class="session-toolbar">
-                <a class="btn btn-secondary btn-small" href="{{ route('dashboard') }}">Dashboard</a>
-                @can('viewAny', \App\Models\User::class)
-                    <a class="btn btn-secondary btn-small" href="{{ route('users.index') }}">Manajemen Akun</a>
-                @endcan
-                <div class="session-user">
-                    <strong>{{ auth()->user()->name }}</strong>
-                    <span class="session-role session-role--{{ auth()->user()->role }}">{{ ucfirst(auth()->user()->role) }}</span>
-                </div>
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button class="btn btn-secondary btn-small" type="submit">Logout</button>
-                </form>
-            </header>
-            @endunless
+            @php
+                $isTransactionPage = request()->routeIs(
+                    'transactions.create',
+                    'transactions.edit',
+                    'transactions.show',
+                );
+                $isUserPage = request()->routeIs('users.*');
+                $isProfilePage = request()->routeIs('profile.*');
+                $pageTitle = $isTransactionPage
+                    ? (request()->routeIs('transactions.edit')
+                        ? 'Edit Transaksi'
+                        : (request()->routeIs('transactions.show') ? 'Detail Transaksi' : 'Transaksi Baru'))
+                    : ($isUserPage
+                        ? 'Manajemen Akun'
+                        : ($isProfilePage
+                            ? 'Pengaturan Akun'
+                            : (request()->routeIs('dashboard', 'transactions.index') ? 'Dashboard' : 'Akun')));
+                $breadcrumbLabel = $isTransactionPage
+                    ? 'Transaksi'
+                    : ($isProfilePage ? 'Pengaturan' : 'Showroom');
+                $breadcrumbUrl = $isTransactionPage
+                    ? route('transactions.index')
+                    : route('dashboard');
+            @endphp
+            <x-app-topbar
+                :breadcrumb-label="$breadcrumbLabel"
+                :breadcrumb-url="$breadcrumbUrl"
+                :page-title="$pageTitle"
+            />
+            <x-app-sidebar />
         @endauth
         @if ($errors->any())
             <div class="error-panel" role="alert">
@@ -41,7 +73,13 @@
                 </ul>
             </div>
         @endif
-        @yield('content')
+        @if (request()->routeIs('dashboard', 'transactions.index', 'users.index', 'profile.edit', 'transactions.create'))
+            @yield('content')
+        @else
+            <div class="showroom-content">
+                @yield('content')
+            </div>
+        @endif
     </main>
 </body>
 </html>

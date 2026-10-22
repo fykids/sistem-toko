@@ -3,6 +3,28 @@
 use Illuminate\Support\Str;
 use Pdo\Mysql;
 
+$nativePhpUserDataPath = env('NATIVEPHP_USER_DATA_PATH');
+$nativePhpDatabasePath = env('NATIVEPHP_DATABASE_PATH');
+$windowsAppDataPath = env('APPDATA');
+$userHomePath = env('USERPROFILE') ?: env('HOME');
+
+if (DIRECTORY_SEPARATOR === '\\') {
+    $fallbackUserDataPath = $windowsAppDataPath
+        ? $windowsAppDataPath.DIRECTORY_SEPARATOR.'Sistem Toko Mobil'
+        : ($userHomePath
+            ? $userHomePath.DIRECTORY_SEPARATOR.'AppData'.DIRECTORY_SEPARATOR.'Roaming'.DIRECTORY_SEPARATOR.'Sistem Toko Mobil'
+            : sys_get_temp_dir().DIRECTORY_SEPARATOR.'Sistem Toko Mobil');
+} else {
+    $fallbackUserDataPath = $userHomePath
+        ? $userHomePath.DIRECTORY_SEPARATOR.'.local'.DIRECTORY_SEPARATOR.'share'.DIRECTORY_SEPARATOR.'Sistem Toko Mobil'
+        : sys_get_temp_dir().DIRECTORY_SEPARATOR.'Sistem Toko Mobil';
+}
+
+$userDataPath = $nativePhpUserDataPath ?: $fallbackUserDataPath;
+$sqliteDatabasePath = env('DB_DATABASE') === ':memory:'
+    ? ':memory:'
+    : ($nativePhpDatabasePath ?: $userDataPath.DIRECTORY_SEPARATOR.'database'.DIRECTORY_SEPARATOR.'database.sqlite');
+
 return [
 
     /*
@@ -34,11 +56,11 @@ return [
 
         'sqlite' => [
             'driver' => 'sqlite',
-            'url' => env('DB_URL'),
-            'database' => env('DB_DATABASE', database_path('database.sqlite')),
+            'url' => null,
+            'database' => $sqliteDatabasePath,
             'prefix' => '',
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
-            'busy_timeout' => null,
+            'busy_timeout' => env('DB_BUSY_TIMEOUT', 5000),
             'journal_mode' => null,
             'synchronous' => null,
             'transaction_mode' => 'DEFERRED',

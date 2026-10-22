@@ -3,6 +3,7 @@
     "name": "laravel/laravel",
     "type": "project",
     "description": "The skeleton application for the Laravel framework.",
+    "version": "1.0.1",
     "keywords": [
         "laravel",
         "framework"

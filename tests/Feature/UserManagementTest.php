@@ -12,7 +12,25 @@ test('master can list users and create an account with an explicitly selected ro
     $this->get(route('users.index'))
         ->assertOk()
         ->assertSee('Manajemen Akun')
-        ->assertSee('Tambah akun');
+        ->assertSee('Showroom')
+        ->assertSee('Tambah akun')
+        ->assertSee('data-app-menu-toggle', false)
+        ->assertSee('id="app-navigation"', false)
+        ->assertSee('data-profile-menu', false)
+        ->assertDontSee('data-profile-menu-database', false)
+        ->assertSee('data-sidebar-database', false)
+        ->assertSee(route('dashboard').'#database', false)
+        ->assertSee('class="showroom-content users-page"', false)
+        ->assertSee('class="showroom-dashboard-heading"', false)
+        ->assertSee('class="panel showroom-inventory users-table-card"', false)
+        ->assertSee('class="toolbar"', false)
+        ->assertSee('class="showroom-primary-action"', false)
+        ->assertSee('data-user-search', false)
+        ->assertSee('Menampilkan 1 pengguna')
+        ->assertSee('Daftar Pengguna')
+        ->assertSee('Tanggal dibuat')
+        ->assertSee(route('dashboard').'#inventaris', false)
+        ->assertSee(route('dashboard').'#laporan', false);
 
     $this->post(route('users.store'), [
         'name' => 'Admin Baru',
@@ -26,6 +44,11 @@ test('master can list users and create an account with an explicitly selected ro
 
     expect($user->role)->toBe('admin')
         ->and(Hash::check('secure-password', $user->password))->toBeTrue();
+
+    $this->get(route('users.index'))
+        ->assertOk()
+        ->assertSee('role="status"', false)
+        ->assertSee('Akun berhasil dibuat.');
 });
 
 test('master can update account details and leave its password unchanged', function () {
@@ -97,19 +120,38 @@ test('admin receives forbidden responses for user management endpoints', functio
     $this->delete(route('users.destroy', $managedUser))->assertForbidden();
 });
 
+test('only masters see user and database management in the showroom sidebar', function () {
+    $this->actingAs(User::factory()->master()->create())
+        ->get(route('transactions.index'))
+        ->assertOk()
+        ->assertSee(route('users.index'), false)
+        ->assertDontSee('data-profile-menu-database', false)
+        ->assertSee('data-sidebar-database', false)
+        ->assertSee('data-database-modal', false);
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('transactions.index'))
+        ->assertOk()
+        ->assertDontSee(route('users.index'), false)
+        ->assertDontSee('data-profile-menu-database', false)
+        ->assertDontSee('data-sidebar-database', false)
+        ->assertDontSee('data-database-modal', false);
+});
+
 test('final master cannot be demoted to admin', function () {
     $master = User::factory()->master()->create();
     $this->actingAs($master);
 
-    $this->from(route('users.index'))->put(route('users.update', $master), [
+    $this->from(route('users.index'))->followingRedirects()->put(route('users.update', $master), [
         'name' => $master->name,
         'email' => $master->email,
         'password' => '',
         'role' => 'admin',
         '_form' => 'edit',
         '_user_id' => $master->id,
-    ])->assertRedirect(route('users.index'))
-        ->assertSessionHasErrors('role');
+    ])->assertOk()
+        ->assertSee('role="alert"', false)
+        ->assertSee('Sistem harus mempertahankan minimal satu akun Master.');
 
     expect($master->refresh()->role)->toBe('master');
 });

@@ -27,6 +27,18 @@ test('it renders repair items with a next index after the highest existing index
         ->assertSee('data-next-index="3"', false);
 });
 
+test('the transaction creation page uses the global topbar and drawer without changing the form', function () {
+    $this->get(route('transactions.create'))
+        ->assertOk()
+        ->assertSee('<header class="showroom-topbar">', false)
+        ->assertSee('data-app-menu-toggle', false)
+        ->assertSee('aria-controls="app-navigation"', false)
+        ->assertSee('id="app-navigation"', false)
+        ->assertSee('Transaksi Baru')
+        ->assertSee('Logout')
+        ->assertSee('class="transaction-form transaction-form--master"', false);
+});
+
 test('it renders an empty repair row by default', function () {
     $response = $this->get(route('transactions.create'));
 

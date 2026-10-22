@@ -3,141 +3,12 @@
 @section('page_class', 'page-shell--dashboard')
 
 @section('content')
-    <div class="showroom-layout" data-showroom-layout data-showroom-view="dashboard"
-        data-sidebar-collapsed="false">
-        <button class="showroom-sidebar-scrim" type="button" data-sidebar-close aria-label="Tutup navigasi"></button>
-
-        <aside class="showroom-sidebar" id="showroom-sidebar" aria-label="Navigasi utama">
-            <a class="showroom-brand" href="#dashboard" aria-label="Sistem Toko Mobil, dashboard">
-                <span class="showroom-brand-mark" aria-hidden="true">ST</span>
-                <span class="showroom-brand-copy">
-                    <strong>Sistem Toko</strong>
-                    <span>Showroom mobil</span>
-                </span>
-            </a>
-
-            <p class="showroom-nav-heading">Menu utama</p>
-            <nav class="showroom-nav">
-                <a class="showroom-nav-link is-active" href="#dashboard" data-dashboard-nav="dashboard"
-                    aria-current="page">
-                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="3" width="8" height="8" rx="1.5" />
-                        <rect x="13" y="3" width="8" height="5" rx="1.5" />
-                        <rect x="13" y="10" width="8" height="11" rx="1.5" />
-                        <rect x="3" y="13" width="8" height="8" rx="1.5" />
-                    </svg>
-                    <span>Dashboard</span>
-                </a>
-                <a class="showroom-nav-link" href="#inventaris" data-dashboard-nav="inventory">
-                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m3 13 1.6-5.2A2.5 2.5 0 0 1 7 6h10a2.5 2.5 0 0 1 2.4 1.8L21 13" />
-                        <path d="M4 13h16a1 1 0 0 1 1 1v4H3v-4a1 1 0 0 1 1-1ZM6 18v2m12-2v2M6 10h.01M18 10h.01" />
-                    </svg>
-                    <span>Inventaris</span>
-                </a>
-                <a class="showroom-nav-link" href="#penjualan" data-dashboard-nav="sales">
-                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 19V5m0 14h16" />
-                        <path d="m7 15 4-4 3 2 5-6" />
-                        <path d="M15 7h4v4" />
-                    </svg>
-                    <span>Penjualan</span>
-                </a>
-                <a class="showroom-nav-link" href="#laporan" data-dashboard-nav="reports">
-                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M5 3h10l4 4v14H5z" />
-                        <path d="M14 3v5h5M8 12h8M8 16h8" />
-                    </svg>
-                    <span>Laporan</span>
-                </a>
-            </nav>
-
-            <div class="showroom-sidebar-divider"></div>
-            <p class="showroom-nav-heading">Pengaturan</p>
-            @can('viewAny', \App\Models\User::class)
-                <a class="showroom-nav-link" href="{{ route('users.index') }}">
-                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                        <circle cx="10" cy="7" r="4" />
-                        <path d="M20 8v6m3-3h-6" />
-                    </svg>
-                    <span>Manajemen Akun</span>
-                </a>
-            @endcan
-            @can('viewSensitiveData', \App\Models\CarTransaction::class)
-                <button class="showroom-nav-link showroom-nav-button" type="button" data-database-open>
-                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <ellipse cx="12" cy="5" rx="8" ry="3" />
-                        <path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" />
-                    </svg>
-                    <span>Manajemen Database</span>
-                </button>
-            @endcan
-
-            <div class="showroom-sidebar-footer">
-                <span class="showroom-status-dot" aria-hidden="true"></span>
-                <span class="showroom-sidebar-footer-copy">
-                    <strong>Operasional aktif</strong>
-                    <span>Data showroom tersimpan</span>
-                </span>
-            </div>
-        </aside>
-
-        <div class="showroom-main">
-            <header class="showroom-topbar">
-                <div class="showroom-topbar-inner">
-                    <button class="showroom-menu-toggle" type="button" aria-label="Buka navigasi" aria-expanded="false"
-                        aria-controls="showroom-sidebar" data-sidebar-toggle>
-                        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                            stroke-linecap="round">
-                            <path d="M4 7h16M4 12h16M4 17h16" />
-                        </svg>
-                    </button>
-                    <div class="showroom-topbar-context">
-                        <span>Showroom</span>
-                        <span aria-hidden="true">/</span>
-                        <strong data-current-view-title>Dashboard</strong>
-                    </div>
-                    @can('viewSensitiveData', \App\Models\CarTransaction::class)
-                        <button class="showroom-topbar-database" type="button" data-database-open>
-                            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <ellipse cx="12" cy="5" rx="8" ry="3" />
-                                <path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" />
-                            </svg>
-                            <span>Database</span>
-                        </button>
-                    @endcan
-                    <div class="showroom-topbar-account">
-                        <div class="session-user">
-                            <strong>{{ auth()->user()->name }}</strong>
-                            <span class="session-role session-role--{{ auth()->user()->role }}">{{ ucfirst(auth()->user()->role) }}</span>
-                        </div>
-                        <form action="{{ route('logout') }}" method="POST">
-                            @csrf
-                            <button class="session-logout" type="submit" aria-label="Logout">
-                                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M10 17l5-5-5-5M15 12H3" />
-                                    <path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" />
-                                </svg>
-                                <span>Logout</span>
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </header>
-
-            <div class="showroom-content">
+    <div class="showroom-content">
                 <section class="showroom-dashboard-heading" id="dashboard" data-dashboard-page="dashboard"
                     aria-labelledby="dashboard-title">
+                    <p class="showroom-page-eyebrow">Ringkasan data</p>
                     <h1 id="dashboard-title">Dashboard Showroom</h1>
+                    <p class="showroom-page-description">Pantau inventaris, penjualan, dan aktivitas showroom dalam satu tempat.</p>
                 </section>
 
                 <section class="showroom-page-header" id="inventaris" data-dashboard-page="inventory"
@@ -393,8 +264,6 @@
                         Menampilkan {{ $transactions->count() }} kendaraan
                     </div>
                 </section>
-            </div>
-        </div>
     </div>
 
     @can('viewSensitiveData', \App\Models\CarTransaction::class)

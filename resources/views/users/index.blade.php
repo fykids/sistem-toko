@@ -3,37 +3,46 @@
 @section('page_class', 'page-shell--users')
 
 @section('content')
-    <section class="users-page" data-user-management>
-        <header class="users-page-heading">
-            <div>
-                <p class="page-eyebrow">Pengaturan sistem</p>
-                <h1>Manajemen Akun</h1>
-                <p class="users-page-description">Kelola akses Master dan Admin showroom.</p>
-            </div>
-            <button class="btn btn-accent" type="button" data-open-create-user>Tambah akun</button>
+    <section class="showroom-content users-page" data-user-management>
+        <header class="showroom-dashboard-heading">
+            <p class="showroom-page-eyebrow">Pengaturan sistem</p>
+            <h1>Manajemen Akun</h1>
+            <p class="showroom-page-description">Kelola akses Master dan Admin showroom dalam satu tempat.</p>
         </header>
 
-        <div class="users-table-card">
-            <div class="users-table-heading">
+        <div class="panel showroom-inventory users-table-card">
+            <div class="toolbar">
                 <div>
-                    <h2>Daftar pengguna</h2>
-                    <p>{{ $users->total() }} akun terdaftar</p>
+                    <h2 class="toolbar-title">Daftar Pengguna</h2>
+                    <span class="cell-secondary">Semua akun terdaftar</span>
+                </div>
+                <div class="toolbar-actions">
+                    <label class="search-wrap">
+                        <span class="search-symbol" aria-hidden="true">⌕</span>
+                        <span class="sr-only">Cari nama, email, atau role pengguna</span>
+                        <input id="users-search" type="search" placeholder="Cari nama, email, role..."
+                            autocomplete="off" data-user-search>
+                    </label>
+                    <button class="showroom-primary-action" type="button" data-open-create-user>
+                        <span aria-hidden="true">+</span>
+                        Tambah akun
+                    </button>
                 </div>
             </div>
-            <div class="users-table-wrap">
-                <table class="users-table">
+            <div class="table-scroll">
+                <table class="users-table data-table">
                     <thead>
                         <tr>
                             <th scope="col">Nama</th>
                             <th scope="col">Email</th>
-                            <th scope="col">Role</th>
-                            <th scope="col">Bergabung</th>
+                            <th scope="col">Peran (Role)</th>
+                            <th scope="col">Tanggal dibuat</th>
                             <th scope="col">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($users as $user)
-                            <tr>
+                            <tr data-user-row>
                                 <td data-label="Nama">
                                     <strong>{{ $user->name }}</strong>
                                     @if (auth()->user()->is($user))
@@ -46,7 +55,7 @@
                                         {{ ucfirst($user->role) }}
                                     </span>
                                 </td>
-                                <td data-label="Bergabung">{{ $user->created_at?->format('d M Y') }}</td>
+                                <td data-label="Tanggal dibuat">{{ $user->created_at?->format('d M Y') }}</td>
                                 <td data-label="Aksi">
                                     <div class="users-row-actions">
                                         <button
@@ -82,9 +91,15 @@
                                 <td colspan="5" class="users-empty-state">Belum ada akun pengguna.</td>
                             </tr>
                         @endforelse
+                        <tr data-user-search-empty hidden>
+                            <td colspan="5" class="users-empty-state">Tidak ada pengguna yang cocok dengan pencarian.</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
+            <footer class="table-foot" data-user-count aria-live="polite">
+                Menampilkan {{ $users->count() }} pengguna
+            </footer>
             @if ($users->hasPages())
                 <div class="users-pagination">{{ $users->links() }}</div>
             @endif

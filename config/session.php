@@ -2,6 +2,12 @@
 
 use Illuminate\Support\Str;
 
+$defaultDriver = env('APP_ENV', 'production') === 'production' ? 'database' : 'file';
+
+if (filter_var(env('NATIVEPHP_RUNNING', false), FILTER_VALIDATE_BOOL)) {
+    $defaultDriver = 'file';
+}
+
 return [
 
     /*
@@ -18,7 +24,7 @@ return [
     |
     */
 
-    'driver' => env('SESSION_DRIVER', 'database'),
+    'driver' => env('SESSION_DRIVER', $defaultDriver),
 
     /*
     |--------------------------------------------------------------------------

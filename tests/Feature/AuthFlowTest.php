@@ -14,6 +14,38 @@ test('guests can render the login form', function () {
         ->assertSee(route('login.store'), false);
 });
 
+test('login page creates a master account that can authenticate with the default credentials', function () {
+    $this->get(route('login'))->assertOk();
+
+    $master = User::query()->where('email', 'master@showroom.com')->sole();
+
+    expect($master->role)->toBe('master')
+        ->and(Hash::check('master123', $master->password))->toBeTrue();
+
+    $this->post(route('login.store'), [
+        'email' => 'master@showroom.com',
+        'password' => 'master123',
+    ])->assertRedirect('/');
+
+    $this->assertAuthenticatedAs($master);
+});
+
+test('login page promotes the existing default email instead of inserting a duplicate', function () {
+    $existingUser = User::factory()->create([
+        'email' => 'master@showroom.com',
+        'password' => 'existing-password',
+    ]);
+
+    $this->get(route('login'))->assertOk();
+
+    $existingUser->refresh();
+
+    expect(User::query()->where('email', 'master@showroom.com')->count())->toBe(1)
+        ->and($existingUser->role)->toBe('master')
+        ->and(Hash::check('existing-password', $existingUser->password))->toBeTrue()
+        ->and(Hash::check('master123', $existingUser->password))->toBeFalse();
+});
+
 test('valid credentials start a session and redirect to the intended route', function () {
     $user = User::factory()->master()->create([
         'email' => 'master@toko.com',
@@ -82,6 +114,8 @@ test('authenticated users can log out and return to the login page', function ()
         ->assertSessionHas('success', 'Anda berhasil logout.');
 
     $this->assertGuest();
+
+    $this->get(route('login'))->assertOk();
 });
 
 test('the shared layout shows the authenticated user role and logout action', function () {
@@ -116,8 +150,13 @@ test('successful login to the dashboard root renders a single navbar', function 
     $html = (string) $response->getContent();
 
     expect(substr_count($html, 'class="showroom-topbar"'))->toBe(1)
-        ->and(substr_count($html, 'data-sidebar-toggle'))->toBe(1)
+        ->and(substr_count($html, 'data-app-menu-toggle'))->toBe(1)
         ->and(substr_count($html, 'class="showroom-topbar-account"'))->toBe(1)
+        ->and(substr_count($html, 'data-profile-menu>'))->toBe(1)
+        ->and(substr_count($html, 'data-profile-menu-database'))->toBe(0)
+        ->and(substr_count($html, 'data-profile-menu-settings'))->toBe(1)
+        ->and(substr_count($html, 'data-confirm-logout'))->toBe(1)
+        ->and(substr_count($html, route('profile.edit')))->toBe(1)
         ->and(substr_count($html, 'class="session-toolbar"'))->toBe(0);
 });
 

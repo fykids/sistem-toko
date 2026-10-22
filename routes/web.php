@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CarTransactionController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TransactionBackupController;
 use App\Http\Controllers\UserController;
 use App\Models\CarTransaction;
@@ -20,6 +21,8 @@ Route::post('/logout', [AuthController::class, 'destroy'])
 
 Route::middleware('auth')->group(function () {
     Route::get('/', [CarTransactionController::class, 'index'])->name('dashboard');
+    Route::get('settings/account', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('settings/account', [ProfileController::class, 'update'])->name('profile.update');
     Route::get('transactions/export', [TransactionBackupController::class, 'export'])
         ->middleware('can:viewSensitiveData,'.CarTransaction::class)
         ->name('transactions.export');

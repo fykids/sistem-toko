@@ -1,11 +1,8 @@
 const layout = document.querySelector('[data-showroom-layout]');
 
 if (layout) {
-    const sidebar = document.getElementById('showroom-sidebar');
-    const sidebarToggle = document.querySelector('[data-sidebar-toggle]');
-    const sidebarScrim = document.querySelector('[data-sidebar-close]');
     const databaseModal = document.querySelector('[data-database-modal]');
-    const databaseOpenButtons = document.querySelectorAll('[data-database-open]');
+    const databaseSidebarLinks = document.querySelectorAll('[data-sidebar-database]');
     const databaseCloseButtons = document.querySelectorAll('[data-database-close]');
     const modalDialog = databaseModal?.querySelector('[role="dialog"]');
     const fileInput = document.getElementById('transaction-backup');
@@ -14,7 +11,6 @@ if (layout) {
     const transactionSearch = document.getElementById('transaction-search');
     const transactionRows = [...document.querySelectorAll('#transaction-rows tr[data-status]')];
     const filterButtons = [...document.querySelectorAll('[data-dashboard-filters] [data-filter]')];
-    const mobileSidebar = window.matchMedia('(max-width: 820px)');
     const viewTitles = {
         dashboard: 'Dashboard',
         inventory: 'Inventaris',
@@ -34,41 +30,6 @@ if (layout) {
         reports: 'Daftar transaksi yang dihitung dalam laporan',
     };
     let modalTrigger = null;
-
-    const setSidebarOpen = (isOpen) => {
-        sidebar.classList.toggle('is-open', isOpen);
-        sidebarScrim.classList.toggle('is-visible', isOpen && mobileSidebar.matches);
-        sidebarToggle.setAttribute('aria-expanded', String(isOpen && mobileSidebar.matches));
-        sidebarToggle.setAttribute('aria-label', isOpen ? 'Tutup navigasi' : 'Buka navigasi');
-    };
-
-    const updateDesktopToggle = () => {
-        const isExpanded = layout.dataset.sidebarCollapsed !== 'true';
-        sidebarToggle.setAttribute('aria-expanded', String(isExpanded));
-        sidebarToggle.setAttribute('aria-label', isExpanded ? 'Kecilkan navigasi' : 'Perlebar navigasi');
-    };
-
-    if (!mobileSidebar.matches) {
-        updateDesktopToggle();
-    }
-
-    sidebarToggle.addEventListener('click', () => {
-        if (mobileSidebar.matches) {
-            setSidebarOpen(!sidebar.classList.contains('is-open'));
-            return;
-        }
-
-        layout.dataset.sidebarCollapsed = String(layout.dataset.sidebarCollapsed !== 'true');
-        updateDesktopToggle();
-    });
-
-    sidebarScrim.addEventListener('click', () => setSidebarOpen(false));
-    window.addEventListener('resize', () => {
-        if (!mobileSidebar.matches) {
-            setSidebarOpen(false);
-            updateDesktopToggle();
-        }
-    });
 
     const filterTransactions = (view) => {
         const query = transactionSearch.value.trim().toLowerCase();
@@ -134,9 +95,6 @@ if (layout) {
     layout.querySelectorAll('[data-dashboard-nav]').forEach((link) => {
         link.addEventListener('click', () => {
             setDashboardView(link.dataset.dashboardNav);
-            if (mobileSidebar.matches) {
-                setSidebarOpen(false);
-            }
         });
     });
 
@@ -159,93 +117,114 @@ if (layout) {
     window.addEventListener('hashchange', viewFromHash);
     viewFromHash();
 
-    const closeDatabaseModal = () => {
-        databaseModal.hidden = true;
-        databaseModal.setAttribute('aria-hidden', 'true');
-        document.body.classList.remove('showroom-modal-open');
-        modalTrigger?.focus();
-    };
+    if (databaseModal && modalDialog) {
+        const closeDatabaseModal = () => {
+            databaseModal.hidden = true;
+            databaseModal.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('showroom-modal-open');
+            const focusTarget = modalTrigger?.closest('[data-app-menu-panel]')
+                && window.matchMedia('(max-width: 820px)').matches
+                ? document.querySelector('[data-app-menu-toggle]')
+                : modalTrigger;
+            focusTarget?.focus();
+        };
 
-    databaseOpenButtons.forEach((button) => {
-        button.addEventListener('click', () => {
-            modalTrigger = button;
+        const openDatabaseModal = (trigger) => {
+            modalTrigger = trigger;
             databaseModal.hidden = false;
             databaseModal.setAttribute('aria-hidden', 'false');
             document.body.classList.add('showroom-modal-open');
             modalDialog.querySelector('[data-database-close]').focus();
+        };
+
+        databaseSidebarLinks.forEach((link) => {
+            link.addEventListener('click', (event) => {
+                if (new URL(link.href).pathname !== window.location.pathname) {
+                    return;
+                }
+
+                event.preventDefault();
+                openDatabaseModal(link);
+            });
         });
-    });
 
-    databaseCloseButtons.forEach((button) => {
-        button.addEventListener('click', closeDatabaseModal);
-    });
-
-    databaseModal.addEventListener('click', (event) => {
-        if (event.target === databaseModal) {
-            closeDatabaseModal();
-        }
-    });
-
-    databaseModal.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape') {
-            closeDatabaseModal();
-            return;
+        if (window.location.hash === '#database') {
+            document.querySelector('[data-sidebar-database]')?.click();
         }
 
-        if (event.key !== 'Tab') {
-            return;
-        }
-
-        const focusableElements = [...modalDialog.querySelectorAll(
-            'a[href], button:not([disabled]), input:not([disabled])',
-        )];
-        const firstElement = focusableElements[0];
-        const lastElement = focusableElements.at(-1);
-
-        if (event.shiftKey && document.activeElement === firstElement) {
-            event.preventDefault();
-            lastElement.focus();
-        } else if (!event.shiftKey && document.activeElement === lastElement) {
-            event.preventDefault();
-            firstElement.focus();
-        }
-    });
-
-    fileInput.addEventListener('change', () => {
-        const selectedFile = fileInput.files[0];
-        const isSupported = selectedFile ? /\.(sqlite|db)$/i.test(selectedFile.name) : true;
-
-        dropzone.classList.toggle('is-invalid', !isSupported);
-        fileInput.setCustomValidity(isSupported ? '' : 'Pilih file backup dengan format .sqlite atau .db.');
-        fileName.textContent = selectedFile
-            ? (isSupported ? selectedFile.name : 'Format tidak didukung. Gunakan .sqlite atau .db.')
-            : 'Belum ada file dipilih';
-    });
-
-    ['dragenter', 'dragover'].forEach((eventName) => {
-        dropzone.addEventListener(eventName, (event) => {
-            event.preventDefault();
-            dropzone.classList.add('is-dragging');
+        databaseCloseButtons.forEach((button) => {
+            button.addEventListener('click', closeDatabaseModal);
         });
-    });
 
-    ['dragleave', 'drop'].forEach((eventName) => {
-        dropzone.addEventListener(eventName, (event) => {
-            event.preventDefault();
-            dropzone.classList.remove('is-dragging');
+        databaseModal.addEventListener('click', (event) => {
+            if (event.target === databaseModal) {
+                closeDatabaseModal();
+            }
         });
-    });
 
-    dropzone.addEventListener('drop', (event) => {
-        const droppedFile = event.dataTransfer.files[0];
+        databaseModal.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                closeDatabaseModal();
+                return;
+            }
 
-        if (!droppedFile) {
-            return;
-        }
+            if (event.key !== 'Tab') {
+                return;
+            }
 
-        const transfer = new DataTransfer();
-        transfer.items.add(droppedFile);
-        fileInput.files = transfer.files;
-        fileInput.dispatchEvent(new Event('change', { bubbles: true }));
-    });
+            const focusableElements = [...modalDialog.querySelectorAll(
+                'a[href], button:not([disabled]), input:not([disabled])',
+            )];
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements.at(-1);
+
+            if (event.shiftKey && document.activeElement === firstElement) {
+                event.preventDefault();
+                lastElement.focus();
+            } else if (!event.shiftKey && document.activeElement === lastElement) {
+                event.preventDefault();
+                firstElement.focus();
+            }
+        });
+    }
+
+    if (fileInput && dropzone && fileName) {
+        fileInput.addEventListener('change', () => {
+            const selectedFile = fileInput.files[0];
+            const isSupported = selectedFile ? /\.(sqlite|db)$/i.test(selectedFile.name) : true;
+
+            dropzone.classList.toggle('is-invalid', !isSupported);
+            fileInput.setCustomValidity(isSupported ? '' : 'Pilih file backup dengan format .sqlite atau .db.');
+            fileName.textContent = selectedFile
+                ? (isSupported ? selectedFile.name : 'Format tidak didukung. Gunakan .sqlite atau .db.')
+                : 'Belum ada file dipilih';
+        });
+
+        ['dragenter', 'dragover'].forEach((eventName) => {
+            dropzone.addEventListener(eventName, (event) => {
+                event.preventDefault();
+                dropzone.classList.add('is-dragging');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach((eventName) => {
+            dropzone.addEventListener(eventName, (event) => {
+                event.preventDefault();
+                dropzone.classList.remove('is-dragging');
+            });
+        });
+
+        dropzone.addEventListener('drop', (event) => {
+            const droppedFile = event.dataTransfer.files[0];
+
+            if (!droppedFile) {
+                return;
+            }
+
+            const transfer = new DataTransfer();
+            transfer.items.add(droppedFile);
+            fileInput.files = transfer.files;
+            fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+    }
 }
