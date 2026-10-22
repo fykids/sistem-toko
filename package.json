@@ -4,7 +4,8 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "deploy": "wrangler deploy --config wrangler.jsonc"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",
