@@ -1,5 +1,7 @@
 import './transactions/create.js';
 import '../css/transactions/leasing.css';
+import '../css/transactions/sale-notes.css';
+import '../css/transactions/jual.css';
 import './dashboard.js';
 import './users.js';
 import '../css/dashboard.css';

@@ -53,6 +53,30 @@
             </svg>
             <span>Penjualan</span>
         </a>
+        @can('viewAny', \App\Models\SaleNote::class)
+            <a class="app-drawer-link" href="{{ route('jual.index') }}"
+                @class(['is-active' => request()->routeIs('jual.*')])
+                @if (request()->routeIs('jual.*')) aria-current="page" @endif>
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 19V5m0 14h16" />
+                    <path d="M7 15h10M7 11h6M15 7h4v4" />
+                </svg>
+                <span>Jual</span>
+            </a>
+        @endcan
+        @can('viewAny', \App\Models\SaleNote::class)
+            <a class="app-drawer-link" href="{{ route('nota-penjualan.index') }}"
+                @class(['is-active' => request()->routeIs('nota-penjualan.*')])
+                @if (request()->routeIs('nota-penjualan.*')) aria-current="page" @endif>
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 3h9l4 4v14H6z" />
+                    <path d="M14 3v5h5M9 12h7M9 16h7" />
+                </svg>
+                <span>Nota Penjualan</span>
+            </a>
+        @endcan
         <a class="app-drawer-link" href="{{ route('dashboard') }}#laporan"
             @if (request()->routeIs('dashboard', 'transactions.index')) data-dashboard-nav="reports" @endif>
             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"

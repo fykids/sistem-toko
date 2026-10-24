@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Http\Requests\StoreCarTransactionRequest;
+use App\Models\Buyer;
 use App\Models\CarTransaction;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -15,6 +16,8 @@ use SQLite3Exception;
 class TransactionBackupService
 {
     private const TABLE = 'car_transactions';
+
+    private const BUYER_TABLE = 'buyers';
 
     private const JSON_COLUMNS = [
         'additional_repairs',
@@ -38,46 +41,18 @@ class TransactionBackupService
             $database = new SQLite3($path);
             $database->enableExceptions(true);
 
-            $columns = Schema::getColumnListing(self::TABLE);
-            $definitions = array_map(
-                fn (string $column): string => $this->quoteIdentifier($column)
-                    .($column === 'id' ? ' INTEGER PRIMARY KEY' : ''),
-                $columns,
+            $this->writeTable(
+                $database,
+                self::TABLE,
+                Schema::getColumnListing(self::TABLE),
+                CarTransaction::query()->orderBy('id')->cursor(),
             );
-
-            $database->exec(sprintf(
-                'CREATE TABLE %s (%s)',
-                $this->quoteIdentifier(self::TABLE),
-                implode(', ', $definitions),
-            ));
-
-            $columnList = implode(', ', array_map($this->quoteIdentifier(...), $columns));
-            $placeholders = implode(', ', array_fill(0, count($columns), '?'));
-            $statement = $database->prepare(sprintf(
-                'INSERT INTO %s (%s) VALUES (%s)',
-                $this->quoteIdentifier(self::TABLE),
-                $columnList,
-                $placeholders,
-            ));
-
-            foreach (CarTransaction::query()->orderBy('id')->cursor() as $transaction) {
-                $attributes = $transaction->getAttributes();
-
-                foreach ($columns as $index => $column) {
-                    $value = $attributes[$column] ?? null;
-                    $type = match (true) {
-                        $value === null => SQLITE3_NULL,
-                        is_int($value), is_bool($value) => SQLITE3_INTEGER,
-                        is_float($value) => SQLITE3_FLOAT,
-                        default => SQLITE3_TEXT,
-                    };
-
-                    $statement->bindValue($index + 1, $value, $type);
-                }
-
-                $statement->execute();
-                $statement->reset();
-            }
+            $this->writeTable(
+                $database,
+                self::BUYER_TABLE,
+                Schema::getColumnListing(self::BUYER_TABLE),
+                Buyer::query()->orderBy('id')->cursor(),
+            );
 
             if ($database->querySingle('PRAGMA integrity_check') !== 'ok') {
                 throw new \RuntimeException('Integritas file backup SQLite tidak valid.');
@@ -132,11 +107,35 @@ class TransactionBackupService
                 $this->quoteIdentifier(self::TABLE),
                 $this->quoteIdentifier('id'),
             ));
+            $buyerResult = null;
+            $hasBuyerTable = (int) $database->querySingle(
+                "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'buyers'",
+            ) > 0;
+
+            if ($hasBuyerTable) {
+                $buyerColumnsResult = $database->query('PRAGMA table_info("buyers")');
+                $buyerColumns = [];
+
+                while ($column = $buyerColumnsResult->fetchArray(SQLITE3_ASSOC)) {
+                    $buyerColumns[] = $column['name'];
+                }
+
+                if ($buyerColumns !== Schema::getColumnListing(self::BUYER_TABLE)) {
+                    throw new InvalidArgumentException(
+                        'Struktur tabel pembeli pada backup tidak sesuai dengan versi aplikasi ini.',
+                    );
+                }
+
+                $buyerResult = $database->query(
+                    'SELECT * FROM "buyers" ORDER BY "id"',
+                );
+            }
 
             $rules = (new StoreCarTransactionRequest)->rules();
 
-            return DB::transaction(function () use ($result, $rules): int {
+            return DB::transaction(function () use ($result, $buyerResult, $rules): int {
                 $importedCount = 0;
+                $transactionIds = [];
 
                 while ($record = $result->fetchArray(SQLITE3_ASSOC)) {
                     $transaction = new CarTransaction;
@@ -190,8 +189,56 @@ class TransactionBackupService
                     $transaction->setAttribute('updated_at', $record['updated_at'] ?? null);
                     $transaction->timestamps = false;
                     $transaction->save();
+                    $transactionIds[(int) $record['id']] = $transaction->id;
 
                     $importedCount++;
+                }
+
+                if ($buyerResult instanceof \SQLite3Result) {
+                    $buyerRules = [
+                        'car_transaction_id' => ['required', 'integer', 'exists:car_transactions,id'],
+                        'buyer_name' => ['required', 'string', 'max:255'],
+                        'buyer_nik' => ['nullable', 'digits:16'],
+                        'buyer_phone' => ['nullable', 'string', 'max:30'],
+                        'buyer_address' => ['nullable', 'string', 'max:2000'],
+                        'sell_price_deal' => ['required', 'numeric', 'min:0', 'max:9999999999999.99'],
+                        'payment_method' => ['required', 'string', 'max:50'],
+                        'sell_date' => ['required', 'date'],
+                        'notes' => ['nullable', 'string', 'max:2000'],
+                    ];
+
+                    while ($record = $buyerResult->fetchArray(SQLITE3_ASSOC)) {
+                        $sourceTransactionId = (int) $record['car_transaction_id'];
+                        $importedTransactionId = $transactionIds[$sourceTransactionId] ?? null;
+
+                        if ($importedTransactionId === null) {
+                            throw new InvalidArgumentException(
+                                'Nota penjualan pada file backup tidak memiliki transaksi kendaraan.',
+                            );
+                        }
+
+                        $buyer = new Buyer;
+                        $attributes = array_intersect_key(
+                            $record,
+                            array_flip($buyer->getFillable()),
+                        );
+                        $attributes['car_transaction_id'] = $importedTransactionId;
+
+                        $validator = Validator::make($attributes, $buyerRules);
+
+                        if ($validator->fails()) {
+                            throw new InvalidArgumentException(
+                                'Data pembeli pada file backup tidak valid: '.$validator->errors()->first(),
+                            );
+                        }
+
+                        $buyer->fill($validator->validated());
+                        $buyer->setAttribute('created_by', null);
+                        $buyer->setAttribute('created_at', $record['created_at'] ?? null);
+                        $buyer->setAttribute('updated_at', $record['updated_at'] ?? null);
+                        $buyer->timestamps = false;
+                        $buyer->save();
+                    }
                 }
 
                 return $importedCount;
@@ -206,5 +253,51 @@ class TransactionBackupService
     private function quoteIdentifier(string $identifier): string
     {
         return '"'.str_replace('"', '""', $identifier).'"';
+    }
+
+    /**
+     * @param  array<int, string>  $columns
+     * @param  iterable<CarTransaction|Buyer>  $records
+     */
+    private function writeTable(SQLite3 $database, string $table, array $columns, iterable $records): void
+    {
+        $definitions = array_map(
+            fn (string $column): string => $this->quoteIdentifier($column)
+                .($column === 'id' ? ' INTEGER PRIMARY KEY' : ''),
+            $columns,
+        );
+        $database->exec(sprintf(
+            'CREATE TABLE %s (%s)',
+            $this->quoteIdentifier($table),
+            implode(', ', $definitions),
+        ));
+
+        $columnList = implode(', ', array_map($this->quoteIdentifier(...), $columns));
+        $placeholders = implode(', ', array_fill(0, count($columns), '?'));
+        $statement = $database->prepare(sprintf(
+            'INSERT INTO %s (%s) VALUES (%s)',
+            $this->quoteIdentifier($table),
+            $columnList,
+            $placeholders,
+        ));
+
+        foreach ($records as $record) {
+            $attributes = $record->getAttributes();
+
+            foreach ($columns as $index => $column) {
+                $value = $attributes[$column] ?? null;
+                $type = match (true) {
+                    $value === null => SQLITE3_NULL,
+                    is_int($value), is_bool($value) => SQLITE3_INTEGER,
+                    is_float($value) => SQLITE3_FLOAT,
+                    default => SQLITE3_TEXT,
+                };
+
+                $statement->bindValue($index + 1, $value, $type);
+            }
+
+            $statement->execute();
+            $statement->reset();
+        }
     }
 }

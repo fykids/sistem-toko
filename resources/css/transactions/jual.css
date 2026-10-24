@@ -1,0 +1,280 @@
+.page-shell--jual,
+.page-shell--jual-form {
+    --jual-accent: #087e8b;
+    --jual-accent-strong: #075d67;
+    --jual-accent-soft: #e8f8f8;
+    --jual-accent-border: #b9e2e3;
+}
+
+.page-shell--jual .jual-heading,
+.page-shell--jual-form .jual-form-heading {
+    border: 1px solid var(--jual-accent-border);
+    background: linear-gradient(120deg, var(--jual-accent-soft), var(--color-card-surface));
+}
+
+.page-shell--jual .jual-heading .showroom-page-eyebrow,
+.page-shell--jual-form .jual-form-heading .showroom-page-eyebrow {
+    color: var(--jual-accent);
+}
+
+.page-shell--jual .jual-page-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.page-shell--jual .jual-delete-form {
+    display: inline-flex;
+}
+
+.page-shell--jual .jual-table-card,
+.page-shell--jual .jual-detail-card {
+    overflow: hidden;
+    border-color: var(--jual-accent-border);
+}
+
+.page-shell--jual .jual-table thead th {
+    background: var(--jual-accent-soft);
+}
+
+.page-shell--jual-form .jual-form-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    width: min(100%, 1400px);
+    margin: 0 auto 14px;
+    padding: 16px 20px;
+    border-radius: var(--radius-card);
+}
+
+.page-shell--jual-form .jual-form-heading h1,
+.page-shell--jual-form .jual-form-heading p {
+    margin: 0;
+}
+
+.page-shell--jual-form .jual-form-heading p:last-child {
+    margin-top: 5px;
+    color: var(--color-text-secondary);
+}
+
+.sell-module-form.transaction-form--admin {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+    gap: 14px;
+    width: min(100%, 1400px);
+    margin-inline: auto;
+}
+
+.sell-module-form.transaction-form--master {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: start;
+    gap: 14px;
+    width: min(100%, 1400px);
+    margin-inline: auto;
+}
+
+.sell-module-form .jual-card {
+    min-width: 0;
+    padding: 16px;
+    border: 1px solid var(--jual-accent-border);
+    border-radius: var(--radius-card);
+    background: var(--color-card-surface);
+    box-shadow: var(--shadow-card, 0 4px 14px rgb(8 126 139 / 7%));
+}
+
+.sell-module-form .jual-card-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--jual-accent-border);
+}
+
+.sell-module-form .jual-card-heading h2,
+.sell-module-form .jual-card-heading p {
+    margin: 0;
+}
+
+.sell-module-form .jual-card-heading h2 {
+    color: var(--jual-accent-strong);
+    font-size: 1rem;
+}
+
+.sell-module-form .jual-card-heading p {
+    margin-top: 3px;
+    color: var(--color-text-secondary);
+    font-size: 0.8rem;
+}
+
+.sell-module-form .jual-section-number {
+    display: grid;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    place-items: center;
+    border-radius: 8px;
+    background: var(--jual-accent-soft);
+    color: var(--jual-accent-strong);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.sell-module-form .jual-field {
+    display: grid;
+    gap: 6px;
+    width: 100%;
+    margin-bottom: 12px;
+    color: var(--color-text-primary);
+    font-size: 0.84rem;
+    font-weight: 600;
+}
+
+.sell-module-form .jual-field input,
+.sell-module-form .jual-field select,
+.sell-module-form .jual-field textarea {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    min-height: 40px;
+    padding: 8px 11px;
+    border: 1px solid var(--color-control-border);
+    border-radius: 8px;
+    background: var(--color-control-surface);
+    color: var(--color-text-primary);
+    font: inherit;
+    font-weight: 400;
+}
+
+.sell-module-form .jual-field textarea {
+    min-height: 88px;
+    resize: vertical;
+}
+
+.sell-module-form .jual-field input:focus,
+.sell-module-form .jual-field select:focus,
+.sell-module-form .jual-field textarea:focus {
+    border-color: var(--jual-accent);
+    outline: 3px solid rgb(8 126 139 / 14%);
+}
+
+.sell-module-form .jual-error {
+    color: var(--color-danger);
+    font-size: 0.76rem;
+    font-weight: 500;
+}
+
+.sell-module-form .jual-vehicle-summary,
+.sell-module-form .jual-financial-summary {
+    display: grid;
+    gap: 9px;
+    color: var(--color-text-secondary);
+    font-size: 0.84rem;
+}
+
+.sell-module-form .jual-vehicle-summary strong,
+.sell-module-form .jual-financial-summary dd {
+    color: var(--color-text-primary);
+}
+
+.sell-module-form .jual-master-capital {
+    display: grid;
+    gap: 8px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-border-subtle);
+    color: var(--color-text-secondary);
+    font-size: 0.82rem;
+}
+
+.sell-module-form .jual-master-capital span,
+.sell-module-form .jual-financial-summary > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.sell-module-form .jual-master-capital strong {
+    color: var(--color-text-primary);
+}
+
+.sell-module-form .jual-financial-summary {
+    margin: 0;
+}
+
+.sell-module-form .jual-financial-summary dt,
+.sell-module-form .jual-financial-summary dd {
+    margin: 0;
+}
+
+.sell-module-form .jual-financial-summary > div:last-child {
+    padding-top: 10px;
+    border-top: 1px solid var(--jual-accent-border);
+    color: var(--jual-accent-strong);
+    font-weight: 700;
+}
+
+.sell-module-form .jual-empty-hint {
+    color: var(--color-text-secondary);
+    font-size: 0.82rem;
+}
+
+.sell-module-form .jual-form-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 4px 0 14px;
+}
+
+.page-shell--jual .jual-detail-card {
+    padding: 22px;
+}
+
+.page-shell--jual .jual-detail-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    margin: 0;
+}
+
+.page-shell--jual .jual-detail-list > div {
+    min-width: 0;
+}
+
+.page-shell--jual .jual-detail-list dt {
+    color: var(--color-text-secondary);
+    font-size: 0.8rem;
+}
+
+.page-shell--jual .jual-detail-list dd {
+    margin: 5px 0 0;
+    overflow-wrap: anywhere;
+    color: var(--color-text-primary);
+    font-weight: 600;
+}
+
+@media (max-width: 1100px) {
+    .sell-module-form.transaction-form--admin,
+    .sell-module-form.transaction-form--master {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 680px) {
+    .page-shell--jual-form .jual-form-heading,
+    .page-shell--jual .jual-heading,
+    .page-shell--jual .jual-page-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .sell-module-form.transaction-form--admin,
+    .sell-module-form.transaction-form--master,
+    .page-shell--jual .jual-detail-list {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

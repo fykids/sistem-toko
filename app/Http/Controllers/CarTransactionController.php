@@ -92,16 +92,6 @@ class CarTransactionController extends Controller
     {
         $validated = $request->validated();
         $user = $this->authenticatedUser($request);
-
-        if ($user->cannot('viewSensitiveData', CarTransaction::class)) {
-            $validated = array_replace($validated, [
-                'buy_price' => $transaction->buy_price,
-                'leasing_ripan' => $transaction->leasing_ripan,
-                'insurance_ripan' => $transaction->insurance_ripan,
-                'booster_ripan' => $transaction->booster_ripan,
-            ]);
-        }
-
         $photo = $request->file('vehicle_photo');
         $previousPhotoPath = $transaction->vehicle_photo_path;
         unset($validated['vehicle_photo']);
@@ -109,13 +99,39 @@ class CarTransactionController extends Controller
         $newPhotoPath = null;
 
         try {
-            DB::transaction(function () use ($transaction, $validated, $photo, &$newPhotoPath): void {
+            DB::transaction(function () use (
+                $transaction,
+                $validated,
+                $user,
+                $photo,
+                &$newPhotoPath,
+            ): void {
+                $lockedTransaction = CarTransaction::query()
+                    ->whereKey($transaction->id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+                $sale = $lockedTransaction->buyer()->lockForUpdate()->first();
+
+                if ($sale !== null) {
+                    $validated['sell_date'] = $sale->sell_date->toDateString();
+                    $validated['selling_price'] = $sale->sell_price_deal;
+                }
+
+                if ($user->cannot('viewSensitiveData', CarTransaction::class)) {
+                    $validated = array_replace($validated, [
+                        'buy_price' => $lockedTransaction->buy_price,
+                        'leasing_ripan' => $lockedTransaction->leasing_ripan,
+                        'insurance_ripan' => $lockedTransaction->insurance_ripan,
+                        'booster_ripan' => $lockedTransaction->booster_ripan,
+                    ]);
+                }
+
                 if ($photo instanceof UploadedFile) {
                     $newPhotoPath = $this->storeVehiclePhoto($photo);
                     $validated['vehicle_photo_path'] = $newPhotoPath;
                 }
 
-                $transaction->update($validated);
+                $lockedTransaction->update($validated);
             });
         } catch (Throwable $exception) {
             if ($newPhotoPath !== null) {
