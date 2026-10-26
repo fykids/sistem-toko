@@ -3,7 +3,7 @@
 @php($intertineCategories = ['KR Jual', 'OP Survei', 'Fee CMO'])
 @php($intertineCategoryCosts = $expenseItems->filter(fn(array $expense) => in_array(strtolower(trim($expense['name'] ?? '')), array_map('strtolower', $intertineCategories), true))->mapWithKeys(fn(array $expense) => [strtolower(trim($expense['name'])) => $expense['cost'] ?? null]))
 @php($legacyIntertineExpenses = $expenseItems->reject(fn(array $expense) => in_array(strtolower(trim($expense['name'] ?? '')), array_map('strtolower', $intertineCategories), true))->values())
-<div id="intertine-expenses" class="intertine-expense-fields">
+<div id="intertine-expenses" class="intertine-expense-fields {{ $expenseGridClass ?? '' }}">
     @foreach ($intertineCategories as $index => $category)
         @php($categoryKey = strtolower($category))
         <div class="form-group intertine-expense-item">
@@ -16,10 +16,12 @@
                 inputmode="decimal" data-rupiah-input>
         </div>
     @endforeach
-    @foreach ($legacyIntertineExpenses as $index => $expense)
-        <input type="hidden" name="intertine_expenses[{{ $index + count($intertineCategories) }}][name]"
-            value="{{ $expense['name'] ?? '' }}">
-        <input type="hidden" name="intertine_expenses[{{ $index + count($intertineCategories) }}][cost]"
-            value="{{ $expense['cost'] ?? 0 }}" data-rupiah-input>
-    @endforeach
+    @if ($showLegacyIntertineExpenses ?? true)
+        @foreach ($legacyIntertineExpenses as $index => $expense)
+            <input type="hidden" name="intertine_expenses[{{ $index + count($intertineCategories) }}][name]"
+                value="{{ $expense['name'] ?? '' }}">
+            <input type="hidden" name="intertine_expenses[{{ $index + count($intertineCategories) }}][cost]"
+                value="{{ $expense['cost'] ?? 0 }}" data-rupiah-input>
+        @endforeach
+    @endif
 </div>

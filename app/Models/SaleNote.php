@@ -4,29 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SaleNote extends Model
 {
     protected $fillable = [
         'car_transaction_id',
-        'buyer_name',
-        'buyer_nik',
-        'buyer_phone',
-        'buyer_address',
-        'deal_price',
-        'payment_method',
-        'sell_date',
-        'notes',
+        'nama_konsumen',
         'created_by',
     ];
-
-    protected function casts(): array
-    {
-        return [
-            'deal_price' => 'decimal:2',
-            'sell_date' => 'date',
-        ];
-    }
 
     public function carTransaction(): BelongsTo
     {
@@ -36,5 +22,40 @@ class SaleNote extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(SalePayment::class, 'sale_note_id');
+    }
+
+    public function paymentStatus(): string
+    {
+        $vehicle = $this->carTransaction;
+
+        if ((float) $vehicle->remaining_payment <= 0) {
+            return 'paid';
+        }
+
+        if (
+            (float) $vehicle->leasing_disbursement > 0
+            || $this->payments->contains('payment_method', 'leasing')
+        ) {
+            return 'leasing';
+        }
+
+        return 'unpaid';
+    }
+
+    public function totalPaidAmount(): float
+    {
+        $vehicle = $this->carTransaction;
+
+        return round(
+            (float) $vehicle->down_payment
+                + (float) $vehicle->leasing_disbursement
+                + (float) $vehicle->settlement_amount,
+            2,
+        );
     }
 }

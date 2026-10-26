@@ -6,9 +6,9 @@
 <div class="showroom-content sale-note-page">
     <section class="showroom-page-header sale-note-heading" aria-labelledby="sale-note-title">
         <div>
-            <p class="showroom-page-eyebrow">Modul independen</p>
-            <h1 id="sale-note-title">Nota Penjualan</h1>
-            <p>Daftar nota pembeli yang terpisah dari alur Penjualan kendaraan.</p>
+            <p class="showroom-page-eyebrow">Penjualan</p>
+            <h1 id="sale-note-title">Laporan Penjualan</h1>
+            <p>Daftar catatan penjualan yang terhubung langsung dengan data kendaraan.</p>
         </div>
         <div class="sale-note-page-actions">
             <span class="showroom-page-count">{{ $notes->total() }} nota</span>
@@ -27,7 +27,7 @@
                         <th>Kendaraan</th>
                         <th>Nama pembeli</th>
                         <th>Tanggal jual</th>
-                        <th class="numeric">Harga deal</th>
+                        <th class="numeric">Harga jual</th>
                         @can('viewSensitiveData', \App\Models\CarTransaction::class)
                             <th class="numeric">Modal Beli</th>
                             <th class="numeric">Total Modal</th>
@@ -46,11 +46,11 @@
                                 <span class="cell-primary">{{ $vehicle->plate_number }}</span>
                                 <span class="cell-secondary">{{ $vehicle->brand }} {{ $vehicle->model }} · {{ $vehicle->year }}</span>
                             </td>
-                            <td data-label="Nama pembeli">{{ $saleNote->buyer_name }}</td>
-                            <td data-label="Tanggal jual">{{ $saleNote->sell_date->format('d-m-Y') }}</td>
-                            <td class="numeric" data-label="Harga deal">Rp {{ number_format((float) $saleNote->deal_price) }}</td>
+                            <td data-label="Nama konsumen">{{ $saleNote->nama_konsumen }}</td>
+                            <td data-label="Tanggal jual">{{ \Illuminate\Support\Carbon::parse($vehicle->sell_date)->format('d-m-Y') }}</td>
+                            <td class="numeric" data-label="Harga jual">Rp {{ number_format((float) $vehicle->selling_price) }}</td>
                             @can('viewSensitiveData', \App\Models\CarTransaction::class)
-                                @php($saleProfit = (float) $saleNote->deal_price - (float) $vehicle->total_capital)
+                                @php($saleProfit = (float) $vehicle->selling_price - (float) $vehicle->total_capital)
                                 @php($totalDealProfit = $saleProfit + (float) $vehicle->leasing_ripan + (float) $vehicle->insurance_ripan + (float) $vehicle->booster_ripan)
                                 <td class="numeric" data-label="Modal Beli">Rp {{ number_format((float) $vehicle->buy_price) }}</td>
                                 <td class="numeric" data-label="Total Modal">Rp {{ number_format((float) $vehicle->total_capital) }}</td>
@@ -77,7 +77,7 @@
             </table>
         </div>
         @if ($notes->hasPages())
-            <div class="table-foot">{{ $notes->links() }}</div>
+            <div class="table-foot">{{ $notes->withQueryString()->links() }}</div>
         @endif
     </section>
 </div>

@@ -2,12 +2,14 @@
 
 use App\Models\Buyer;
 use App\Models\CarTransaction;
+use App\Models\SaleNote;
 use App\Models\User;
 use App\Services\TransactionBackupService;
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use SQLite3;
 
 uses(RefreshDatabase::class);
 
@@ -57,6 +59,17 @@ test('it downloads an intact SQLite backup containing transactions and sale note
         'sell_date' => '2026-10-22',
         'selling_price' => 150000000,
     ]);
+    $saleNote = $transaction->saleNote()->create([
+        'nama_konsumen' => 'Dewi Pembeli',
+        'created_by' => auth()->id(),
+    ]);
+    $saleNote->payments()->create([
+        'amount' => 25000000,
+        'payment_method' => 'bank_transfer',
+        'payment_date' => '2026-10-23',
+        'notes' => 'Referensi backup',
+        'recorded_by' => auth()->id(),
+    ]);
 
     $response = $this->get(route('transactions.export'));
 
@@ -79,6 +92,8 @@ test('it downloads an intact SQLite backup containing transactions and sale note
 
         $transaction = $backupDatabase->querySingle('SELECT * FROM car_transactions', true);
         $buyer = $backupDatabase->querySingle('SELECT * FROM buyers', true);
+        $saleNote = $backupDatabase->querySingle('SELECT * FROM sale_notes', true);
+        $payment = $backupDatabase->querySingle('SELECT * FROM sale_payments', true);
 
         expect($backupDatabase->querySingle('PRAGMA integrity_check'))->toBe('ok')
             ->and($backupColumns)->toBe(Schema::getColumnListing('car_transactions'))
@@ -93,7 +108,11 @@ test('it downloads an intact SQLite backup containing transactions and sale note
             ->toBe([['name' => 'BCA', 'disbursement' => 90000000, 'dp' => 35000000]])
             ->and($buyer['buyer_name'])->toBe('Rina Pembeli')
             ->and((int) $buyer['sell_price_deal'])->toBe(150000000)
-            ->and((int) $buyer['car_transaction_id'])->toBe((int) $transaction['id']);
+            ->and((int) $buyer['car_transaction_id'])->toBe((int) $transaction['id'])
+            ->and($saleNote['nama_konsumen'])->toBe('Dewi Pembeli')
+            ->and((int) $saleNote['car_transaction_id'])->toBe((int) $transaction['id'])
+            ->and((int) $payment['amount'])->toBe(25000000)
+            ->and($payment['notes'])->toBe('Referensi backup');
 
     } finally {
         if ($backupDatabase instanceof SQLite3) {
@@ -169,6 +188,70 @@ test('it imports sale notes and reconnects them to newly imported vehicles', fun
         ->and($importedTransaction->sell_date)->toBe('2026-10-22')
         ->and((float) $importedTransaction->selling_price)->toBe(80000000.0)
         ->and($importedSale->created_by)->toBeNull();
+});
+
+test('it imports sale payments with their sale note and vehicle relationships', function () {
+    $creator = auth()->user();
+    $sourceTransaction = CarTransaction::create([
+        'plate_number' => 'B 5566 PAYMENT',
+        'brand' => 'Honda',
+        'model' => 'Brio',
+        'year' => 2023,
+        'transmission' => 'Automatic',
+        'color' => 'Putih',
+        'buy_date' => '2026-10-01',
+        'buy_price' => 100000000,
+        'sell_date' => '2026-10-20',
+        'selling_price' => 120000000,
+        'down_payment' => 20000000,
+    ]);
+    $sourceSaleNote = SaleNote::query()->create([
+        'car_transaction_id' => $sourceTransaction->id,
+        'nama_konsumen' => 'Ayu Import',
+        'created_by' => $creator->id,
+    ]);
+    $sourceSaleNote->payments()->create([
+        'amount' => 15000000,
+        'payment_method' => 'leasing',
+        'payment_date' => '2026-10-24',
+        'notes' => 'Pencairan tahap pertama',
+        'recorded_by' => $creator->id,
+    ]);
+
+    $backupPath = app(TransactionBackupService::class)->createBackup();
+    $backupContents = file_get_contents($backupPath);
+    $sourceTransaction->delete();
+    $userLookupQueries = 0;
+
+    DB::listen(static function (QueryExecuted $query) use (&$userLookupQueries): void {
+        if (str_contains(strtolower($query->sql), 'from "users"')) {
+            $userLookupQueries++;
+        }
+    });
+
+    try {
+        $this->post(route('transactions.import'), [
+            'backup' => UploadedFile::fake()->createWithContent('sale-payments.sqlite', $backupContents),
+        ])
+            ->assertRedirect(route('transactions.index'))
+            ->assertSessionHas('success');
+    } finally {
+        unlink($backupPath);
+    }
+
+    $importedTransaction = CarTransaction::query()
+        ->where('plate_number', 'B 5566 PAYMENT')
+        ->sole();
+    $importedSaleNote = $importedTransaction->saleNote()->sole();
+    $importedPayment = $importedSaleNote->payments()->sole();
+
+    expect($importedSaleNote->nama_konsumen)->toBe('Ayu Import')
+        ->and($importedSaleNote->created_by)->toBe($creator->id)
+        ->and((float) $importedPayment->amount)->toBe(15000000.0)
+        ->and($importedPayment->payment_method)->toBe('leasing')
+        ->and($importedPayment->notes)->toBe('Pencairan tahap pertama')
+        ->and($importedPayment->recorded_by)->toBe($creator->id)
+        ->and($userLookupQueries)->toBe(1);
 });
 
 test('it accepts legacy backups without a buyers table', function () {

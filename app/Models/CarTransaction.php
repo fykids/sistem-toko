@@ -57,11 +57,6 @@ class CarTransaction extends Model
         ];
     }
 
-    public function buyer(): HasOne
-    {
-        return $this->hasOne(Buyer::class);
-    }
-
     public function saleNote(): HasOne
     {
         return $this->hasOne(SaleNote::class, 'car_transaction_id');

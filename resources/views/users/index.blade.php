@@ -17,12 +17,13 @@
                     <span class="cell-secondary">Semua akun terdaftar</span>
                 </div>
                 <div class="toolbar-actions">
-                    <label class="search-wrap">
+                    <form class="search-wrap" action="{{ route('users.index') }}" method="GET">
                         <span class="search-symbol" aria-hidden="true">⌕</span>
                         <span class="sr-only">Cari nama, username, atau role pengguna</span>
-                        <input id="users-search" type="search" placeholder="Cari nama, username, role..."
-                            autocomplete="off" data-user-search>
-                    </label>
+                        <input id="users-search" type="search" name="q" value="{{ $search }}"
+                            placeholder="Cari nama, username, role..." autocomplete="off" data-user-search>
+                        <button class="sr-only" type="submit">Cari pengguna</button>
+                    </form>
                     <button class="showroom-primary-action" type="button" data-open-create-user>
                         <span aria-hidden="true">+</span>
                         Tambah akun
@@ -91,9 +92,6 @@
                                 <td colspan="5" class="users-empty-state">Belum ada akun pengguna.</td>
                             </tr>
                         @endforelse
-                        <tr data-user-search-empty hidden>
-                            <td colspan="5" class="users-empty-state">Tidak ada pengguna yang cocok dengan pencarian.</td>
-                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -101,7 +99,7 @@
                 Menampilkan {{ $users->count() }} pengguna
             </footer>
             @if ($users->hasPages())
-                <div class="users-pagination">{{ $users->links() }}</div>
+                <div class="users-pagination">{{ $users->withQueryString()->links() }}</div>
             @endif
         </div>
 
@@ -138,6 +136,7 @@
                         <select id="create-user-role" name="role" required>
                             <option value="admin" @selected(old('_form') === 'create' && old('role') === 'admin')>Admin</option>
                             <option value="master" @selected(old('_form') === 'create' && old('role') === 'master')>Master</option>
+                            <option value="marketing" @selected(old('_form') === 'create' && old('role') === 'marketing')>Marketing</option>
                         </select>
                         @error('role')<span class="users-field-error">{{ $message }}</span>@enderror
                     </div>
@@ -185,6 +184,7 @@
                         <select id="edit-user-role" name="role" required>
                             <option value="admin" @selected(old('_form') === 'edit' && old('role') === 'admin')>Admin</option>
                             <option value="master" @selected(old('_form') === 'edit' && old('role') === 'master')>Master</option>
+                            <option value="marketing" @selected(old('_form') === 'edit' && old('role') === 'marketing')>Marketing</option>
                         </select>
                         @error('role')<span class="users-field-error">{{ $message }}</span>@enderror
                     </div>

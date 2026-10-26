@@ -37,7 +37,7 @@ class UpdateUserRequest extends FormRequest
                 Rule::unique(User::class, 'username')->ignore($managedUser),
             ],
             'password' => ['nullable', 'string', 'min:8'],
-            'role' => ['required', 'string', Rule::in(['master', 'admin'])],
+            'role' => ['required', 'string', Rule::in(['master', 'admin', 'marketing'])],
         ];
     }
 

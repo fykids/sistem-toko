@@ -19,10 +19,14 @@ class SellModuleController extends Controller
     {
         Gate::authorize('viewAny', SaleNote::class);
         $canViewSensitiveData = $request->user()->can('viewSensitiveData', CarTransaction::class);
+        $filters = $request->validate([
+            'status' => ['nullable', 'in:all,unpaid,leasing,paid'],
+        ]);
 
         return view('jual.index', [
-            'notes' => $this->sellModuleService->listNotes($canViewSensitiveData),
+            'notes' => $this->sellModuleService->listNotes($request->user(), $filters['status'] ?? 'all'),
             'canViewSensitiveData' => $canViewSensitiveData,
+            'status' => $filters['status'] ?? 'all',
         ]);
     }
 
@@ -32,10 +36,15 @@ class SellModuleController extends Controller
 
         $canViewSensitiveData = $request->user()->can('viewSensitiveData', CarTransaction::class);
         $availableVehicles = $this->sellModuleService->availableVehicles($canViewSensitiveData);
+        $selectedVehicle = $this->sellModuleService->findAvailableVehicle(
+            $request->integer('vehicle'),
+            $canViewSensitiveData,
+        );
 
         return view('jual.create', [
             'availableVehicles' => $availableVehicles,
-            'selectedVehicle' => $availableVehicles->firstWhere('id', $request->integer('vehicle')),
+            'hasAvailableVehicles' => $this->sellModuleService->hasAvailableVehicles(),
+            'selectedVehicle' => $selectedVehicle,
             'saleNote' => new SaleNote,
             'isEditing' => false,
             'canViewSensitiveData' => $canViewSensitiveData,
@@ -59,6 +68,7 @@ class SellModuleController extends Controller
             'carTransaction' => fn ($query) => $query->select(
                 $this->sellModuleService->vehicleColumns($canViewSensitiveData),
             ),
+            'payments' => fn ($query) => $query->orderBy('payment_date')->orderBy('id'),
         ]);
 
         return view('jual.show', [

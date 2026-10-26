@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class UserController extends Controller
@@ -16,12 +17,30 @@ class UserController extends Controller
 
     public function __construct(private readonly UserService $userService) {}
 
-    public function index(): View
+    public function index(Request $request): View
     {
         $this->authorize('viewAny', User::class);
 
+        $filters = $request->validate([
+            'q' => ['nullable', 'string', 'max:255'],
+        ]);
+        $search = trim($filters['q'] ?? '');
+
         return view('users.index', [
-            'users' => User::query()->orderBy('name')->orderBy('id')->paginate(15),
+            'users' => User::query()
+                ->when($search !== '', function ($query) use ($search): void {
+                    $searchPattern = '%'.$search.'%';
+                    $query->where(function ($query) use ($searchPattern): void {
+                        $query->where('name', 'like', $searchPattern)
+                            ->orWhere('username', 'like', $searchPattern)
+                            ->orWhere('role', 'like', $searchPattern);
+                    });
+                })
+                ->orderBy('name')
+                ->orderBy('id')
+                ->paginate(10)
+                ->withQueryString(),
+            'search' => $search,
             'masterCount' => User::query()->where('role', 'master')->count(),
         ]);
     }

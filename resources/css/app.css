@@ -443,6 +443,14 @@ a:hover { color: var(--accent-dark); }
 .app-drawer-link:hover { background: var(--color-surface-hover); color: var(--color-primary); }
 .app-drawer-link.is-active { border-color: var(--palette-dfede3); background: var(--color-primary-subtle); color: var(--color-primary); font-weight: 750; }
 .app-drawer-link svg { width: 19px; height: 19px; flex: 0 0 19px; }
+.app-drawer-group-toggle { appearance: none; }
+.app-drawer-group-toggle > span { flex: 1; }
+.app-drawer-group-chevron { width: 16px !important; height: 16px !important; transition: transform .15s ease; }
+.app-drawer-group-toggle[aria-expanded="true"] .app-drawer-group-chevron { transform: rotate(180deg); }
+.app-drawer-submenu { display: grid; gap: 3px; margin: 3px 0 7px 20px; padding-left: 12px; border-left: 1px solid var(--color-border); }
+.app-drawer-submenu[hidden] { display: none; }
+.app-drawer-sublink { display: flex; min-height: 38px; align-items: center; padding: 0 10px; border-radius: var(--radius-control); color: var(--color-text-nav); font-size: var(--font-size-sm); font-weight: 650; text-decoration: none; transition: background .15s ease, color .15s ease; }
+.app-drawer-sublink:hover, .app-drawer-sublink.is-active { background: var(--color-primary-subtle); color: var(--color-primary); }
 .app-drawer-button { appearance: none; }
 .app-drawer-divider { height: 1px; margin: 20px 8px 18px; background: var(--color-border-subtle); }
 .app-drawer-footer { display: flex; align-items: center; gap: 10px; margin-top: auto; padding: 14px 9px 0; border-top: 1px solid var(--color-border-subtle); }

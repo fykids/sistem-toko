@@ -36,9 +36,7 @@ class UserService
         return DB::transaction(function () use ($user, $data): User {
             $masterCount = User::query()
                 ->where('role', 'master')
-                ->orderBy('id')
                 ->lockForUpdate()
-                ->get(['id'])
                 ->count();
             $managedUser = User::query()->lockForUpdate()->findOrFail($user->getKey());
 
@@ -69,9 +67,7 @@ class UserService
         return DB::transaction(function () use ($user): bool {
             $masterCount = User::query()
                 ->where('role', 'master')
-                ->orderBy('id')
                 ->lockForUpdate()
-                ->get(['id'])
                 ->count();
             $managedUser = User::query()->lockForUpdate()->find($user->getKey());
 

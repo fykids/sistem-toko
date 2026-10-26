@@ -1,34 +1,43 @@
-<section class="jual-card jual-card--payment" aria-labelledby="jual-payment-title">
-    <header class="jual-card-heading">
-        <span class="jual-section-number">03</span>
-        <div>
-            <h2 id="jual-payment-title">Harga & pembayaran</h2>
-            <p>Detail pokok penjualan kendaraan.</p>
+<section aria-labelledby="jual-payment-title">
+    @php($initialPaymentType = old('payment_type', 'selling_price'))
+    <h3 id="jual-payment-title" class="form-section-title">Skema pembayaran</h3>
+    <div class="grid gap-4">
+        <div class="form-group">
+            <label for="jual-payment-type">Kategori pembayaran</label>
+            <div class="grid gap-2">
+                <select id="jual-payment-type" name="payment_type" data-jual-payment-type required>
+                    @foreach ([
+                        'selling_price' => 'Harga Jual (Rp)',
+                        'down_payment' => 'DP (Rp)',
+                        'settlement_amount' => 'Pelunasan (Rp)',
+                        'leasing_disbursement' => 'Pencairan Leasing (Rp)',
+                    ] as $field => $label)
+                        <option value="{{ $field }}" @selected(old('payment_type', 'selling_price') === $field)>{{ $label }}</option>
+                    @endforeach
+                </select>
+                @error('payment_type')<span class="form-help">{{ $message }}</span>@enderror
+                <label for="jual-payment-amount">Nilai pembayaran (Rp)</label>
+                <input id="jual-payment-amount" type="text" name="payment_amount"
+                    value="{{ old('payment_amount', $selectedVehicle?->getAttribute($initialPaymentType) ?? 0) }}"
+                    data-jual-payment-amount data-preserve-value="{{ old('payment_amount') !== null ? 'true' : 'false' }}"
+                    data-rupiah-input inputmode="decimal" autocomplete="off" placeholder="Rp 0" required>
+                @error('payment_amount')<span class="form-help">{{ $message }}</span>@enderror
+            </div>
         </div>
-    </header>
-    <label class="jual-field">
-        <span>Harga deal (Rp)</span>
-        <input type="number" name="deal_price" value="{{ old('deal_price', $saleNote->deal_price) }}" min="0" step="0.01" required>
-        @error('deal_price')<span class="jual-error">{{ $message }}</span>@enderror
-    </label>
-    <label class="jual-field">
-        <span>Metode pembayaran</span>
-        <select name="payment_method" required>
-            <option value="">Pilih metode pembayaran</option>
-            @foreach (['Tunai', 'Transfer', 'Kredit', 'Lainnya'] as $paymentMethod)
-                <option value="{{ $paymentMethod }}" @selected(old('payment_method', $saleNote->payment_method) === $paymentMethod)>{{ $paymentMethod }}</option>
-            @endforeach
-        </select>
-        @error('payment_method')<span class="jual-error">{{ $message }}</span>@enderror
-    </label>
-    <label class="jual-field">
-        <span>Tanggal jual</span>
-        <input type="date" name="sell_date" value="{{ old('sell_date', $saleNote->sell_date?->format('Y-m-d') ?? now()->toDateString()) }}" required>
-        @error('sell_date')<span class="jual-error">{{ $message }}</span>@enderror
-    </label>
-    <label class="jual-field">
-        <span>Catatan</span>
-        <textarea name="notes" rows="3" maxlength="5000">{{ old('notes', $saleNote->notes) }}</textarea>
-        @error('notes')<span class="jual-error">{{ $message }}</span>@enderror
-    </label>
+        <div class="field-grid two-column">
+            <div class="form-group">
+                <label for="jual-remaining-payment">Sisa pembayaran (Rp)</label>
+                <output id="jual-remaining-payment" class="status-badge" aria-live="polite"
+                    data-jual-remaining-payment>
+                    Rp {{ number_format((float) ($selectedVehicle?->remaining_payment ?? 0)) }}
+                </output>
+            </div>
+            <div class="form-group">
+                <label for="jual-sale-date">Tanggal jual</label>
+                <input id="jual-sale-date" type="date" name="sell_date"
+                    value="{{ old('sell_date', $selectedVehicle?->sell_date ?? now()->toDateString()) }}" required>
+                @error('sell_date')<span class="form-help">{{ $message }}</span>@enderror
+            </div>
+        </div>
+    </div>
 </section>

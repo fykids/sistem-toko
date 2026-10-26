@@ -22,23 +22,13 @@ test('guests can render the login form', function () {
         ->assertSee(route('login.store'), false);
 });
 
-test('login page creates a master account that can authenticate with the default credentials', function () {
+test('login page does not create a default master account', function () {
     $this->get(route('login'))->assertOk();
 
-    $master = User::query()->where('username', 'master')->sole();
-
-    expect($master->role)->toBe('master')
-        ->and(Hash::check('master123', $master->password))->toBeTrue();
-
-    $this->post(route('login.store'), [
-        'username' => 'master',
-        'password' => 'master123',
-    ])->assertRedirect('/');
-
-    $this->assertAuthenticatedAs($master);
+    expect(User::query()->count())->toBe(0);
 });
 
-test('login page promotes the existing default username instead of inserting a duplicate', function () {
+test('login page does not promote an existing username to master', function () {
     $existingUser = User::factory()->create([
         'username' => 'master',
         'password' => 'existing-password',
@@ -49,9 +39,44 @@ test('login page promotes the existing default username instead of inserting a d
     $existingUser->refresh();
 
     expect(User::query()->where('username', 'master')->count())->toBe(1)
-        ->and($existingUser->role)->toBe('master')
+        ->and($existingUser->role)->toBe('admin')
         ->and(Hash::check('existing-password', $existingUser->password))->toBeTrue()
         ->and(Hash::check('master123', $existingUser->password))->toBeFalse();
+});
+
+test('an initial master account can be provisioned with an operator-supplied password', function () {
+    $this->artisan('app:create-master-user')
+        ->expectsQuestion('Name', 'Master Showroom')
+        ->expectsQuestion('Username', 'master_toko')
+        ->expectsQuestion('Password (minimum 12 characters)', 'a-unique-master-secret')
+        ->expectsQuestion('Confirm password', 'a-unique-master-secret')
+        ->assertExitCode(0);
+
+    $master = User::query()->where('username', 'master_toko')->sole();
+
+    expect($master->role)->toBe('master')
+        ->and(Hash::check('a-unique-master-secret', $master->password))->toBeTrue()
+        ->and(Hash::check('master123', $master->password))->toBeFalse();
+});
+
+test('initial master provisioning rejects passwords shorter than 12 characters', function () {
+    $this->artisan('app:create-master-user')
+        ->expectsQuestion('Name', 'Master Showroom')
+        ->expectsQuestion('Username', 'master_toko')
+        ->expectsQuestion('Password (minimum 12 characters)', 'short')
+        ->expectsQuestion('Confirm password', 'short')
+        ->assertExitCode(1);
+
+    expect(User::query()->count())->toBe(0);
+});
+
+test('initial master provisioning refuses to create another master account', function () {
+    User::factory()->master()->create();
+
+    $this->artisan('app:create-master-user')
+        ->assertExitCode(1);
+
+    expect(User::query()->where('role', 'master')->count())->toBe(1);
 });
 
 test('valid credentials start a session and redirect to the intended route', function () {

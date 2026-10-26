@@ -166,5 +166,10 @@
             </div>
             @endforeach
         </div>
+        <div class="form-group">
+            <label for="calculated-total-repair-cost">Total Pengeluaran Perbaikan (Rp)</label>
+            <input id="calculated-total-repair-cost" type="text" value="0" readonly data-rupiah-input
+                aria-live="polite">
+        </div>
     </div>
 </section>

@@ -51,31 +51,41 @@
                 <path d="m7 15 4-4 3 2 5-6" />
                 <path d="M15 7h4v4" />
             </svg>
-            <span>Penjualan</span>
+            <span>Ringkasan penjualan</span>
         </a>
         @can('viewAny', \App\Models\SaleNote::class)
-            <a class="app-drawer-link" href="{{ route('jual.index') }}"
-                @class(['is-active' => request()->routeIs('jual.*')])
-                @if (request()->routeIs('jual.*')) aria-current="page" @endif>
+            @php($isSalesMenuActive = request()->routeIs('jual.*', 'nota-penjualan.*'))
+            <div class="app-drawer-group" data-sales-menu>
+                <button class="app-drawer-link app-drawer-group-toggle" type="button"
+                    aria-controls="sales-submenu"
+                    aria-expanded="{{ $isSalesMenuActive ? 'true' : 'false' }}"
+                    @class(['is-active' => $isSalesMenuActive])
+                    data-sales-menu-toggle>
                 <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M4 19V5m0 14h16" />
                     <path d="M7 15h10M7 11h6M15 7h4v4" />
                 </svg>
-                <span>Jual</span>
-            </a>
-        @endcan
-        @can('viewAny', \App\Models\SaleNote::class)
-            <a class="app-drawer-link" href="{{ route('nota-penjualan.index') }}"
-                @class(['is-active' => request()->routeIs('nota-penjualan.*')])
-                @if (request()->routeIs('nota-penjualan.*')) aria-current="page" @endif>
-                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M6 3h9l4 4v14H6z" />
-                    <path d="M14 3v5h5M9 12h7M9 16h7" />
-                </svg>
-                <span>Nota Penjualan</span>
-            </a>
+                    <span>Transaksi jual</span>
+                    <svg class="app-drawer-group-chevron" aria-hidden="true" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="m7 10 5 5 5-5" />
+                    </svg>
+                </button>
+                <div class="app-drawer-submenu" id="sales-submenu" data-sales-menu-panel
+                    @if (! $isSalesMenuActive) hidden @endif>
+                    <a class="app-drawer-sublink" href="{{ route('jual.create') }}"
+                        @if (request()->routeIs('jual.create')) aria-current="page" @endif>
+                        Input / Transaksi Jual
+                    </a>
+                    <a class="app-drawer-sublink" href="{{ route('jual.index') }}"
+                        @class(['is-active' => request()->routeIs('jual.index', 'nota-penjualan.*')])
+                        @if (request()->routeIs('jual.index', 'nota-penjualan.*')) aria-current="page" @endif>
+                        Laporan Penjualan
+                    </a>
+                </div>
+            </div>
         @endcan
         <a class="app-drawer-link" href="{{ route('dashboard') }}#laporan"
             @if (request()->routeIs('dashboard', 'transactions.index')) data-dashboard-nav="reports" @endif>

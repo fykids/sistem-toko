@@ -50,6 +50,8 @@ test('it renders an empty repair row by default', function () {
         ->assertSee('id="repair-name-0"', false)
         ->assertSee('id="repair-name-__INDEX__"', false)
         ->assertSee('id="add-repair"', false)
+        ->assertSee('id="calculated-total-repair-cost"', false)
+        ->assertSee('Total Pengeluaran Perbaikan (Rp)')
         ->assertSee('class="repair-form-labels"', false);
 
     $content = $response->getContent();

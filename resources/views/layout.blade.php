@@ -45,6 +45,7 @@
                 $isUserPage = request()->routeIs('users.*');
                 $isProfilePage = request()->routeIs('profile.*');
                 $pageTitle = match (true) {
+                    request()->routeIs('jual.payments.create') => 'Catat Pelunasan',
                     request()->routeIs('nota-penjualan.edit') => 'Edit Nota Penjualan',
                     request()->routeIs('nota-penjualan.show') => 'Detail Nota Penjualan',
                     request()->routeIs('nota-penjualan.create') => 'Nota Penjualan Baru',

@@ -39,4 +39,11 @@ class UserFactory extends Factory
             'role' => 'master',
         ]);
     }
+
+    public function marketing(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'marketing',
+        ]);
+    }
 }

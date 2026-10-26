@@ -1,6 +1,6 @@
 (() => {
     const transactionForm = document.querySelector('.transaction-form');
-    if (!transactionForm) {
+    if (!transactionForm || transactionForm.classList.contains('sell-module-form')) {
         return;
     }
 
@@ -17,6 +17,7 @@
     const purchaseOperationalInput = document.getElementById('purchase-operational');
     const otherCostsInput = document.getElementById('other-costs');
     const calculatedSaleProfitInput = document.getElementById('calculated-sale-profit');
+    const calculatedTotalRepairCostInput = document.getElementById('calculated-total-repair-cost');
     const calculatedTotalProfitInput = document.getElementById('calculated-total-profit');
     const calculatedTotalCapitalInput = document.getElementById('calculated-total-capital');
     const setorPriceInput = document.getElementById('setor-price');
@@ -184,6 +185,18 @@
             + variableCapital;
     }
 
+    function updateTotalRepairCost() {
+        if (!calculatedTotalRepairCostInput) {
+            return;
+        }
+
+        const totalRepairCost = Array.from(transactionForm.querySelectorAll(
+            '[name^="additional_repairs["][name$="[cost]"]',
+        )).reduce((total, input) => total + toNumericAmount(input.value), 0);
+
+        calculatedTotalRepairCostInput.value = rupiahFormatter.format(totalRepairCost);
+    }
+
     function updateProfitCalculation() {
         const totalCapital = calculateTotalCapital();
         const saleProfit = toNumericAmount(sellingPriceInput.value) - totalCapital;
@@ -251,6 +264,7 @@
     });
     syncLeasingSellingPrices();
     updateLeasingDownPayments();
+    updateTotalRepairCost();
     updateProfitCalculation();
 
     transactionForm.addEventListener('input', (event) => {
@@ -273,6 +287,10 @@
             '#selling-price, #setor-price, #opening-price, #leasing-ripan, #insurance-ripan, #booster-ripan, #buy-price, #purchase-operational, #other-costs, [name^="tax_items["][name$="[cost]"], [name^="additional_repairs["][name$="[cost]"], [name^="intertine_expenses["][name$="[cost]"]',
         )) {
             updateProfitCalculation();
+        }
+
+        if (event.target.matches('[name^="additional_repairs["][name$="[cost]"]')) {
+            updateTotalRepairCost();
         }
     });
 
@@ -363,6 +381,7 @@
                 }
 
                 updateRemoveButtons();
+                updateTotalRepairCost();
                 updateProfitCalculation();
             }
         });

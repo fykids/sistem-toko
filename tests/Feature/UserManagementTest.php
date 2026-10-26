@@ -51,6 +51,31 @@ test('master can list users and create an account with an explicitly selected ro
         ->assertSee('Akun berhasil dibuat.');
 });
 
+test('master user list paginates ten matching accounts and retains the search query', function () {
+    $master = User::factory()->master()->create();
+    User::factory()
+        ->count(11)
+        ->sequence(fn ($sequence) => ['name' => sprintf('Needle Account %02d', $sequence->index + 1)])
+        ->create();
+    $this->actingAs($master);
+
+    $response = $this->get(route('users.index', ['q' => 'Needle']));
+
+    $response->assertOk()
+        ->assertSee('value="Needle"', false)
+        ->assertSee('page=2', false)
+        ->assertSee('q=Needle', false);
+
+    expect(substr_count($response->getContent(), 'data-user-row'))->toBe(10);
+
+    $pageTwo = $this->get(route('users.index', ['q' => 'Needle', 'page' => 2]));
+
+    $pageTwo->assertOk()
+        ->assertSee('Needle Account 11');
+
+    expect(substr_count($pageTwo->getContent(), 'data-user-row'))->toBe(1);
+});
+
 test('master can update account details and leave its password unchanged', function () {
     $master = User::factory()->master()->create();
     $managedUser = User::factory()->create([
