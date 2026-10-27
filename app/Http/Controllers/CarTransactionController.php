@@ -6,24 +6,27 @@ use App\Http\Requests\StoreCarTransactionRequest;
 use App\Models\CarTransaction;
 use App\Models\User;
 use App\Presenters\TransactionPresenter;
+use App\Services\CarTransactionService;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
-use Throwable;
 
 class CarTransactionController extends Controller
 {
     public function index(Request $request, TransactionPresenter $presenter): View
     {
+        $filters = $request->validate([
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'q' => ['nullable', 'string', 'max:255'],
+            'view' => ['nullable', 'in:dashboard,inventory,sales,reports'],
+        ]);
+
         return view(
             'transactions.index',
-            $presenter->dashboard($this->authenticatedUser($request)),
+            $presenter->dashboard($this->authenticatedUser($request), $filters),
         );
     }
 
@@ -49,88 +52,42 @@ class CarTransactionController extends Controller
         ]);
     }
 
-    public function store(StoreCarTransactionRequest $request): RedirectResponse
-    {
+    public function store(
+        StoreCarTransactionRequest $request,
+        CarTransactionService $carTransactionService,
+    ): RedirectResponse {
         $validated = $request->validated();
         $user = $this->authenticatedUser($request);
-
-        if ($user->cannot('viewSensitiveData', CarTransaction::class)) {
-            $validated = array_replace($validated, [
-                'buy_price' => 0,
-                'leasing_ripan' => 0,
-                'insurance_ripan' => 0,
-                'booster_ripan' => 0,
-            ]);
-        }
-
         $photo = $request->file('vehicle_photo');
         unset($validated['vehicle_photo']);
 
-        $photoPath = null;
-
-        try {
-            DB::transaction(function () use ($validated, $photo, &$photoPath): void {
-                if ($photo instanceof UploadedFile) {
-                    $photoPath = $this->storeVehiclePhoto($photo);
-                    $validated['vehicle_photo_path'] = $photoPath;
-                }
-
-                CarTransaction::create($validated);
-            });
-        } catch (Throwable $exception) {
-            if ($photoPath !== null) {
-                $this->deleteVehiclePhotoIfExists($photoPath, null);
-            }
-
-            throw $exception;
-        }
+        $carTransactionService->create($validated, $photo, $user);
 
         return redirect()->route('transactions.index')->with('success', 'Data transaksi berhasil disimpan!');
     }
 
-    public function update(StoreCarTransactionRequest $request, CarTransaction $transaction): RedirectResponse
-    {
+    public function update(
+        StoreCarTransactionRequest $request,
+        CarTransaction $transaction,
+        CarTransactionService $carTransactionService,
+    ): RedirectResponse {
         $validated = $request->validated();
+        $user = $this->authenticatedUser($request);
         $photo = $request->file('vehicle_photo');
-        $previousPhotoPath = $transaction->vehicle_photo_path;
         unset($validated['vehicle_photo']);
 
-        $newPhotoPath = null;
-
-        try {
-            DB::transaction(function () use ($transaction, $validated, $photo, &$newPhotoPath): void {
-                if ($photo instanceof UploadedFile) {
-                    $newPhotoPath = $this->storeVehiclePhoto($photo);
-                    $validated['vehicle_photo_path'] = $newPhotoPath;
-                }
-
-                $transaction->update($validated);
-            });
-        } catch (Throwable $exception) {
-            if ($newPhotoPath !== null) {
-                $this->deleteVehiclePhotoIfExists($newPhotoPath, $transaction->id);
-            }
-
-            throw $exception;
-        }
-
-        if ($newPhotoPath !== null && $previousPhotoPath !== null) {
-            $this->deleteVehiclePhotoIfExists($previousPhotoPath, $transaction->id);
-        }
+        $carTransactionService->update($transaction, $validated, $photo, $user);
 
         return redirect()->route('transactions.index')->with('success', 'Data transaksi berhasil diperbarui!');
     }
 
-    public function destroy(CarTransaction $transaction): RedirectResponse
-    {
+    public function destroy(
+        CarTransaction $transaction,
+        CarTransactionService $carTransactionService,
+    ): RedirectResponse {
         Gate::authorize('delete', $transaction);
 
-        $photoPath = $transaction->vehicle_photo_path;
-        $transaction->delete();
-
-        if ($photoPath !== null) {
-            $this->deleteVehiclePhotoIfExists($photoPath, $transaction->id);
-        }
+        $carTransactionService->delete($transaction);
 
         return redirect()->route('transactions.index')->with('success', 'Data transaksi berhasil dihapus!');
     }
@@ -140,6 +97,8 @@ class CarTransactionController extends Controller
         Request $request,
         TransactionPresenter $presenter,
     ): View {
+        Gate::authorize('view', $transaction);
+
         return view('transactions.show', [
             'transaction' => $presenter->transactionDetail(
                 $transaction,
@@ -157,28 +116,5 @@ class CarTransactionController extends Controller
         }
 
         return $user;
-    }
-
-    private function storeVehiclePhoto(UploadedFile $photo): string
-    {
-        $path = $photo->store('vehicle-photos', 'public');
-
-        if (! is_string($path)) {
-            throw new \RuntimeException('The vehicle photo could not be stored.');
-        }
-
-        return $path;
-    }
-
-    private function deleteVehiclePhotoIfExists(string $path, ?int $transactionId): void
-    {
-        $disk = Storage::disk('public');
-
-        if ($disk->exists($path) && ! $disk->delete($path)) {
-            Log::error('A vehicle photo could not be deleted.', [
-                'path' => $path,
-                'transaction_id' => $transactionId,
-            ]);
-        }
     }
 }

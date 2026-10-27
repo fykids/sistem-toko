@@ -23,7 +23,7 @@ class ProfileController extends Controller
             abort(403);
         }
 
-        $profile = $request->safe()->only(['name', 'email']);
+        $profile = $request->safe()->only(['name', 'username']);
 
         if (filled($request->validated('password'))) {
             $profile['password'] = Hash::make($request->validated('password'));

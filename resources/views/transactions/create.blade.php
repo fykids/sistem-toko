@@ -1,8 +1,6 @@
 @extends('layout')
 
-@section('page_class', request()->routeIs('transactions.create')
-    ? 'page-shell--transaction-form page-shell--transaction-form-create'
-    : 'page-shell--transaction-form')
+@section('page_class', 'page-shell--transaction-form page-shell--transaction-form-entry')
 
 @section('content')
 @php($transaction = $transaction ?? null)
@@ -11,6 +9,7 @@
     enctype="multipart/form-data" @class([
         'transaction-form',
         'transaction-form--master' => auth()->user()->can('viewSensitiveData', \App\Models\CarTransaction::class),
+        'transaction-form--admin' => auth()->user()->role === 'admin',
     ])>
     @csrf
     @if ($isEditing)

@@ -1,5 +1,8 @@
 import './transactions/create.js';
+import './transactions/jual.js';
 import '../css/transactions/leasing.css';
+import '../css/transactions/sale-notes.css';
+import '../css/transactions/jual.css';
 import './dashboard.js';
 import './users.js';
 import '../css/dashboard.css';
@@ -239,6 +242,43 @@ document.querySelectorAll('[data-app-menu-toggle]').forEach((toggle) => {
             menu.setAttribute('aria-hidden', 'true');
             toggle.setAttribute('aria-expanded', 'false');
             toggle.setAttribute('aria-label', 'Buka navigasi');
+        }
+    });
+});
+
+document.querySelectorAll('[data-sales-menu-toggle]').forEach((toggle) => {
+    const group = toggle.closest('[data-sales-menu]');
+    const panel = group?.querySelector('[data-sales-menu-panel]');
+
+    if (!group || !panel) {
+        return;
+    }
+
+    const closeMenu = (restoreFocus = false) => {
+        toggle.setAttribute('aria-expanded', 'false');
+        panel.hidden = true;
+
+        if (restoreFocus) {
+            toggle.focus();
+        }
+    };
+
+    toggle.addEventListener('click', () => {
+        const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+
+        toggle.setAttribute('aria-expanded', String(!isExpanded));
+        panel.hidden = isExpanded;
+    });
+
+    group.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+            closeMenu(true);
+        }
+    });
+
+    document.addEventListener('click', (event) => {
+        if (event.target instanceof Node && !group.contains(event.target)) {
+            closeMenu();
         }
     });
 });

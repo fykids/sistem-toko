@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\Buyer;
 use App\Models\CarTransaction;
 use App\Models\User;
+use App\Policies\BuyerPolicy;
 use App\Policies\CarTransactionPolicy;
 use App\Policies\UserPolicy;
 use App\Services\DatabaseSetupService;
@@ -61,12 +63,13 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Gate::policy(CarTransaction::class, CarTransactionPolicy::class);
+        Gate::policy(Buyer::class, BuyerPolicy::class);
         Gate::policy(User::class, UserPolicy::class);
 
         RateLimiter::for('login', function (Request $request): Limit {
-            $email = Str::lower($request->string('email')->toString());
+            $username = Str::lower($request->string('username')->toString());
 
-            return Limit::perMinute(5)->by(Str::transliterate($email.'|'.$request->ip()));
+            return Limit::perMinute(5)->by(Str::transliterate($username.'|'.$request->ip()));
         });
     }
 }

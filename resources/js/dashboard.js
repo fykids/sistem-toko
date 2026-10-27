@@ -8,7 +8,6 @@ if (layout) {
     const fileInput = document.getElementById('transaction-backup');
     const dropzone = document.querySelector('[data-dropzone]');
     const fileName = document.querySelector('[data-file-name]');
-    const transactionSearch = document.getElementById('transaction-search');
     const transactionRows = [...document.querySelectorAll('#transaction-rows tr[data-status]')];
     const filterButtons = [...document.querySelectorAll('[data-dashboard-filters] [data-filter]')];
     const viewTitles = {
@@ -32,17 +31,7 @@ if (layout) {
     let modalTrigger = null;
 
     const filterTransactions = (view) => {
-        const query = transactionSearch.value.trim().toLowerCase();
-        let visibleCount = 0;
-        const statusFilter = view === 'inventory' ? 'stock' : ['sales', 'reports'].includes(view) ? 'sold' : null;
-
-        transactionRows.forEach((row) => {
-            const matchesQuery = row.dataset.search.includes(query);
-            const matchesStatus = !statusFilter || row.dataset.status === statusFilter;
-            row.hidden = !(matchesQuery && matchesStatus);
-            visibleCount += row.hidden ? 0 : 1;
-        });
-
+        const visibleCount = transactionRows.length;
         const emptyState = document.querySelector('[data-empty-state]');
         emptyState.hidden = visibleCount > 0;
         document.querySelector('[data-empty-title]').textContent = {
@@ -51,11 +40,10 @@ if (layout) {
             sales: 'Belum ada kendaraan terjual',
             reports: 'Belum ada data penjualan',
         }[view];
-        document.querySelector('[data-empty-description]').textContent = query
+        const hasSearchQuery = new URLSearchParams(window.location.search).get('q')?.trim();
+        document.querySelector('[data-empty-description]').textContent = hasSearchQuery
             ? 'Coba ubah kata kunci pencarian.'
             : 'Data akan muncul di sini setelah transaksi dicatat.';
-        document.getElementById('transaction-count').textContent =
-            `Menampilkan ${visibleCount} kendaraan`;
     };
 
     const setDashboardView = (view, updateHash = true) => {
@@ -92,25 +80,41 @@ if (layout) {
         }
     };
 
+    const navigateDashboardView = (view, targetHref = window.location.href) => {
+        const targetUrl = new URL(targetHref, window.location.href);
+        targetUrl.search = window.location.search;
+        targetUrl.searchParams.delete('page');
+        targetUrl.searchParams.set('view', view);
+        targetUrl.hash = view === 'sales' ? 'penjualan' : view;
+        window.location.assign(targetUrl);
+    };
+
     layout.querySelectorAll('[data-dashboard-nav]').forEach((link) => {
-        link.addEventListener('click', () => {
-            setDashboardView(link.dataset.dashboardNav);
+        link.addEventListener('click', (event) => {
+            event.preventDefault();
+            navigateDashboardView(link.dataset.dashboardNav, link.href);
         });
     });
 
     filterButtons.forEach((button) => {
-        button.addEventListener('click', () => setDashboardView(button.dataset.filter));
+        button.addEventListener('click', () => navigateDashboardView(button.dataset.filter));
     });
 
-    transactionSearch.addEventListener('input', () => filterTransactions(layout.dataset.showroomView));
-
     const viewFromHash = () => {
-        const view = {
+        const hashView = {
             '#dashboard': 'dashboard',
             '#inventaris': 'inventory',
             '#penjualan': 'sales',
             '#laporan': 'reports',
-        }[window.location.hash] ?? 'dashboard';
+        }[window.location.hash];
+        const queryView = new URLSearchParams(window.location.search).get('view');
+
+        if (hashView && !queryView) {
+            navigateDashboardView(hashView);
+            return;
+        }
+
+        const view = queryView ?? 'dashboard';
         setDashboardView(view, false);
     };
 

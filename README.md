@@ -33,13 +33,21 @@ Aplikasi pencatatan transaksi kendaraan berbasis Laravel. Aplikasi menyediakan d
 
    Perintah ini menggunakan `.env.example` sebagai dasar `.env` lokal bila file tersebut belum ada. Jangan bagikan `.env` atau kredensial lingkungan.
 
-5. Jalankan aplikasi pada terminal pertama:
+5. Buat akun Master awal melalui terminal. Masukkan username dan kata sandi unik; kata sandi tidak ditampilkan saat diketik:
+
+   ```powershell
+   php artisan app:create-master-user
+   ```
+
+   Perintah ini hanya membuat akun jika Master belum ada. Akun tidak dibuat otomatis saat halaman login dibuka.
+
+6. Jalankan aplikasi pada terminal pertama:
 
    ```powershell
    php artisan serve
    ```
 
-6. Untuk mengembangkan aset frontend, jalankan pada terminal kedua:
+7. Untuk mengembangkan aset frontend, jalankan pada terminal kedua:
 
    ```powershell
    npm run dev

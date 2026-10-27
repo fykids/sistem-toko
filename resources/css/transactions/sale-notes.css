@@ -1,0 +1,269 @@
+.page-shell--sale-note,
+.page-shell--sale-note-form {
+    --sale-note-accent: #5d4c9b;
+    --sale-note-accent-strong: #463879;
+    --sale-note-accent-soft: #f4f0ff;
+    --sale-note-accent-border: #dcd3f5;
+}
+
+.page-shell--sale-note .sale-note-heading,
+.page-shell--sale-note-form .sale-note-form-heading {
+    border: 1px solid var(--sale-note-accent-border);
+    background: linear-gradient(120deg, var(--sale-note-accent-soft), var(--color-card-surface));
+}
+
+.page-shell--sale-note .sale-note-heading .showroom-page-eyebrow,
+.page-shell--sale-note-form .sale-note-form-heading .page-eyebrow {
+    color: var(--sale-note-accent);
+}
+
+.page-shell--sale-note .sale-note-page-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.page-shell--sale-note .sale-note-table-card,
+.page-shell--sale-note .sale-note-detail-card {
+    overflow: hidden;
+    border-color: var(--sale-note-accent-border);
+}
+
+.page-shell--sale-note .sale-note-table thead th {
+    background: var(--sale-note-accent-soft);
+}
+
+.page-shell--sale-note .sale-note-row-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.page-shell--sale-note-form .sale-note-form-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    width: min(100%, 1400px);
+    margin: 0 auto 14px;
+    padding: 16px 20px;
+    border-radius: var(--radius-card);
+}
+
+.page-shell--sale-note-form .sale-note-form-heading h1,
+.page-shell--sale-note-form .sale-note-form-heading p {
+    margin: 0;
+}
+
+.page-shell--sale-note-form .sale-note-form-heading p:last-child {
+    margin-top: 5px;
+    color: var(--color-text-secondary);
+}
+
+.page-shell--sale-note-form .transaction-form.transaction-form--sale-note.transaction-form--admin {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+    gap: 14px;
+    width: min(100%, 1400px);
+    margin-inline: auto;
+}
+
+.page-shell--sale-note-form .transaction-form.transaction-form--sale-note.transaction-form--master {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: start;
+    gap: 14px;
+    width: min(100%, 1400px);
+    margin-inline: auto;
+}
+
+.page-shell--sale-note-form .sale-note-card {
+    min-width: 0;
+    padding: 16px;
+    border: 1px solid var(--sale-note-accent-border);
+    border-radius: var(--radius-card);
+    background: var(--color-card-surface);
+    box-shadow: var(--shadow-card, 0 4px 14px rgb(40 35 70 / 6%));
+}
+
+.page-shell--sale-note-form .sale-note-card-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--sale-note-accent-border);
+}
+
+.page-shell--sale-note-form .sale-note-card-heading h2,
+.page-shell--sale-note-form .sale-note-card-heading p {
+    margin: 0;
+}
+
+.page-shell--sale-note-form .sale-note-card-heading h2 {
+    color: var(--sale-note-accent-strong);
+    font-size: 1rem;
+}
+
+.page-shell--sale-note-form .sale-note-card-heading p {
+    margin-top: 3px;
+    color: var(--color-text-secondary);
+    font-size: 0.8rem;
+}
+
+.page-shell--sale-note-form .sale-note-section-number {
+    display: grid;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    place-items: center;
+    border-radius: 8px;
+    background: var(--sale-note-accent-soft);
+    color: var(--sale-note-accent-strong);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.page-shell--sale-note-form .sale-note-field {
+    display: grid;
+    gap: 6px;
+    width: 100%;
+    margin-bottom: 12px;
+    color: var(--color-text-primary);
+    font-size: 0.84rem;
+    font-weight: 600;
+}
+
+.page-shell--sale-note-form .sale-note-field input,
+.page-shell--sale-note-form .sale-note-field select,
+.page-shell--sale-note-form .sale-note-field textarea {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    min-height: 40px;
+    padding: 8px 11px;
+    border: 1px solid var(--color-control-border);
+    border-radius: 8px;
+    background: var(--color-control-surface);
+    color: var(--color-text-primary);
+    font: inherit;
+    font-weight: 400;
+}
+
+.page-shell--sale-note-form .sale-note-field textarea {
+    min-height: 88px;
+    resize: vertical;
+}
+
+.page-shell--sale-note-form .sale-note-field input:focus,
+.page-shell--sale-note-form .sale-note-field select:focus,
+.page-shell--sale-note-form .sale-note-field textarea:focus {
+    border-color: var(--sale-note-accent);
+    outline: 3px solid rgb(93 76 155 / 14%);
+}
+
+.page-shell--sale-note-form .sale-note-error {
+    color: var(--color-danger);
+    font-size: 0.76rem;
+    font-weight: 500;
+}
+
+.page-shell--sale-note-form .sale-note-vehicle-summary,
+.page-shell--sale-note-form .sale-note-margin-list {
+    display: grid;
+    gap: 10px;
+    color: var(--color-text-secondary);
+    font-size: 0.84rem;
+}
+
+.page-shell--sale-note-form .sale-note-vehicle-summary strong,
+.page-shell--sale-note-form .sale-note-margin-list dd {
+    color: var(--color-text-primary);
+}
+
+.page-shell--sale-note-form .sale-note-vehicle-summary--financial {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-border-subtle);
+}
+
+.page-shell--sale-note-form .sale-note-vehicle-summary--financial span,
+.page-shell--sale-note-form .sale-note-margin-list > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.page-shell--sale-note-form .sale-note-margin-list {
+    margin: 0;
+}
+
+.page-shell--sale-note-form .sale-note-margin-list dt,
+.page-shell--sale-note-form .sale-note-margin-list dd {
+    margin: 0;
+}
+
+.page-shell--sale-note-form .sale-note-margin-list > div:last-child {
+    padding-top: 10px;
+    border-top: 1px solid var(--sale-note-accent-border);
+    color: var(--sale-note-accent-strong);
+    font-weight: 700;
+}
+
+.page-shell--sale-note-form .sale-note-form-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 4px 0 14px;
+}
+
+.page-shell--sale-note .sale-note-detail-card {
+    padding: 22px;
+}
+
+.page-shell--sale-note .sale-note-detail-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    margin: 0;
+}
+
+.page-shell--sale-note .sale-note-detail-list > div {
+    min-width: 0;
+}
+
+.page-shell--sale-note .sale-note-detail-list dt {
+    color: var(--color-text-secondary);
+    font-size: 0.8rem;
+}
+
+.page-shell--sale-note .sale-note-detail-list dd {
+    margin: 5px 0 0;
+    overflow-wrap: anywhere;
+    color: var(--color-text-primary);
+    font-weight: 600;
+}
+
+@media (max-width: 1100px) {
+    .page-shell--sale-note-form .transaction-form.transaction-form--sale-note.transaction-form--admin,
+    .page-shell--sale-note-form .transaction-form.transaction-form--sale-note.transaction-form--master {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 680px) {
+    .page-shell--sale-note-form .sale-note-form-heading,
+    .page-shell--sale-note .sale-note-heading,
+    .page-shell--sale-note .sale-note-page-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .page-shell--sale-note-form .transaction-form.transaction-form--sale-note.transaction-form--admin,
+    .page-shell--sale-note-form .transaction-form.transaction-form--sale-note.transaction-form--master,
+    .page-shell--sale-note .sale-note-detail-list {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

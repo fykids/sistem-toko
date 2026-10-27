@@ -6,6 +6,7 @@ use App\Models\CarTransaction;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class StoreCarTransactionRequest extends FormRequest
 {
@@ -144,6 +145,7 @@ class StoreCarTransactionRequest extends FormRequest
             'down_payment_date' => ['nullable', 'date'],
             'settlement_date' => ['nullable', 'date'],
             'leasing_disbursement_date' => ['nullable', 'date'],
+            'planned_payment_date' => ['nullable', 'date'],
             'buy_price' => ['required', 'numeric', 'min:0'],
             'purchase_operational' => ['nullable', 'numeric', 'min:0'],
             'other_costs' => ['nullable', 'numeric', 'min:0'],
@@ -189,6 +191,42 @@ class StoreCarTransactionRequest extends FormRequest
             'leasing_options.*.installment_4yr' => ['nullable', 'numeric', 'min:0'],
             'leasing_options.*.installment_5yr' => ['nullable', 'numeric', 'min:0'],
             'vehicle_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+        ];
+    }
+
+    /**
+     * @return array<int, \Closure(Validator): void>
+     */
+    public function after(): array
+    {
+        return [
+            function (Validator $validator): void {
+                $paymentFields = [
+                    'selling_price',
+                    'down_payment',
+                    'settlement_amount',
+                    'leasing_disbursement',
+                ];
+
+                if ($validator->errors()->hasAny($paymentFields)) {
+                    return;
+                }
+
+                $remainingPayment = max(
+                    (float) $this->input('selling_price', 0)
+                        - (float) $this->input('down_payment', 0)
+                        - (float) $this->input('settlement_amount', 0)
+                        - (float) $this->input('leasing_disbursement', 0),
+                    0,
+                );
+
+                if ($remainingPayment > 0 && ! filled($this->input('planned_payment_date'))) {
+                    $validator->errors()->add(
+                        'planned_payment_date',
+                        'Tanggal rencana pembayaran wajib diisi jika masih terdapat sisa pembayaran.',
+                    );
+                }
+            },
         ];
     }
 }

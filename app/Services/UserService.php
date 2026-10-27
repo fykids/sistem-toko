@@ -11,7 +11,7 @@ use Illuminate\Validation\ValidationException;
 class UserService
 {
     /**
-     * @param  array{name: string, email: string, password: string, role: string}  $data
+     * @param  array{name: string, username: string, password: string, role: string}  $data
      */
     public function createUser(array $data): User
     {
@@ -19,7 +19,7 @@ class UserService
             $user = new User;
             $user->forceFill([
                 'name' => $data['name'],
-                'email' => $data['email'],
+                'username' => $data['username'],
                 'password' => Hash::make($data['password']),
                 'role' => $data['role'],
             ])->save();
@@ -29,16 +29,14 @@ class UserService
     }
 
     /**
-     * @param  array{name: string, email: string, password?: string|null, role: string}  $data
+     * @param  array{name: string, username: string, password?: string|null, role: string}  $data
      */
     public function updateUser(User $user, array $data): User
     {
         return DB::transaction(function () use ($user, $data): User {
             $masterCount = User::query()
                 ->where('role', 'master')
-                ->orderBy('id')
                 ->lockForUpdate()
-                ->get(['id'])
                 ->count();
             $managedUser = User::query()->lockForUpdate()->findOrFail($user->getKey());
 
@@ -50,7 +48,7 @@ class UserService
 
             $attributes = [
                 'name' => $data['name'],
-                'email' => $data['email'],
+                'username' => $data['username'],
                 'role' => $data['role'],
             ];
 
@@ -69,9 +67,7 @@ class UserService
         return DB::transaction(function () use ($user): bool {
             $masterCount = User::query()
                 ->where('role', 'master')
-                ->orderBy('id')
                 ->lockForUpdate()
-                ->get(['id'])
                 ->count();
             $managedUser = User::query()->lockForUpdate()->find($user->getKey());
 

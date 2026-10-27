@@ -718,7 +718,7 @@
 @media (min-width: 821px) {
     .page-shell--transaction-form .transaction-form.transaction-form--master {
         --transaction-field-label-width: 104px;
-        --transaction-control-zone-width: 300px;
+        --transaction-control-zone-width: 420px;
         --transaction-date-input-width: clamp(112px, 7vw, 124px);
         gap: 10px;
     }
@@ -797,6 +797,12 @@
         max-width: none;
     }
 
+    .page-shell--transaction-form .transaction-form.transaction-form--master .payment-inputs--remaining > input[type="date"] {
+        flex-basis: clamp(150px, 10vw, 190px);
+        width: clamp(150px, 10vw, 190px);
+        min-width: clamp(150px, 10vw, 190px);
+    }
+
     .page-shell--transaction-form .transaction-form.transaction-form--master .payment-inputs {
         display: flex !important;
         align-items: center;
@@ -823,6 +829,10 @@
         gap: 8px;
     }
 
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section .section-content > .costs-primary-grid > .buy-date-group:has(input[name="buy_price"]) {
+        grid-template-columns: var(--transaction-field-label-width) minmax(0, 1fr) !important;
+    }
+
     .page-shell--transaction-form .transaction-form.transaction-form--master .cost-inputs {
         display: grid;
         grid-column: 2;
@@ -830,21 +840,34 @@
         gap: 6px;
         width: min(100%, var(--transaction-control-zone-width));
         min-width: 0;
-        margin-left: auto;
+        justify-self: start;
+        margin-left: 0;
     }
 
-    .page-shell--transaction-form .transaction-form.transaction-form--master .cost-inputs--dated,
+    .page-shell--transaction-form .transaction-form.transaction-form--master .cost-inputs--dated {
+        grid-template-columns: minmax(0, 1.5fr) minmax(var(--transaction-date-input-width), 1fr);
+    }
+
     .page-shell--transaction-form .transaction-form.transaction-form--master .cost-inputs--date-only {
-        grid-template-columns: minmax(0, 1fr) var(--transaction-date-input-width);
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .page-shell--transaction-form .transaction-form.transaction-form--master .cost-inputs--date-only > input[type="date"] {
-        grid-column: 2;
+        grid-column: 1;
+        margin-left: 0;
+        justify-self: start;
     }
 
-    .page-shell--transaction-form .transaction-form.transaction-form--master .cost-inputs > input {
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section .section-content > .field-grid > .form-group .cost-inputs > input:not([type="hidden"]):not([type="date"]) {
         width: 100%;
         min-width: 0;
+        margin-left: 0;
+        justify-self: stretch;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--master > .costs-section .section-content > .field-grid > .form-group .cost-inputs > input[type="date"] {
+        margin-left: 0;
+        justify-self: start;
     }
 }
 
@@ -893,5 +916,27 @@
         max-width: 1800px;
         grid-template-columns: minmax(0, .95fr) minmax(0, 1.15fr) minmax(0, 1.2fr) minmax(0, .95fr);
         gap: 12px;
+    }
+}
+
+@media (min-width: 1101px) {
+    .page-shell--transaction-form .transaction-form.transaction-form--admin {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--admin > .vehicle-section {
+        grid-column: 1;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--admin > .costs-section {
+        grid-column: 2;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--admin > .marketing-section {
+        grid-column: 3;
+    }
+
+    .page-shell--transaction-form .transaction-form.transaction-form--admin > .leasing-photo-layout {
+        grid-column: 1 / -1;
     }
 }

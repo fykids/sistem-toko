@@ -21,18 +21,18 @@ class UserSeeder extends Seeder
         foreach ([
             [
                 'name' => 'Master',
-                'email' => 'master@toko.com',
+                'username' => 'master',
                 'password' => 'password',
                 'role' => 'master',
             ],
             [
                 'name' => 'Admin',
-                'email' => 'admin@toko.com',
+                'username' => 'admin',
                 'password' => 'password',
                 'role' => 'admin',
             ],
         ] as $account) {
-            $user = User::query()->firstOrNew(['email' => $account['email']]);
+            $user = User::query()->firstOrNew(['username' => $account['username']]);
 
             $user->forceFill([
                 'name' => $account['name'],

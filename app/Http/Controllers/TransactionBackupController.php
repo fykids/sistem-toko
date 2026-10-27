@@ -75,7 +75,7 @@ class TransactionBackupController extends Controller
         ]);
 
         try {
-            $importedCount = $backupService->import($validated['backup']->getRealPath());
+            $importedCount = $backupService->import($validated['backup']->getRealPath(), $request->user());
         } catch (InvalidArgumentException $exception) {
             throw ValidationException::withMessages([
                 'backup' => $exception->getMessage(),

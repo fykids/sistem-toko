@@ -1,0 +1,307 @@
+.page-shell--jual {
+    --jual-accent: #087e8b;
+    --jual-accent-strong: #075d67;
+    --jual-accent-soft: #e8f8f8;
+    --jual-accent-border: #b9e2e3;
+}
+
+.page-shell--jual .jual-heading {
+    border: 1px solid var(--jual-accent-border);
+    background: linear-gradient(120deg, var(--jual-accent-soft), var(--color-card-surface));
+}
+
+.page-shell--jual .jual-heading .showroom-page-eyebrow {
+    color: var(--jual-accent);
+}
+
+.page-shell--jual .jual-page-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.page-shell--jual .jual-delete-form {
+    display: inline-flex;
+}
+
+.page-shell--jual .jual-table-card,
+.page-shell--jual .jual-detail-card {
+    overflow: hidden;
+    border-color: var(--jual-accent-border);
+}
+
+.page-shell--jual .jual-table thead th {
+    background: var(--jual-accent-soft);
+}
+
+.page-shell--jual .jual-detail-card {
+    padding: 22px;
+}
+
+.page-shell--jual .jual-detail-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    margin: 0;
+}
+
+.page-shell--jual .jual-detail-list > div {
+    min-width: 0;
+}
+
+.page-shell--jual .jual-detail-list dt {
+    color: var(--color-text-secondary);
+    font-size: 0.8rem;
+}
+
+.page-shell--jual .jual-detail-list dd {
+    margin: 5px 0 0;
+    overflow-wrap: anywhere;
+    color: var(--color-text-primary);
+    font-weight: 600;
+}
+
+@media (max-width: 680px) {
+    .page-shell--jual .jual-heading,
+    .page-shell--jual .jual-page-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .page-shell--jual .jual-detail-list {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.page-shell--jual-entry.page-shell--transaction-form .transaction-form.transaction-form--master,
+.page-shell--jual-entry.page-shell--transaction-form .transaction-form.transaction-form--admin {
+    width: min(100%, 768px);
+    max-width: 768px;
+    margin-inline: auto;
+}
+
+.page-shell--jual-entry .sell-module-form-section > .section-heading {
+    gap: 10px;
+    padding: 10px 14px;
+}
+
+.page-shell--jual-entry .sell-module-form-section > .section-heading h2 {
+    font-size: var(--font-size-body-lg);
+}
+
+.page-shell--jual-entry .sell-module-form-section > .section-heading p {
+    font-size: var(--font-size-sm);
+}
+
+.page-shell--jual-entry .sell-module-form-section > .section-content {
+    gap: 10px;
+    padding: 11px 14px 13px;
+}
+
+.page-shell--jual-entry .sell-module-form-section .sell-form-row,
+.page-shell--jual-entry .sell-module-form-section .sell-payment-row {
+    grid-template-columns: 160px minmax(0, 1fr);
+    gap: 8px;
+}
+
+.page-shell--jual-entry .sell-module-form-section .form-section-title {
+    margin: 8px 0 5px;
+    font-size: var(--font-size-xs);
+}
+
+.page-shell--jual-entry .sell-module-form-section .sell-vehicle-fields,
+.page-shell--jual-entry .sell-module-form-section .sell-vehicle-readonly-fields,
+.page-shell--jual-entry .sell-module-form-section .sell-consumer-fields,
+.page-shell--jual-entry .sell-module-form-section .sell-payment-rows {
+    gap: 6px;
+}
+
+.page-shell--jual-entry .sell-module-form-section .sell-form-row > label,
+.page-shell--jual-entry .sell-module-form-section .sell-payment-row > label {
+    font-size: var(--font-size-sm);
+    line-height: 1.25;
+}
+
+.page-shell--jual-entry .sell-module-form .sell-form-row > input,
+.page-shell--jual-entry .sell-module-form .sell-form-control > input,
+.page-shell--jual-entry .sell-module-form .sell-form-control > select,
+.page-shell--jual-entry .sell-module-form .sell-form-control > textarea,
+.page-shell--jual-entry .sell-module-form .sell-payment-row-fields input {
+    min-height: 34px;
+    padding: 5px 8px;
+    font-size: var(--font-size-sm);
+    line-height: 1.3;
+}
+
+.page-shell--jual-entry .sell-module-form .sell-form-control > textarea {
+    min-height: 54px;
+}
+
+.page-shell--jual-entry .sell-module-form .sell-form-control {
+    gap: 3px;
+}
+
+.page-shell--jual-entry .sell-module-form .sell-payment-row-fields {
+    gap: 8px;
+}
+
+.page-shell--jual-entry .sell-module-form .sell-payment-row-fields > .form-group {
+    gap: 4px;
+}
+
+.page-shell--jual-entry .sell-module-form .sell-payment-row-fields > .form-group > label:not(.sr-only) {
+    min-height: 2.2em;
+    font-size: var(--font-size-xs);
+    line-height: 1.2;
+}
+
+.page-shell--jual-entry .sell-module-form .sell-payment-row-fields > output {
+    min-height: 34px;
+    align-content: center;
+}
+
+.page-shell--jual-entry .sell-module-form .form-help {
+    margin-top: 2px;
+    font-size: var(--font-size-xs);
+}
+
+.page-shell--transaction-form .sell-module-form-section {
+    width: 100%;
+}
+
+.page-shell--transaction-form .sell-vehicle-fields,
+.page-shell--transaction-form .sell-vehicle-readonly-fields,
+.page-shell--transaction-form .sell-consumer-fields,
+.page-shell--transaction-form .sell-payment-rows {
+    display: grid;
+    gap: 10px;
+}
+
+.page-shell--transaction-form .sell-form-row,
+.page-shell--transaction-form .sell-payment-row {
+    display: grid;
+    grid-template-columns: minmax(180px, 0.4fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.page-shell--transaction-form .sell-form-row > label,
+.page-shell--transaction-form .sell-payment-row > label {
+    color: var(--color-text-secondary);
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.page-shell--transaction-form .sell-form-row > input,
+.page-shell--transaction-form .sell-form-control > input,
+.page-shell--transaction-form .sell-form-control > select,
+.page-shell--transaction-form .sell-form-control > textarea {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    min-height: 39px;
+    padding: 7px 10px;
+    border: 1px solid var(--color-control-border);
+    border-radius: var(--radius-input);
+    background-color: var(--color-control-surface);
+    color: var(--color-text-primary);
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-body-sm);
+    line-height: 1.4;
+    transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+
+.page-shell--transaction-form .sell-form-row > input::placeholder,
+.page-shell--transaction-form .sell-form-control > input::placeholder,
+.page-shell--transaction-form .sell-form-control > textarea::placeholder {
+    color: var(--color-placeholder);
+    opacity: 1;
+}
+
+.page-shell--transaction-form .sell-form-row > input[readonly] {
+    border-color: var(--color-border-muted);
+    background: var(--color-surface-input-readonly);
+    color: var(--color-text-secondary);
+    font-weight: 500;
+}
+
+.page-shell--transaction-form .sell-form-row > input:focus,
+.page-shell--transaction-form .sell-form-control > input:focus,
+.page-shell--transaction-form .sell-form-control > select:focus,
+.page-shell--transaction-form .sell-form-control > textarea:focus {
+    border-color: var(--color-control-focus-border);
+    outline: 0;
+    background: var(--color-surface);
+    box-shadow: 0 0 0 3px var(--color-primary-focus-ring);
+}
+
+.page-shell--transaction-form .sell-form-control > textarea {
+    min-height: 88px;
+    resize: vertical;
+}
+
+.page-shell--transaction-form .sell-form-control {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+}
+
+.page-shell--transaction-form .sell-payment-row-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: end;
+    gap: 10px;
+    min-width: 0;
+}
+
+.page-shell--transaction-form .sell-payment-row-fields > .form-group {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    gap: 6px;
+    min-width: 0;
+    margin: 0;
+}
+
+.page-shell--transaction-form .sell-payment-row-fields > .form-group > label:not(.sr-only) {
+    display: flex;
+    min-height: 2.6em;
+    align-items: flex-end;
+    margin: 0;
+    line-height: 1.3;
+}
+
+.page-shell--transaction-form .sell-payment-row-fields input,
+.page-shell--transaction-form .sell-payment-row-fields output {
+    width: 100%;
+    min-width: 0;
+}
+
+.page-shell--transaction-form .sell-payment-row--remaining > output {
+    justify-self: start;
+}
+
+.page-shell--transaction-form .sell-form-row .form-help,
+.page-shell--transaction-form .sell-payment-row .form-help {
+    grid-column: 2;
+}
+
+@media (max-width: 680px) {
+    .page-shell--transaction-form .sell-form-row,
+    .page-shell--transaction-form .sell-payment-row {
+        grid-template-columns: minmax(108px, 0.38fr) minmax(0, 1fr);
+        gap: 8px;
+    }
+
+    .page-shell--transaction-form .sell-payment-row-fields {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .page-shell--jual-entry .sell-module-form-section .sell-form-row,
+    .page-shell--jual-entry .sell-module-form-section .sell-payment-row {
+        grid-template-columns: minmax(108px, 0.38fr) minmax(0, 1fr);
+        gap: 8px;
+    }
+}

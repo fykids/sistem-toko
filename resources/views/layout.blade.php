@@ -30,7 +30,8 @@
     <main @class([
         'page-shell',
         trim($__env->yieldContent('page_class')),
-        'page-shell--app' => auth()->check() && ! request()->routeIs('transactions.create'),
+        'page-shell--app' => auth()->check()
+            && ! request()->routeIs('transactions.create', 'transactions.edit', 'sales.create', 'sales.edit', 'nota-penjualan.create', 'nota-penjualan.edit', 'jual.create'),
     ]) @if (request()->routeIs('dashboard', 'transactions.index')) data-showroom-layout data-showroom-view="dashboard" @endif>
         @auth
             @php
@@ -39,23 +40,40 @@
                     'transactions.edit',
                     'transactions.show',
                 );
+                $isSaleNotePage = request()->routeIs('nota-penjualan.*');
+                $isJualPage = request()->routeIs('jual.*');
                 $isUserPage = request()->routeIs('users.*');
                 $isProfilePage = request()->routeIs('profile.*');
-                $pageTitle = $isTransactionPage
-                    ? (request()->routeIs('transactions.edit')
-                        ? 'Edit Transaksi'
-                        : (request()->routeIs('transactions.show') ? 'Detail Transaksi' : 'Transaksi Baru'))
-                    : ($isUserPage
-                        ? 'Manajemen Akun'
-                        : ($isProfilePage
-                            ? 'Pengaturan Akun'
-                            : (request()->routeIs('dashboard', 'transactions.index') ? 'Dashboard' : 'Akun')));
-                $breadcrumbLabel = $isTransactionPage
-                    ? 'Transaksi'
-                    : ($isProfilePage ? 'Pengaturan' : 'Showroom');
-                $breadcrumbUrl = $isTransactionPage
-                    ? route('transactions.index')
-                    : route('dashboard');
+                $pageTitle = match (true) {
+                    request()->routeIs('jual.payments.create') => 'Catat Pelunasan',
+                    request()->routeIs('nota-penjualan.edit') => 'Edit Nota Penjualan',
+                    request()->routeIs('nota-penjualan.show') => 'Detail Nota Penjualan',
+                    request()->routeIs('nota-penjualan.create') => 'Nota Penjualan Baru',
+                    $isSaleNotePage => 'Daftar Nota Penjualan',
+                    request()->routeIs('jual.create') => 'Input Jual',
+                    request()->routeIs('jual.show') => 'Detail Jual',
+                    $isJualPage => 'Menu Jual',
+                    request()->routeIs('transactions.edit') => 'Edit Transaksi',
+                    request()->routeIs('transactions.show') => 'Detail Transaksi',
+                    $isTransactionPage => 'Transaksi Baru',
+                    $isUserPage => 'Manajemen Akun',
+                    $isProfilePage => 'Pengaturan Akun',
+                    request()->routeIs('dashboard', 'transactions.index') => 'Dashboard',
+                    default => 'Akun',
+                };
+                $breadcrumbLabel = match (true) {
+                    $isSaleNotePage => 'Nota Penjualan',
+                    $isJualPage => 'Jual',
+                    $isTransactionPage => 'Transaksi',
+                    $isProfilePage => 'Pengaturan',
+                    default => 'Showroom',
+                };
+                $breadcrumbUrl = match (true) {
+                    $isSaleNotePage => route('nota-penjualan.index'),
+                    $isJualPage => route('jual.index'),
+                    $isTransactionPage => route('transactions.index'),
+                    default => route('dashboard'),
+                };
             @endphp
             <x-app-topbar
                 :breadcrumb-label="$breadcrumbLabel"
@@ -73,7 +91,7 @@
                 </ul>
             </div>
         @endif
-        @if (request()->routeIs('dashboard', 'transactions.index', 'users.index', 'profile.edit', 'transactions.create'))
+        @if (request()->routeIs('dashboard', 'transactions.index', 'users.index', 'profile.edit', 'transactions.create', 'transactions.edit', 'nota-penjualan.*', 'jual.*'))
             @yield('content')
         @else
             <div class="showroom-content">

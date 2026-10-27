@@ -17,12 +17,13 @@
                     <span class="cell-secondary">Semua akun terdaftar</span>
                 </div>
                 <div class="toolbar-actions">
-                    <label class="search-wrap">
+                    <form class="search-wrap" action="{{ route('users.index') }}" method="GET">
                         <span class="search-symbol" aria-hidden="true">⌕</span>
-                        <span class="sr-only">Cari nama, email, atau role pengguna</span>
-                        <input id="users-search" type="search" placeholder="Cari nama, email, role..."
-                            autocomplete="off" data-user-search>
-                    </label>
+                        <span class="sr-only">Cari nama, username, atau role pengguna</span>
+                        <input id="users-search" type="search" name="q" value="{{ $search }}"
+                            placeholder="Cari nama, username, role..." autocomplete="off" data-user-search>
+                        <button class="sr-only" type="submit">Cari pengguna</button>
+                    </form>
                     <button class="showroom-primary-action" type="button" data-open-create-user>
                         <span aria-hidden="true">+</span>
                         Tambah akun
@@ -34,7 +35,7 @@
                     <thead>
                         <tr>
                             <th scope="col">Nama</th>
-                            <th scope="col">Email</th>
+                            <th scope="col">Username</th>
                             <th scope="col">Peran (Role)</th>
                             <th scope="col">Tanggal dibuat</th>
                             <th scope="col">Aksi</th>
@@ -49,7 +50,7 @@
                                         <span class="users-current-account">Anda</span>
                                     @endif
                                 </td>
-                                <td data-label="Email">{{ $user->email }}</td>
+                                <td data-label="Username">{{ $user->username }}</td>
                                 <td data-label="Role">
                                     <span class="session-role session-role--{{ $user->role }}">
                                         {{ ucfirst($user->role) }}
@@ -65,7 +66,7 @@
                                             data-user-id="{{ $user->getKey() }}"
                                             data-update-url="{{ route('users.update', $user) }}"
                                             data-name="{{ $user->name }}"
-                                            data-email="{{ $user->email }}"
+                                            data-username="{{ $user->username }}"
                                             data-role="{{ $user->role }}"
                                         >Edit</button>
                                         <form action="{{ route('users.destroy', $user) }}" method="POST"
@@ -91,9 +92,6 @@
                                 <td colspan="5" class="users-empty-state">Belum ada akun pengguna.</td>
                             </tr>
                         @endforelse
-                        <tr data-user-search-empty hidden>
-                            <td colspan="5" class="users-empty-state">Tidak ada pengguna yang cocok dengan pencarian.</td>
-                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -101,7 +99,7 @@
                 Menampilkan {{ $users->count() }} pengguna
             </footer>
             @if ($users->hasPages())
-                <div class="users-pagination">{{ $users->links() }}</div>
+                <div class="users-pagination">{{ $users->withQueryString()->links() }}</div>
             @endif
         </div>
 
@@ -124,9 +122,9 @@
                         @error('name')<span class="users-field-error">{{ $message }}</span>@enderror
                     </div>
                     <div class="form-group">
-                        <label for="create-user-email">Email</label>
-                        <input id="create-user-email" type="email" name="email" value="{{ old('_form') === 'create' ? old('email') : '' }}" required maxlength="255" autocomplete="email">
-                        @error('email')<span class="users-field-error">{{ $message }}</span>@enderror
+                        <label for="create-user-username">Username</label>
+                        <input id="create-user-username" type="text" name="username" value="{{ old('_form') === 'create' ? old('username') : '' }}" required maxlength="255" autocomplete="username">
+                        @error('username')<span class="users-field-error">{{ $message }}</span>@enderror
                     </div>
                     <div class="form-group">
                         <label for="create-user-password">Password</label>
@@ -138,6 +136,7 @@
                         <select id="create-user-role" name="role" required>
                             <option value="admin" @selected(old('_form') === 'create' && old('role') === 'admin')>Admin</option>
                             <option value="master" @selected(old('_form') === 'create' && old('role') === 'master')>Master</option>
+                            <option value="marketing" @selected(old('_form') === 'create' && old('role') === 'marketing')>Marketing</option>
                         </select>
                         @error('role')<span class="users-field-error">{{ $message }}</span>@enderror
                     </div>
@@ -171,9 +170,9 @@
                         @error('name')<span class="users-field-error">{{ $message }}</span>@enderror
                     </div>
                     <div class="form-group">
-                        <label for="edit-user-email">Email</label>
-                        <input id="edit-user-email" type="email" name="email" value="{{ old('_form') === 'edit' ? old('email') : '' }}" required maxlength="255" autocomplete="email">
-                        @error('email')<span class="users-field-error">{{ $message }}</span>@enderror
+                        <label for="edit-user-username">Username</label>
+                        <input id="edit-user-username" type="text" name="username" value="{{ old('_form') === 'edit' ? old('username') : '' }}" required maxlength="255" autocomplete="username">
+                        @error('username')<span class="users-field-error">{{ $message }}</span>@enderror
                     </div>
                     <div class="form-group">
                         <label for="edit-user-password">Password baru <span>(opsional)</span></label>
@@ -185,6 +184,7 @@
                         <select id="edit-user-role" name="role" required>
                             <option value="admin" @selected(old('_form') === 'edit' && old('role') === 'admin')>Admin</option>
                             <option value="master" @selected(old('_form') === 'edit' && old('role') === 'master')>Master</option>
+                            <option value="marketing" @selected(old('_form') === 'edit' && old('role') === 'marketing')>Marketing</option>
                         </select>
                         @error('role')<span class="users-field-error">{{ $message }}</span>@enderror
                     </div>

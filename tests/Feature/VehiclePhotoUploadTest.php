@@ -91,6 +91,22 @@ test('it replaces a photo on update and retains the existing photo when no repla
     Storage::disk('public')->assertExists($replacementPath);
 });
 
+test('it deletes the stored vehicle photo when the transaction is deleted', function () {
+    Storage::fake('public');
+
+    $photoPath = 'vehicle-photos/avanza.jpg';
+    Storage::disk('public')->put($photoPath, 'vehicle photo');
+    $transaction = CarTransaction::create(validVehiclePhotoTransactionData() + [
+        'vehicle_photo_path' => $photoPath,
+    ]);
+
+    $this->delete(route('transactions.destroy', $transaction))
+        ->assertRedirect(route('transactions.index'));
+
+    $this->assertDatabaseMissing('car_transactions', ['id' => $transaction->id]);
+    Storage::disk('public')->assertMissing($photoPath);
+});
+
 test('it rejects unsupported files without creating a transaction', function () {
     Storage::fake('public');
 

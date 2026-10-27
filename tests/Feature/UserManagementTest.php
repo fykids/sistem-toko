@@ -34,13 +34,13 @@ test('master can list users and create an account with an explicitly selected ro
 
     $this->post(route('users.store'), [
         'name' => 'Admin Baru',
-        'email' => 'admin-baru@example.com',
+        'username' => 'admin_baru',
         'password' => 'secure-password',
         'role' => 'admin',
     ])->assertRedirect(route('users.index'))
         ->assertSessionHas('success', 'Akun berhasil dibuat.');
 
-    $user = User::query()->where('email', 'admin-baru@example.com')->sole();
+    $user = User::query()->where('username', 'admin_baru')->sole();
 
     expect($user->role)->toBe('admin')
         ->and(Hash::check('secure-password', $user->password))->toBeTrue();
@@ -49,6 +49,31 @@ test('master can list users and create an account with an explicitly selected ro
         ->assertOk()
         ->assertSee('role="status"', false)
         ->assertSee('Akun berhasil dibuat.');
+});
+
+test('master user list paginates ten matching accounts and retains the search query', function () {
+    $master = User::factory()->master()->create();
+    User::factory()
+        ->count(11)
+        ->sequence(fn ($sequence) => ['name' => sprintf('Needle Account %02d', $sequence->index + 1)])
+        ->create();
+    $this->actingAs($master);
+
+    $response = $this->get(route('users.index', ['q' => 'Needle']));
+
+    $response->assertOk()
+        ->assertSee('value="Needle"', false)
+        ->assertSee('page=2', false)
+        ->assertSee('q=Needle', false);
+
+    expect(substr_count($response->getContent(), 'data-user-row'))->toBe(10);
+
+    $pageTwo = $this->get(route('users.index', ['q' => 'Needle', 'page' => 2]));
+
+    $pageTwo->assertOk()
+        ->assertSee('Needle Account 11');
+
+    expect(substr_count($pageTwo->getContent(), 'data-user-row'))->toBe(1);
 });
 
 test('master can update account details and leave its password unchanged', function () {
@@ -60,7 +85,7 @@ test('master can update account details and leave its password unchanged', funct
 
     $this->put(route('users.update', $managedUser), [
         'name' => 'Nama Diperbarui',
-        'email' => $managedUser->email,
+        'username' => $managedUser->username,
         'password' => '',
         'role' => 'admin',
         '_form' => 'edit',
@@ -105,14 +130,14 @@ test('admin receives forbidden responses for user management endpoints', functio
 
     $this->post(route('users.store'), [
         'name' => 'Tidak Diizinkan',
-        'email' => 'no-access@example.com',
+        'username' => 'no_access',
         'password' => 'secure-password',
         'role' => 'master',
     ])->assertForbidden();
 
     $this->put(route('users.update', $managedUser), [
         'name' => 'Tidak Diizinkan',
-        'email' => $managedUser->email,
+        'username' => $managedUser->username,
         'password' => '',
         'role' => 'admin',
     ])->assertForbidden();
@@ -144,7 +169,7 @@ test('final master cannot be demoted to admin', function () {
 
     $this->from(route('users.index'))->followingRedirects()->put(route('users.update', $master), [
         'name' => $master->name,
-        'email' => $master->email,
+        'username' => $master->username,
         'password' => '',
         'role' => 'admin',
         '_form' => 'edit',

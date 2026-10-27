@@ -1,6 +1,6 @@
 (() => {
     const transactionForm = document.querySelector('.transaction-form');
-    if (!transactionForm) {
+    if (!transactionForm || transactionForm.classList.contains('sell-module-form')) {
         return;
     }
 
@@ -10,6 +10,7 @@
     const settlementAmountInput = document.getElementById('settlement-amount');
     const leasingDisbursementInput = document.getElementById('leasing-disbursement');
     const remainingPaymentInput = document.getElementById('remaining-payment');
+    const plannedPaymentDateInput = document.getElementById('planned-payment-date');
     const leasingRipanInput = document.getElementById('leasing-ripan');
     const insuranceRipanInput = document.getElementById('insurance-ripan');
     const boosterRipanInput = document.getElementById('booster-ripan');
@@ -17,6 +18,7 @@
     const purchaseOperationalInput = document.getElementById('purchase-operational');
     const otherCostsInput = document.getElementById('other-costs');
     const calculatedSaleProfitInput = document.getElementById('calculated-sale-profit');
+    const calculatedTotalRepairCostInput = document.getElementById('calculated-total-repair-cost');
     const calculatedTotalProfitInput = document.getElementById('calculated-total-profit');
     const calculatedTotalCapitalInput = document.getElementById('calculated-total-capital');
     const setorPriceInput = document.getElementById('setor-price');
@@ -140,10 +142,16 @@
         const downPayment = toNumericAmount(downPaymentInput.value);
         const settlementAmount = toNumericAmount(settlementAmountInput.value);
         const leasingDisbursement = toNumericAmount(leasingDisbursementInput.value);
-        remainingPaymentInput.value = rupiahFormatter.format(Math.max(
+        const remainingPayment = Math.max(
             sellingPrice - downPayment - settlementAmount - leasingDisbursement,
             0,
-        ));
+        );
+
+        remainingPaymentInput.value = rupiahFormatter.format(remainingPayment);
+
+        if (plannedPaymentDateInput) {
+            plannedPaymentDateInput.required = remainingPayment > 0;
+        }
     }
 
     function syncLeasingSellingPrices() {
@@ -182,6 +190,18 @@
             + toNumericAmount(purchaseOperationalInput.value)
             + toNumericAmount(otherCostsInput.value)
             + variableCapital;
+    }
+
+    function updateTotalRepairCost() {
+        if (!calculatedTotalRepairCostInput) {
+            return;
+        }
+
+        const totalRepairCost = Array.from(transactionForm.querySelectorAll(
+            '[name^="additional_repairs["][name$="[cost]"]',
+        )).reduce((total, input) => total + toNumericAmount(input.value), 0);
+
+        calculatedTotalRepairCostInput.value = rupiahFormatter.format(totalRepairCost);
     }
 
     function updateProfitCalculation() {
@@ -237,14 +257,22 @@
     }
 
     sellingPriceInput.addEventListener('input', updateRemainingPayment);
+    sellingPriceInput.addEventListener('change', () => {
+        formatRupiahInput(sellingPriceInput);
+        updateRemainingPayment();
+        syncLeasingSellingPrices();
+        updateLeasingDownPayments();
+    });
     downPaymentInput.addEventListener('input', updateRemainingPayment);
     settlementAmountInput.addEventListener('input', updateRemainingPayment);
     leasingDisbursementInput.addEventListener('input', updateRemainingPayment);
+    updateRemainingPayment();
     transactionForm.querySelectorAll('[data-leasing-disbursement], [data-leasing-selling-price]').forEach((input) => {
         input.addEventListener('input', updateLeasingDownPayments);
     });
     syncLeasingSellingPrices();
     updateLeasingDownPayments();
+    updateTotalRepairCost();
     updateProfitCalculation();
 
     transactionForm.addEventListener('input', (event) => {
@@ -267,6 +295,10 @@
             '#selling-price, #setor-price, #opening-price, #leasing-ripan, #insurance-ripan, #booster-ripan, #buy-price, #purchase-operational, #other-costs, [name^="tax_items["][name$="[cost]"], [name^="additional_repairs["][name$="[cost]"], [name^="intertine_expenses["][name$="[cost]"]',
         )) {
             updateProfitCalculation();
+        }
+
+        if (event.target.matches('[name^="additional_repairs["][name$="[cost]"]')) {
+            updateTotalRepairCost();
         }
     });
 
@@ -357,6 +389,7 @@
                 }
 
                 updateRemoveButtons();
+                updateTotalRepairCost();
                 updateProfitCalculation();
             }
         });

@@ -8,7 +8,7 @@
             <p class="showroom-page-eyebrow">Pengaturan sistem</p>
             <h1>Pengaturan Akun Master</h1>
             <p class="showroom-page-description">
-                Kelola informasi profil, email, dan kata sandi akses akun Anda.
+                Kelola informasi username dan kata sandi akses akun Anda.
             </p>
         </header>
 
@@ -34,10 +34,10 @@
                         @enderror
                     </div>
                     <div class="form-group">
-                        <label for="profile-email">Email</label>
-                        <input id="profile-email" type="email" name="email" value="{{ old('email', auth()->user()->email) }}"
-                            autocomplete="email" maxlength="255" required>
-                        @error('email')
+                        <label for="profile-username">Username</label>
+                        <input id="profile-username" type="text" name="username" value="{{ old('username', auth()->user()->username) }}"
+                            autocomplete="username" maxlength="255" required>
+                        @error('username')
                             <span class="users-field-error">{{ $message }}</span>
                         @enderror
                     </div>

@@ -97,10 +97,23 @@
                         aria-label="Tanggal pencairan leasing">
                 </div>
             </div>
-            <div class="form-group"><label for="remaining-payment">Sisa pembayaran (Rp)</label><input type="text"
-                    name="remaining_payment" id="remaining-payment"
-                    value="{{ max((float) old('selling_price', $transaction?->selling_price ?? 0) - (float) old('down_payment', $transaction?->down_payment ?? 0) - (float) old('settlement_amount', $transaction?->settlement_amount ?? 0) - (float) old('leasing_disbursement', $transaction?->leasing_disbursement ?? 0), 0) }}"
-                    inputmode="decimal" data-rupiah-input readonly></div>
+            <div class="form-group">
+                <label for="remaining-payment">Sisa pembayaran (Rp)</label>
+                <div class="payment-inputs payment-inputs--remaining">
+                    <input type="text" name="remaining_payment" id="remaining-payment"
+                        value="{{ max((float) old('selling_price', $transaction?->selling_price ?? 0) - (float) old('down_payment', $transaction?->down_payment ?? 0) - (float) old('settlement_amount', $transaction?->settlement_amount ?? 0) - (float) old('leasing_disbursement', $transaction?->leasing_disbursement ?? 0), 0) }}"
+                        inputmode="decimal" data-rupiah-input readonly>
+                    <input type="date" name="planned_payment_date" id="planned-payment-date"
+                        value="{{ old('planned_payment_date', $transaction?->planned_payment_date) }}"
+                        aria-label="Tanggal rencana pembayaran (jatuh tempo)" data-planned-payment-date>
+                </div>
+                @error('planned_payment_date')
+                    <span class="form-help">{{ $message }}</span>
+                @enderror
+            </div>
         </div>
+        @if (auth()->user()->role === 'admin')
+            @include('transactions.partials.intertine-expense-fields')
+        @endif
     </div>
 </section>

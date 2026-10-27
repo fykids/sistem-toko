@@ -39,6 +39,61 @@ test('the transaction creation page uses the global topbar and drawer without ch
         ->assertSee('class="transaction-form transaction-form--master"', false);
 });
 
+test('it renders the planned payment date beside the remaining payment amount', function () {
+    $this->get(route('transactions.create'))
+        ->assertOk()
+        ->assertSee('name="planned_payment_date"', false)
+        ->assertSee('type="date" name="planned_payment_date"', false)
+        ->assertSee('aria-label="Tanggal rencana pembayaran (jatuh tempo)"', false);
+});
+
+test('it requires and stores a planned payment date when a payment balance remains', function () {
+    $payload = [
+        'plate_number' => 'B 1234 CD',
+        'brand' => 'TOYOTA',
+        'model' => 'INNOVA',
+        'year' => 2014,
+        'transmission' => 'MANUAL',
+        'color' => 'HITAM',
+        'buy_date' => '2026-10-12',
+        'buy_price' => 500000,
+        'selling_price' => 1000000,
+        'down_payment' => 250000,
+        'settlement_amount' => 100000,
+        'leasing_disbursement' => 0,
+    ];
+
+    $this->from(route('transactions.create'))
+        ->post(route('transactions.store'), $payload)
+        ->assertRedirect(route('transactions.create'))
+        ->assertSessionHasErrors('planned_payment_date');
+
+    expect(CarTransaction::query()->count())->toBe(0);
+
+    $this->post(route('transactions.store'), [
+        ...$payload,
+        'planned_payment_date' => '2026-11-20',
+    ])->assertRedirect(route('transactions.index'));
+
+    $transaction = CarTransaction::query()->sole();
+
+    expect($transaction->planned_payment_date)->toBe('2026-11-20')
+        ->and((float) $transaction->remaining_payment)->toBe(650000.0);
+
+    $this->post(route('transactions.store'), [
+        ...$payload,
+        'plate_number' => 'B 5678 EF',
+        'down_payment' => 1000000,
+    ])->assertRedirect(route('transactions.index'));
+
+    $fullyPaidTransaction = CarTransaction::query()
+        ->where('plate_number', 'B 5678 EF')
+        ->sole();
+
+    expect($fullyPaidTransaction->planned_payment_date)->toBeNull()
+        ->and((float) $fullyPaidTransaction->remaining_payment)->toBe(0.0);
+});
+
 test('it renders an empty repair row by default', function () {
     $response = $this->get(route('transactions.create'));
 
@@ -50,6 +105,8 @@ test('it renders an empty repair row by default', function () {
         ->assertSee('id="repair-name-0"', false)
         ->assertSee('id="repair-name-__INDEX__"', false)
         ->assertSee('id="add-repair"', false)
+        ->assertSee('id="calculated-total-repair-cost"', false)
+        ->assertSee('Total Pengeluaran Perbaikan (Rp)')
         ->assertSee('class="repair-form-labels"', false);
 
     $content = $response->getContent();
@@ -672,6 +729,7 @@ test('it saves manual intertine expense fields and calculates the net profit', f
         'buy_date' => '2026-10-12',
         'buy_price' => 500000,
         'selling_price' => 1000000,
+        'planned_payment_date' => '2026-11-20',
         'intertine_expenses' => [
             ['name' => 'KR Jual', 'cost' => 20000],
             ['name' => 'OP Survei', 'cost' => 10000],
@@ -711,6 +769,7 @@ test('it stores custom repair items and includes them in transaction totals', fu
         'down_payment' => 250000,
         'settlement_amount' => 100000,
         'leasing_disbursement' => 500000,
+        'planned_payment_date' => '2026-11-20',
         'total_capital' => 1,
         'gross_profit' => 1,
         'net_profit' => 1,
@@ -787,6 +846,7 @@ test('it calculates sale profit from selling price minus total capital and adds 
         'buy_date' => '2026-10-12',
         'buy_price' => 400000,
         'selling_price' => 1200000,
+        'planned_payment_date' => '2026-11-20',
         'setor_price' => 1000000,
         'opening_price' => 1500000,
         'leasing_ripan' => 100000,
@@ -852,6 +912,7 @@ test('it displays transaction values under the matching list columns', function 
         'down_payment' => 100000000,
         'settlement_amount' => 200000000,
         'leasing_disbursement' => 250000000,
+        'planned_payment_date' => '2026-11-20',
         'leasing_ripan' => 11000000,
         'insurance_ripan' => 12000000,
         'booster_ripan' => 13000000,
@@ -870,7 +931,7 @@ test('it displays transaction values under the matching list columns', function 
 
     $this->get(route('transactions.index'))
         ->assertOk()
-        ->assertSee('class="data-table transaction-list-table"', false)
+        ->assertSee('class="data-table transaction-list-table transaction-list-table--sensitive"', false)
         ->assertSee('<th>Kendaraan</th>', false)
         ->assertSee('<th>Status</th>', false)
         ->assertSee('<th>Tanggal beli</th>', false)
@@ -908,6 +969,7 @@ test('it stores the fixed tax fields as separate tax items and includes them in 
         'purchase_operational' => 5000.02,
         'other_costs' => 6000.03,
         'selling_price' => 200000.36,
+        'planned_payment_date' => '2026-11-20',
         'tax_items' => [
             0 => ['name' => 'Pajak', 'date' => '2026-10-10', 'cost' => 10000.04],
             1 => ['name' => 'BBN', 'date' => '2026-10-11', 'cost' => 20000.05],
@@ -954,6 +1016,7 @@ test('it recalculates showroom fee when an existing transaction is updated', fun
         'buy_date' => '2026-10-12',
         'buy_price' => 100000,
         'selling_price' => 300000,
+        'planned_payment_date' => '2026-11-20',
     ]);
 
     $response->assertRedirect(route('transactions.index'));
