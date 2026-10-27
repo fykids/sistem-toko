@@ -38,7 +38,7 @@
             <div class="form-group"><label for="calculated-showroom-fee">Fee Showroom (Rp)</label><input type="text"
                     id="calculated-showroom-fee" value="0" readonly aria-label="Fee Showroom (Rupiah)"></div>
         @endcan
-        @include('transactions.partials.intertine-expense-fields')
+        @include('transactions.partials.intertine-expense-fields', ['excludeKrJual' => true])
         @can('viewSensitiveData', \App\Models\CarTransaction::class)
             <div class="form-group"><label for="calculated-total-intertine-expenses">Total Pengeluaran Intertine
                     (Rp)</label><input type="text" id="calculated-total-intertine-expenses" value="0" readonly

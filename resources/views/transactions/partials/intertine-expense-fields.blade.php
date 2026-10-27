@@ -6,15 +6,17 @@
 <div id="intertine-expenses" class="intertine-expense-fields {{ $expenseGridClass ?? '' }}">
     @foreach ($intertineCategories as $index => $category)
         @php($categoryKey = strtolower($category))
-        <div class="form-group intertine-expense-item">
-            <input type="hidden" name="intertine_expenses[{{ $index }}][name]" value="{{ $category }}">
-            <label for="intertine-expense-cost-{{ $index }}">{{ $category }}</label>
-            <input id="intertine-expense-cost-{{ $index }}" type="text"
-                name="intertine_expenses[{{ $index }}][cost]"
-                value="{{ old("intertine_expenses.{$index}.cost", $intertineCategoryCosts->get($categoryKey)) }}"
-                placeholder="Rp 0"
-                inputmode="decimal" data-rupiah-input>
-        </div>
+        @if (!($excludeKrJual ?? false) || $category !== 'KR Jual')
+            <div class="form-group intertine-expense-item">
+                <input type="hidden" name="intertine_expenses[{{ $index }}][name]" value="{{ $category }}">
+                <label for="intertine-expense-cost-{{ $index }}">{{ $category }}</label>
+                <input id="intertine-expense-cost-{{ $index }}" type="text"
+                    name="intertine_expenses[{{ $index }}][cost]"
+                    value="{{ old("intertine_expenses.{$index}.cost", $intertineCategoryCosts->get($categoryKey)) }}"
+                    placeholder="Rp 0"
+                    inputmode="decimal" data-rupiah-input>
+            </div>
+        @endif
     @endforeach
     @if ($showLegacyIntertineExpenses ?? true)
         @foreach ($legacyIntertineExpenses as $index => $expense)

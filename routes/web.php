@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CarTransactionController;
+use App\Http\Controllers\InitialMasterSetupController;
 use App\Http\Controllers\MarketingCatalogController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SaleNoteController;
@@ -9,15 +10,29 @@ use App\Http\Controllers\SalePaymentController;
 use App\Http\Controllers\SellModuleController;
 use App\Http\Controllers\TransactionBackupController;
 use App\Http\Controllers\UserController;
+use App\Http\Middleware\EnsureInitialMasterSetup;
+use App\Http\Middleware\RedirectGuestsToMasterSetup;
 use App\Models\CarTransaction;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('guest')->group(function () {
-    Route::get('/login', [AuthController::class, 'create'])->name('login');
+Route::middleware(['guest', RedirectGuestsToMasterSetup::class])->group(function () {
+    Route::get('/login', [AuthController::class, 'create'])
+        ->name('login');
     Route::post('/login', [AuthController::class, 'store'])
         ->middleware('throttle:login')
         ->name('login.store');
 });
+
+Route::middleware([EnsureInitialMasterSetup::class, 'guest'])
+    ->controller(InitialMasterSetupController::class)
+    ->group(function (): void {
+        Route::get('/setup-master', 'create')->name('setup-master.create');
+        Route::post('/setup-master', 'store')->name('setup-master.store');
+    });
+
+Route::get('/', [CarTransactionController::class, 'index'])
+    ->middleware([RedirectGuestsToMasterSetup::class, 'role.dashboard:master,admin'])
+    ->name('dashboard');
 
 Route::post('/logout', [AuthController::class, 'destroy'])
     ->middleware('auth')
@@ -33,7 +48,6 @@ Route::prefix('marketing/stok')
     });
 
 Route::middleware(['auth', 'role.dashboard:master,admin'])->group(function () {
-    Route::get('/', [CarTransactionController::class, 'index'])->name('dashboard');
     Route::get('settings/account', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('settings/account', [ProfileController::class, 'update'])->name('profile.update');
     Route::get('transactions/export', [TransactionBackupController::class, 'export'])

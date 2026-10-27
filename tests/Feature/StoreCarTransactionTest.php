@@ -143,9 +143,11 @@ test('it renders fixed intertine expense fields and totals', function () {
     $content = $response->getContent();
     $vehicleSectionStart = strpos($content, '<section class="form-section vehicle-section">');
     $costSectionStart = strpos($content, '<section class="form-section costs-section">');
+    $costSectionEnd = strpos($content, '</section>', $costSectionStart);
     $marketingSectionStart = strpos($content, '<section class="form-section marketing-section">');
     $salesSectionStart = strpos($content, '<section class="form-section sales-section">');
     $salesSectionEnd = strpos($content, '</section>', $salesSectionStart);
+    $costsSection = substr($content, $costSectionStart, $costSectionEnd - $costSectionStart);
     $salesSection = substr($content, $salesSectionStart, $salesSectionEnd - $salesSectionStart);
 
     expect($vehicleSectionStart)->not->toBeFalse()
@@ -155,7 +157,13 @@ test('it renders fixed intertine expense fields and totals', function () {
         ->and($salesSection)
         ->toContain('id="intertine-expenses"')
         ->toContain('id="calculated-total-intertine-expenses"')
-        ->toContain('id="calculated-net-profit"');
+        ->toContain('id="calculated-net-profit"')
+        ->not->toContain('KR Jual');
+
+    expect(strpos($costsSection, 'label for="other-costs">KR Beli (Rp)'))
+        ->toBeLessThan(strpos($costsSection, 'label for="intertine-expense-cost-0">KR Jual'))
+        ->and(strpos($costsSection, 'label for="intertine-expense-cost-0">KR Jual'))
+        ->toBeLessThan(strpos($costsSection, 'label for="tax-price">Biaya Pajak'));
 
     expect(Schema::hasColumn('car_transactions', 'intertine_expenses'))->toBeTrue()
         ->and(Schema::hasColumn('car_transactions', 'total_intertine_expense'))->toBeTrue()
