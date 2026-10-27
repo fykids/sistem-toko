@@ -19,6 +19,9 @@
     <section class="panel sale-note-detail-card" aria-label="Detail nota">
         <dl class="sale-note-detail-list">
             <div><dt>Nama konsumen</dt><dd>{{ $saleNote->nama_konsumen }}</dd></div>
+            <div><dt>NIK</dt><dd>{{ $saleNote->buyer_nik ?: '—' }}</dd></div>
+            <div><dt>Alamat</dt><dd>{{ $saleNote->buyer_address ?: '—' }}</dd></div>
+            <div><dt>No. HP</dt><dd>{{ $saleNote->buyer_phone ?: '—' }}</dd></div>
             <div><dt>Harga jual</dt><dd>Rp {{ number_format((float) $vehicle->selling_price) }}</dd></div>
             <div><dt>Tanggal jual</dt><dd>{{ \Illuminate\Support\Carbon::parse($vehicle->sell_date)->format('d-m-Y') }}</dd></div>
             @can('viewSensitiveData', \App\Models\CarTransaction::class)

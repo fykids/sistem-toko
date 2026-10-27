@@ -80,9 +80,21 @@ class SellModuleService
                 'recorded_by' => $recorder->id,
             ]);
 
+            $settlementAmount = (float) $vehicle->settlement_amount + (float) $attributes['amount'];
+            $remainingPayment = max(
+                (float) $vehicle->selling_price
+                    - (float) $vehicle->down_payment
+                    - $settlementAmount
+                    - (float) $vehicle->leasing_disbursement,
+                0,
+            );
+
             $vehicle->forceFill([
-                'settlement_amount' => (float) $vehicle->settlement_amount + (float) $attributes['amount'],
+                'settlement_amount' => $settlementAmount,
                 'settlement_date' => $attributes['payment_date'],
+                'planned_payment_date' => $remainingPayment > 0
+                    ? $vehicle->planned_payment_date
+                    : null,
             ])->save();
         });
     }
@@ -149,6 +161,9 @@ class SellModuleService
 
             return $vehicle->saleNote()->create([
                 'nama_konsumen' => $attributes['nama_konsumen'],
+                'buyer_nik' => $attributes['buyer_nik'] ?? null,
+                'buyer_phone' => $attributes['buyer_phone'] ?? null,
+                'buyer_address' => $attributes['buyer_address'] ?? null,
                 'created_by' => $creator->id,
             ]);
         });
@@ -170,9 +185,17 @@ class SellModuleService
                 ->firstOrFail();
 
             $vehicle->forceFill($this->vehicleSaleAttributes($vehicle, $attributes))->save();
-            $lockedSaleNote->update([
+            $saleNoteAttributes = [
                 'nama_konsumen' => $attributes['nama_konsumen'],
-            ]);
+            ];
+
+            foreach (['buyer_nik', 'buyer_phone', 'buyer_address'] as $field) {
+                if (array_key_exists($field, $attributes)) {
+                    $saleNoteAttributes[$field] = $attributes[$field];
+                }
+            }
+
+            $lockedSaleNote->update($saleNoteAttributes);
 
             return $lockedSaleNote;
         });
@@ -232,6 +255,7 @@ class SellModuleService
             'settlement_date',
             'leasing_disbursement',
             'leasing_disbursement_date',
+            'planned_payment_date',
             'remaining_payment',
             'intertine_expenses',
             'leasing_options',
@@ -261,6 +285,40 @@ class SellModuleService
      */
     private function vehicleSaleAttributes(CarTransaction $vehicle, array $attributes): array
     {
+        if (array_key_exists('payment_type', $attributes)) {
+            return $this->legacyVehicleSaleAttributes($vehicle, $attributes);
+        }
+
+        $sellingPrice = (float) $attributes['selling_price'];
+        $downPayment = (float) $attributes['down_payment'];
+        $settlementAmount = (float) $attributes['settlement_amount'];
+        $leasingDisbursement = (float) $attributes['leasing_disbursement'];
+        $remainingPayment = max(
+            $sellingPrice - $downPayment - $settlementAmount - $leasingDisbursement,
+            0,
+        );
+
+        return [
+            'selling_price' => $sellingPrice,
+            'down_payment' => $downPayment,
+            'down_payment_date' => $attributes['down_payment_date'] ?? null,
+            'settlement_amount' => $settlementAmount,
+            'settlement_date' => $attributes['settlement_date'] ?? null,
+            'leasing_disbursement' => $leasingDisbursement,
+            'leasing_disbursement_date' => $attributes['leasing_disbursement_date'] ?? null,
+            'planned_payment_date' => $remainingPayment > 0
+                ? $attributes['planned_payment_date']
+                : null,
+            'sell_date' => $attributes['sell_date'],
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $attributes
+     * @return array<string, mixed>
+     */
+    private function legacyVehicleSaleAttributes(CarTransaction $vehicle, array $attributes): array
+    {
         $intertineExpenses = collect($vehicle->intertine_expenses ?? [])
             ->filter(fn (mixed $expense): bool => is_array($expense) && ! in_array(
                 strtolower(trim((string) ($expense['name'] ?? ''))),
@@ -277,10 +335,6 @@ class SellModuleService
         }
 
         $paymentAttributes = [];
-        if (array_key_exists('selling_price', $attributes)) {
-            $paymentAttributes['selling_price'] = $attributes['selling_price'];
-        }
-
         if (($attributes['payment_type'] ?? null) === 'selling_price') {
             $paymentAttributes['selling_price'] = $attributes['payment_amount'];
         } else {

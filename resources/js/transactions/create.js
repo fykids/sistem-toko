@@ -10,6 +10,7 @@
     const settlementAmountInput = document.getElementById('settlement-amount');
     const leasingDisbursementInput = document.getElementById('leasing-disbursement');
     const remainingPaymentInput = document.getElementById('remaining-payment');
+    const plannedPaymentDateInput = document.getElementById('planned-payment-date');
     const leasingRipanInput = document.getElementById('leasing-ripan');
     const insuranceRipanInput = document.getElementById('insurance-ripan');
     const boosterRipanInput = document.getElementById('booster-ripan');
@@ -141,10 +142,16 @@
         const downPayment = toNumericAmount(downPaymentInput.value);
         const settlementAmount = toNumericAmount(settlementAmountInput.value);
         const leasingDisbursement = toNumericAmount(leasingDisbursementInput.value);
-        remainingPaymentInput.value = rupiahFormatter.format(Math.max(
+        const remainingPayment = Math.max(
             sellingPrice - downPayment - settlementAmount - leasingDisbursement,
             0,
-        ));
+        );
+
+        remainingPaymentInput.value = rupiahFormatter.format(remainingPayment);
+
+        if (plannedPaymentDateInput) {
+            plannedPaymentDateInput.required = remainingPayment > 0;
+        }
     }
 
     function syncLeasingSellingPrices() {
@@ -259,6 +266,7 @@
     downPaymentInput.addEventListener('input', updateRemainingPayment);
     settlementAmountInput.addEventListener('input', updateRemainingPayment);
     leasingDisbursementInput.addEventListener('input', updateRemainingPayment);
+    updateRemainingPayment();
     transactionForm.querySelectorAll('[data-leasing-disbursement], [data-leasing-selling-price]').forEach((input) => {
         input.addEventListener('input', updateLeasingDownPayments);
     });

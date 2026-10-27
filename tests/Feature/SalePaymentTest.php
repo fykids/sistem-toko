@@ -23,6 +23,7 @@ function createSalePaymentTestNote(User $creator, array $vehicleOverrides = []):
         'down_payment' => 10000000,
         'settlement_amount' => 0,
         'leasing_disbursement' => 0,
+        'planned_payment_date' => '2026-11-20',
     ], $vehicleOverrides));
 
     return $vehicle->saleNote()->create([
@@ -103,7 +104,8 @@ it('records a partial payment and updates the remaining balance', function () {
     ]);
 
     expect((float) $vehicle->fresh()->settlement_amount)->toBe(20000000.0)
-        ->and((float) $vehicle->fresh()->remaining_payment)->toBe(62000000.0);
+        ->and((float) $vehicle->fresh()->remaining_payment)->toBe(62000000.0)
+        ->and($vehicle->fresh()->planned_payment_date)->toBe('2026-11-20');
 
     $this->get(route('jual.show', $saleNote))
         ->assertOk()
@@ -158,6 +160,7 @@ it('marks a transaction paid and clamps its remaining balance after an overpayme
         ->assertSessionHas('success');
 
     expect((float) $saleNote->carTransaction->fresh()->remaining_payment)->toBe(0.0)
+        ->and($saleNote->carTransaction->fresh()->planned_payment_date)->toBeNull()
         ->and($saleNote->fresh()->paymentStatus())->toBe('paid');
 });
 

@@ -11,6 +11,9 @@ class SaleNote extends Model
     protected $fillable = [
         'car_transaction_id',
         'nama_konsumen',
+        'buyer_nik',
+        'buyer_phone',
+        'buyer_address',
         'created_by',
     ];
 

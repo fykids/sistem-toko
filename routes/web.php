@@ -25,14 +25,14 @@ Route::post('/logout', [AuthController::class, 'destroy'])
 
 Route::prefix('marketing/stok')
     ->name('marketing.stok.')
-    ->middleware(['auth', 'marketing.catalog'])
+    ->middleware(['auth', 'role.dashboard:marketing'])
     ->controller(MarketingCatalogController::class)
     ->group(function (): void {
         Route::get('/', 'index')->name('index');
         Route::get('/{transaction}', 'show')->whereNumber('transaction')->name('show');
     });
 
-Route::middleware(['auth', 'marketing.catalog'])->group(function () {
+Route::middleware(['auth', 'role.dashboard:master,admin'])->group(function () {
     Route::get('/', [CarTransactionController::class, 'index'])->name('dashboard');
     Route::get('settings/account', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('settings/account', [ProfileController::class, 'update'])->name('profile.update');

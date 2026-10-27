@@ -315,6 +315,9 @@ class TransactionBackupService
                         $saleNote = new SaleNote([
                             'car_transaction_id' => $importedTransactionId,
                             'nama_konsumen' => $record['nama_konsumen'],
+                            'buyer_nik' => $record['buyer_nik'],
+                            'buyer_phone' => $record['buyer_phone'],
+                            'buyer_address' => $record['buyer_address'],
                             'created_by' => $creatorId,
                         ]);
                         $saleNote->timestamps = false;

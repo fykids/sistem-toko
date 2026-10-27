@@ -61,6 +61,9 @@ test('it downloads an intact SQLite backup containing transactions and sale note
     ]);
     $saleNote = $transaction->saleNote()->create([
         'nama_konsumen' => 'Dewi Pembeli',
+        'buyer_nik' => '3174012345678901',
+        'buyer_phone' => '081234567890',
+        'buyer_address' => 'Jakarta',
         'created_by' => auth()->id(),
     ]);
     $saleNote->payments()->create([
@@ -110,6 +113,9 @@ test('it downloads an intact SQLite backup containing transactions and sale note
             ->and((int) $buyer['sell_price_deal'])->toBe(150000000)
             ->and((int) $buyer['car_transaction_id'])->toBe((int) $transaction['id'])
             ->and($saleNote['nama_konsumen'])->toBe('Dewi Pembeli')
+            ->and($saleNote['buyer_nik'])->toBe('3174012345678901')
+            ->and($saleNote['buyer_phone'])->toBe('081234567890')
+            ->and($saleNote['buyer_address'])->toBe('Jakarta')
             ->and((int) $saleNote['car_transaction_id'])->toBe((int) $transaction['id'])
             ->and((int) $payment['amount'])->toBe(25000000)
             ->and($payment['notes'])->toBe('Referensi backup');
@@ -204,10 +210,14 @@ test('it imports sale payments with their sale note and vehicle relationships', 
         'sell_date' => '2026-10-20',
         'selling_price' => 120000000,
         'down_payment' => 20000000,
+        'planned_payment_date' => '2026-11-20',
     ]);
     $sourceSaleNote = SaleNote::query()->create([
         'car_transaction_id' => $sourceTransaction->id,
         'nama_konsumen' => 'Ayu Import',
+        'buyer_nik' => '3174012345678901',
+        'buyer_phone' => '081234567890',
+        'buyer_address' => 'Jakarta',
         'created_by' => $creator->id,
     ]);
     $sourceSaleNote->payments()->create([
@@ -246,11 +256,15 @@ test('it imports sale payments with their sale note and vehicle relationships', 
     $importedPayment = $importedSaleNote->payments()->sole();
 
     expect($importedSaleNote->nama_konsumen)->toBe('Ayu Import')
+        ->and($importedSaleNote->buyer_nik)->toBe('3174012345678901')
+        ->and($importedSaleNote->buyer_phone)->toBe('081234567890')
+        ->and($importedSaleNote->buyer_address)->toBe('Jakarta')
         ->and($importedSaleNote->created_by)->toBe($creator->id)
         ->and((float) $importedPayment->amount)->toBe(15000000.0)
         ->and($importedPayment->payment_method)->toBe('leasing')
         ->and($importedPayment->notes)->toBe('Pencairan tahap pertama')
         ->and($importedPayment->recorded_by)->toBe($creator->id)
+        ->and($importedTransaction->planned_payment_date)->toBe('2026-11-20')
         ->and($userLookupQueries)->toBe(1);
 });
 

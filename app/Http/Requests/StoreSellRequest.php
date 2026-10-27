@@ -3,39 +3,32 @@
 namespace App\Http\Requests;
 
 use App\Models\SaleNote;
+use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class StoreSellRequest extends FormRequest
 {
     protected function prepareForValidation(): void
     {
-        $sellingPrice = $this->input('selling_price');
-        $paymentAmount = $this->input('payment_amount');
-        $expenses = $this->input('intertine_expenses');
+        $amounts = [];
 
-        if (is_string($sellingPrice)) {
-            $this->merge([
-                'selling_price' => str_replace(',', '.', str_replace('.', '', $sellingPrice)),
-            ]);
-        }
+        foreach (['selling_price', 'down_payment', 'settlement_amount', 'leasing_disbursement'] as $field) {
+            $value = $this->input($field);
 
-        if (is_string($paymentAmount)) {
-            $this->merge([
-                'payment_amount' => str_replace(',', '.', str_replace('.', '', $paymentAmount)),
-            ]);
-        }
-
-        if (is_array($expenses)) {
-            foreach ($expenses as &$expense) {
-                if (is_array($expense) && is_string($expense['cost'] ?? null)) {
-                    $expense['cost'] = str_replace(',', '.', str_replace('.', '', $expense['cost']));
-                }
+            if (is_string($value)) {
+                $amounts[$field] = str_contains($value, ',')
+                    ? str_replace(',', '.', str_replace('.', '', $value))
+                    : (preg_match('/^\d{1,3}(?:\.\d{3})+$/D', $value) === 1
+                        ? str_replace('.', '', $value)
+                        : $value);
             }
+        }
 
-            unset($expense);
-            $this->merge(['intertine_expenses' => $expenses]);
+        if ($amounts !== []) {
+            $this->merge($amounts);
         }
     }
 
@@ -65,22 +58,64 @@ class StoreSellRequest extends FormRequest
                     Rule::unique('sale_notes', 'car_transaction_id'),
                 ],
             'nama_konsumen' => ['required', 'string', 'max:255'],
+            'buyer_nik' => ['nullable', 'digits:16'],
+            'buyer_phone' => ['nullable', 'string', 'max:30'],
+            'buyer_address' => ['nullable', 'string', 'max:2000'],
             'selling_price' => ['required', 'numeric', 'min:0'],
-            'payment_type' => [
-                'required',
-                Rule::in(['down_payment', 'settlement_amount', 'leasing_disbursement']),
-            ],
-            'payment_amount' => ['required', 'numeric', 'min:0'],
-            'payment_date' => ['nullable', 'date'],
+            'down_payment' => ['required', 'numeric', 'min:0'],
+            'down_payment_date' => ['nullable', 'date'],
+            'settlement_amount' => ['required', 'numeric', 'min:0'],
+            'settlement_date' => ['nullable', 'date'],
+            'leasing_disbursement' => ['required', 'numeric', 'min:0'],
+            'leasing_disbursement_date' => ['nullable', 'date'],
             'sell_date' => ['required', 'date'],
-            'intertine_expenses' => ['required', 'array', 'size:3'],
-            'intertine_expenses.*' => ['required', 'array:name,cost'],
-            'intertine_expenses.*.name' => [
-                'required',
-                'distinct',
-                Rule::in(['KR Jual', 'OP Survei', 'Fee CMO']),
-            ],
-            'intertine_expenses.*.cost' => ['required', 'numeric', 'min:0'],
+            'planned_payment_date' => ['nullable', 'date'],
+        ];
+    }
+
+    /**
+     * @return array<int, Closure>
+     */
+    public function after(): array
+    {
+        return [
+            function (Validator $validator): void {
+                $amountFields = [
+                    'selling_price',
+                    'down_payment',
+                    'settlement_amount',
+                    'leasing_disbursement',
+                ];
+
+                if ($validator->errors()->hasAny($amountFields)) {
+                    return;
+                }
+
+                foreach ([
+                    'down_payment' => 'down_payment_date',
+                    'settlement_amount' => 'settlement_date',
+                    'leasing_disbursement' => 'leasing_disbursement_date',
+                ] as $amountField => $dateField) {
+                    if ((float) $this->input($amountField) > 0 && blank($this->input($dateField))) {
+                        $validator->errors()->add($dateField, 'Tanggal realisasi pembayaran wajib diisi.');
+                    }
+                }
+
+                $remainingPayment = max(
+                    (float) $this->input('selling_price')
+                        - (float) $this->input('down_payment')
+                        - (float) $this->input('settlement_amount')
+                        - (float) $this->input('leasing_disbursement'),
+                    0,
+                );
+
+                if ($remainingPayment > 0 && blank($this->input('planned_payment_date'))) {
+                    $validator->errors()->add(
+                        'planned_payment_date',
+                        'Tanggal rencana pembayaran wajib diisi selama masih ada sisa pembayaran.',
+                    );
+                }
+            },
         ];
     }
 
@@ -95,13 +130,24 @@ class StoreSellRequest extends FormRequest
             'car_transaction_id.unique' => 'Kendaraan ini sudah memiliki data Jual.',
             'car_transaction_id.prohibited' => 'Kendaraan pada transaksi Jual tidak dapat diganti.',
             'nama_konsumen.required' => 'Nama konsumen wajib diisi.',
+            'buyer_nik.digits' => 'NIK harus terdiri dari 16 digit.',
+            'buyer_phone.max' => 'Nomor HP maksimal 30 karakter.',
+            'buyer_address.max' => 'Alamat maksimal 2.000 karakter.',
             'selling_price.required' => 'Harga jual wajib diisi.',
-            'payment_type.required' => 'Pilih kategori pembayaran.',
-            'payment_amount.required' => 'Nilai pembayaran wajib diisi.',
-            'payment_amount.numeric' => 'Nilai pembayaran harus berupa angka.',
-            'payment_amount.min' => 'Nilai pembayaran tidak boleh kurang dari nol.',
-            'payment_date.date' => 'Tanggal pembayaran harus berupa tanggal yang valid.',
+            'down_payment.required' => 'Nominal DP wajib diisi.',
+            'down_payment.numeric' => 'Nominal DP harus berupa angka.',
+            'down_payment.min' => 'Nominal DP tidak boleh kurang dari nol.',
+            'down_payment_date.date' => 'Tanggal pembayaran DP harus berupa tanggal yang valid.',
+            'settlement_amount.required' => 'Nominal pelunasan wajib diisi.',
+            'settlement_amount.numeric' => 'Nominal pelunasan harus berupa angka.',
+            'settlement_amount.min' => 'Nominal pelunasan tidak boleh kurang dari nol.',
+            'settlement_date.date' => 'Tanggal pelunasan harus berupa tanggal yang valid.',
+            'leasing_disbursement.required' => 'Nominal pencairan leasing wajib diisi.',
+            'leasing_disbursement.numeric' => 'Nominal pencairan leasing harus berupa angka.',
+            'leasing_disbursement.min' => 'Nominal pencairan leasing tidak boleh kurang dari nol.',
+            'leasing_disbursement_date.date' => 'Tanggal pencairan leasing harus berupa tanggal yang valid.',
             'sell_date.required' => 'Tanggal penjualan wajib diisi.',
+            'planned_payment_date.date' => 'Tanggal rencana pembayaran harus berupa tanggal yang valid.',
         ];
     }
 }

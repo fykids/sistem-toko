@@ -91,7 +91,7 @@ it('enforces the required vehicle and creator relationships', function () {
         ->and($saleNote->creator->is($creator))->toBeTrue();
 });
 
-it('keeps sale-note storage limited to the buyer identity and vehicle relationship', function () {
+it('stores consumer contact details with the sale note and vehicle relationship', function () {
     expect(Schema::getColumnListing('sale_notes'))->toBe([
         'id',
         'car_transaction_id',
@@ -99,6 +99,9 @@ it('keeps sale-note storage limited to the buyer identity and vehicle relationsh
         'created_by',
         'created_at',
         'updated_at',
+        'buyer_nik',
+        'buyer_phone',
+        'buyer_address',
     ]);
 });
 

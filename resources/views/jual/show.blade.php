@@ -27,10 +27,20 @@
     <section class="panel jual-detail-card" aria-label="Detail transaksi Jual">
         <dl class="jual-detail-list">
             <div><dt>Nama konsumen</dt><dd>{{ $saleNote->nama_konsumen }}</dd></div>
+            <div><dt>NIK</dt><dd>{{ $saleNote->buyer_nik ?: '—' }}</dd></div>
+            <div><dt>Alamat</dt><dd>{{ $saleNote->buyer_address ?: '—' }}</dd></div>
+            <div><dt>No. HP</dt><dd>{{ $saleNote->buyer_phone ?: '—' }}</dd></div>
             <div><dt>Harga jual</dt><dd>Rp {{ number_format((float) $vehicle->selling_price) }}</dd></div>
             <div><dt>Tanggal jual</dt><dd>{{ \Illuminate\Support\Carbon::parse($vehicle->sell_date)->format('d-m-Y') }}</dd></div>
+            <div><dt>DP</dt><dd>Rp {{ number_format((float) $vehicle->down_payment) }}</dd></div>
+            <div><dt>Tanggal pembayaran DP</dt><dd>{{ $vehicle->down_payment_date ? \Illuminate\Support\Carbon::parse($vehicle->down_payment_date)->format('d-m-Y') : '—' }}</dd></div>
+            <div><dt>Pelunasan diterima</dt><dd>Rp {{ number_format((float) $vehicle->settlement_amount) }}</dd></div>
+            <div><dt>Tanggal pelunasan diterima</dt><dd>{{ $vehicle->settlement_date ? \Illuminate\Support\Carbon::parse($vehicle->settlement_date)->format('d-m-Y') : '—' }}</dd></div>
+            <div><dt>Pencairan leasing</dt><dd>Rp {{ number_format((float) $vehicle->leasing_disbursement) }}</dd></div>
+            <div><dt>Tanggal pencairan leasing</dt><dd>{{ $vehicle->leasing_disbursement_date ? \Illuminate\Support\Carbon::parse($vehicle->leasing_disbursement_date)->format('d-m-Y') : '—' }}</dd></div>
             <div><dt>Total dibayar</dt><dd>Rp {{ number_format($saleNote->totalPaidAmount()) }}</dd></div>
             <div><dt>Sisa pembayaran</dt><dd>Rp {{ number_format((float) $vehicle->remaining_payment) }}</dd></div>
+            <div><dt>Rencana pembayaran</dt><dd>{{ $vehicle->planned_payment_date ? \Illuminate\Support\Carbon::parse($vehicle->planned_payment_date)->format('d-m-Y') : '—' }}</dd></div>
             @php($paymentStatus = $saleNote->paymentStatus())
             <div>
                 <dt>Status pembayaran</dt>

@@ -29,15 +29,18 @@ function validJualPayload(CarTransaction $vehicle, array $overrides = []): array
     return array_merge([
         'car_transaction_id' => $vehicle->id,
         'nama_konsumen' => 'Dewi Jual',
+        'buyer_nik' => null,
+        'buyer_phone' => null,
+        'buyer_address' => null,
         'selling_price' => 92000000,
-        'payment_type' => 'down_payment',
-        'payment_amount' => 0,
+        'down_payment' => 0,
+        'down_payment_date' => null,
+        'settlement_amount' => 0,
+        'settlement_date' => null,
+        'leasing_disbursement' => 0,
+        'leasing_disbursement_date' => null,
         'sell_date' => '2026-10-23',
-        'intertine_expenses' => [
-            ['name' => 'KR Jual', 'cost' => 0],
-            ['name' => 'OP Survei', 'cost' => 0],
-            ['name' => 'Fee CMO', 'cost' => 0],
-        ],
+        'planned_payment_date' => '2026-11-23',
     ], $overrides);
 }
 
@@ -50,11 +53,17 @@ function createJualSaleNote(
     $vehicle->update([
         'sell_date' => $attributes['sell_date'],
         'selling_price' => $attributes['selling_price'],
-        $attributes['payment_type'] => $attributes['payment_amount'],
+        'down_payment' => $attributes['down_payment'],
+        'settlement_amount' => $attributes['settlement_amount'],
+        'leasing_disbursement' => $attributes['leasing_disbursement'],
+        'planned_payment_date' => $attributes['planned_payment_date'],
     ]);
 
     return $vehicle->saleNote()->create([
         'nama_konsumen' => $attributes['nama_konsumen'],
+        'buyer_nik' => $attributes['buyer_nik'],
+        'buyer_phone' => $attributes['buyer_phone'],
+        'buyer_address' => $attributes['buyer_address'],
         'created_by' => $creator->id,
     ]);
 }
@@ -95,29 +104,30 @@ it('renders the independent jual list and role-specific form without leasing', f
         ->assertSee('class="section-content', false)
         ->assertSee('class="btn btn-accent"', false)
         ->assertSee('class="btn btn-secondary"', false)
-        ->assertSee('name="payment_type"', false)
-        ->assertSee('name="payment_amount"', false)
         ->assertSee('name="selling_price"', false)
-        ->assertSee('DP (Rp)')
-        ->assertSee('Pencairan Leasing (Rp)')
-        ->assertSee('Pelunasan (Rp)')
-        ->assertSee('class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end"', false)
-        ->assertSee('name="payment_date"', false)
-        ->assertSee('Tanggal Pembayaran')
+        ->assertSee('name="down_payment"', false)
+        ->assertSee('name="down_payment_date"', false)
+        ->assertSee('name="settlement_amount"', false)
+        ->assertSee('name="settlement_date"', false)
+        ->assertSee('name="leasing_disbursement"', false)
+        ->assertSee('name="leasing_disbursement_date"', false)
+        ->assertSee('name="planned_payment_date"', false)
+        ->assertSee('name="buyer_nik"', false)
+        ->assertSee('name="buyer_phone"', false)
+        ->assertSee('name="buyer_address"', false)
+        ->assertSee('class="sell-payment-row"', false)
+        ->assertSee('Tanggal konsumen melakukan pembayaran')
+        ->assertSee('Tanggal rencana pembayaran (jatuh tempo)')
         ->assertDontSee('Harga Jual (Rp)</option>')
-        ->assertSee('grid grid-cols-12 gap-4 items-start', false)
-        ->assertSee('sell-module-layout', false)
-        ->assertSee('sell-module-main', false)
-        ->assertSee('lg:col-span-5', false)
-        ->assertSee('sell-module-leasing-card', false)
-        ->assertSee('lg:col-span-7', false)
-        ->assertSee('sell-module-leasing-table', false)
-        ->assertSee('leasing-custom-table', false)
-        ->assertSee('name="intertine_expenses[0][cost]"', false)
+        ->assertDontSee('payment_type', false)
+        ->assertDontSee('payment_amount', false)
+        ->assertDontSee('intertine_expenses', false)
+        ->assertDontSee('leasing-custom-table', false)
+        ->assertDontSee('data-jual-vehicle-preview', false)
         ->assertDontSee('Pilihan Leasing')
         ->assertDontSee('leasing_options');
 
-    expect(substr_count($response->getContent(), 'class="form-section"'))->toBe(1);
+    expect(substr_count($response->getContent(), 'class="form-section sell-module-form-section"'))->toBe(1);
 
     $this->actingAs(User::factory()->master()->create())
         ->get(route('jual.create'))
@@ -126,7 +136,7 @@ it('renders the independent jual list and role-specific form without leasing', f
         ->assertDontSee('Pilihan Leasing');
 });
 
-it('shows selected vehicle details and section two and three costs without exposing master-only values', function () {
+it('shows only the selected vehicle details from stock without exposing unrelated values', function () {
     $vehicle = createJualVehicle();
     $vehicle->update([
         'leasing_options' => [[
@@ -158,32 +168,24 @@ it('shows selected vehicle details and section two and three costs without expos
     $this->actingAs(User::factory()->create())
         ->get(route('jual.create', ['vehicle' => $vehicle->id]))
         ->assertOk()
-        ->assertSee('Preview rincian mobil terpilih')
-        ->assertSee('Informasi Pembayaran Leasing')
-        ->assertSee('BCA')
-        ->assertSee('80,000,000')
-        ->assertSee('3,500,000')
-        ->assertSee('data-leasing-value="dp"', false)
-        ->assertDontSee('name="leasing_options[', false)
         ->assertSee('B 1122 JUAL')
-        ->assertSee('Rincian biaya perbaikan')
-        ->assertSee('Tune up')
-        ->assertSee('Rp 1,250,000')
-        ->assertSee('Rincian pajak')
-        ->assertSee('Pajak')
-        ->assertSee('Rincian biaya intertine')
-        ->assertSee('Komisi')
-        ->assertSee('Harga setor')
-        ->assertSee('Rp 110,000,000')
+        ->assertSee('value="Toyota"', false)
+        ->assertSee('data-jual-vehicle-field="manager_name"', false)
+        ->assertSee('data-jual-vehicle-field="owner_name"', false)
+        ->assertDontSee('Informasi Pembayaran Leasing')
+        ->assertDontSee('Rincian biaya perbaikan')
+        ->assertDontSee('Rincian pajak')
+        ->assertDontSee('Rincian biaya intertine')
+        ->assertDontSee('Harga setor')
         ->assertDontSee('Ripan booster')
         ->assertDontSee('Rp 3,000,000');
 
     $this->actingAs(User::factory()->master()->create())
         ->get(route('jual.create', ['vehicle' => $vehicle->id]))
         ->assertOk()
-        ->assertSee('Modal beli')
-        ->assertSee('Ripan booster')
-        ->assertSee('Rp 3,000,000');
+        ->assertDontSee('Modal beli')
+        ->assertDontSee('Ripan booster')
+        ->assertDontSee('Rp 3,000,000');
 });
 
 it('renders every available vehicle while preserving the requested vehicle preview', function () {
@@ -296,21 +298,21 @@ it('stores a jual record and updates vehicle stock and sale details atomically',
         ->assertSee('Terjual');
 });
 
-it('updates the selected payment field and saves the three sales cost categories', function () {
+it('stores all received payment amounts and preserves vehicle costs omitted from the form', function () {
     $vehicle = createJualVehicle();
-    $vehicle->update(['selling_price' => 92000000]);
+    $vehicle->update([
+        'selling_price' => 92000000,
+        'intertine_expenses' => [['name' => 'Biaya lama', 'cost' => 900000]],
+    ]);
     $admin = User::factory()->create();
 
     $response = $this->actingAs($admin)
         ->post(route('jual.store'), validJualPayload($vehicle, [
-            'payment_type' => 'down_payment',
-            'payment_amount' => 10000000,
-            'payment_date' => '2026-10-24',
-            'intertine_expenses' => [
-                ['name' => 'KR Jual', 'cost' => 1500000],
-                ['name' => 'OP Survei', 'cost' => 750000],
-                ['name' => 'Fee CMO', 'cost' => 500000],
-            ],
+            'down_payment' => 10000000,
+            'down_payment_date' => '2026-10-24',
+            'buyer_nik' => '3174012345678901',
+            'buyer_phone' => '081234567890',
+            'buyer_address' => 'Jl. Merdeka No. 1',
         ]));
 
     $saleNote = SaleNote::query()->sole();
@@ -321,44 +323,110 @@ it('updates the selected payment field and saves the three sales cost categories
         ->and((float) $vehicle->down_payment)->toBe(10000000.0)
         ->and($vehicle->down_payment_date)->toBe('2026-10-24')
         ->and((float) $vehicle->remaining_payment)->toBe(82000000.0)
-        ->and($vehicle->intertine_expenses)->toBe([
-            ['name' => 'KR Jual', 'cost' => 1500000],
-            ['name' => 'OP Survei', 'cost' => 750000],
-            ['name' => 'Fee CMO', 'cost' => 500000],
-        ]);
+        ->and($vehicle->planned_payment_date)->toBe('2026-11-23')
+        ->and($vehicle->intertine_expenses)->toBe([['name' => 'Biaya lama', 'cost' => 900000]])
+        ->and($saleNote->buyer_nik)->toBe('3174012345678901')
+        ->and($saleNote->buyer_phone)->toBe('081234567890')
+        ->and($saleNote->buyer_address)->toBe('Jl. Merdeka No. 1');
 });
 
-it('stores a selected payment date in the matching vehicle field', function (string $paymentType, string $dateField) {
+it('stores all actual payment dates with the corresponding amounts', function () {
     $vehicle = createJualVehicle();
 
     $response = $this->actingAs(User::factory()->create())
         ->post(route('jual.store'), validJualPayload($vehicle, [
-            'payment_type' => $paymentType,
-            'payment_amount' => 1000000,
-            'payment_date' => '2026-10-24',
+            'selling_price' => '100.000.000',
+            'down_payment' => '20.000.000',
+            'down_payment_date' => '2026-10-24',
+            'settlement_amount' => '5.000.000',
+            'settlement_date' => '2026-10-25',
+            'leasing_disbursement' => '30.000.000',
+            'leasing_disbursement_date' => '2026-10-26',
+            'planned_payment_date' => '2026-11-26',
+            'buyer_nik' => '3174012345678901',
+            'buyer_phone' => '081234567890',
+            'buyer_address' => 'Jl. Merdeka No. 1',
         ]));
 
     $saleNote = SaleNote::query()->sole();
     $response->assertRedirect(route('jual.show', $saleNote));
 
-    expect($vehicle->fresh()->getAttribute($dateField))->toBe('2026-10-24');
-})->with([
-    'leasing disbursement' => ['leasing_disbursement', 'leasing_disbursement_date'],
-    'settlement' => ['settlement_amount', 'settlement_date'],
-]);
+    expect((float) $vehicle->fresh()->selling_price)->toBe(100000000.0)
+        ->and((float) $vehicle->fresh()->down_payment)->toBe(20000000.0)
+        ->and($vehicle->fresh()->down_payment_date)->toBe('2026-10-24')
+        ->and((float) $vehicle->fresh()->settlement_amount)->toBe(5000000.0)
+        ->and($vehicle->fresh()->settlement_date)->toBe('2026-10-25')
+        ->and((float) $vehicle->fresh()->leasing_disbursement)->toBe(30000000.0)
+        ->and($vehicle->fresh()->leasing_disbursement_date)->toBe('2026-10-26')
+        ->and((float) $vehicle->fresh()->remaining_payment)->toBe(45000000.0)
+        ->and($vehicle->fresh()->planned_payment_date)->toBe('2026-11-26');
 
-it('rejects an unapproved payment field without changing the vehicle', function () {
+    $this->get(route('jual.show', $saleNote))
+        ->assertOk()
+        ->assertSee('Tanggal pelunasan diterima')
+        ->assertSee('Tanggal pencairan leasing')
+        ->assertSee('Rencana pembayaran')
+        ->assertSee('3174012345678901')
+        ->assertSee('081234567890')
+        ->assertSee('Jl. Merdeka No. 1');
+});
+
+it('requires a planned payment date while any balance remains', function () {
     $vehicle = createJualVehicle();
 
     $this->actingAs(User::factory()->create())
         ->post(route('jual.store'), validJualPayload($vehicle, [
-            'payment_type' => 'buy_price',
-            'payment_amount' => 1,
+            'planned_payment_date' => null,
+            'down_payment' => 10000000,
         ]))
-        ->assertSessionHasErrors('payment_type');
+        ->assertSessionHasErrors('planned_payment_date');
 
     expect(SaleNote::query()->count())->toBe(0)
-        ->and((float) $vehicle->fresh()->buy_price)->toBe(65000000.0)
+        ->and($vehicle->fresh()->sell_date)->toBeNull();
+});
+
+it('does not require or retain a planned payment date once the sale is fully paid', function () {
+    $vehicle = createJualVehicle();
+
+    $this->actingAs(User::factory()->create())
+        ->post(route('jual.store'), validJualPayload($vehicle, [
+            'selling_price' => 92000000,
+            'down_payment' => 20000000,
+            'down_payment_date' => '2026-10-23',
+            'settlement_amount' => 72000000,
+            'settlement_date' => '2026-10-24',
+            'planned_payment_date' => null,
+        ]))
+        ->assertRedirect(route('jual.show', SaleNote::query()->sole()));
+
+    expect((float) $vehicle->fresh()->remaining_payment)->toBe(0.0)
+        ->and($vehicle->fresh()->planned_payment_date)->toBeNull();
+});
+
+it('requires a real payment date when a received payment amount is positive', function () {
+    $vehicle = createJualVehicle();
+
+    $this->actingAs(User::factory()->create())
+        ->post(route('jual.store'), validJualPayload($vehicle, [
+            'down_payment' => 10000000,
+            'down_payment_date' => null,
+        ]))
+        ->assertSessionHasErrors('down_payment_date');
+
+    expect(SaleNote::query()->count())->toBe(0)
+        ->and($vehicle->fresh()->sell_date)->toBeNull();
+});
+
+it('rejects consumer identity data with an invalid national identification number', function () {
+    $vehicle = createJualVehicle();
+
+    $this->actingAs(User::factory()->create())
+        ->post(route('jual.store'), validJualPayload($vehicle, [
+            'buyer_nik' => '12345',
+        ]))
+        ->assertSessionHasErrors('buyer_nik');
+
+    expect(SaleNote::query()->count())->toBe(0)
         ->and($vehicle->fresh()->sell_date)->toBeNull();
 });
 
@@ -369,13 +437,8 @@ it('accepts a nominal above the former validation ceiling', function () {
     $response = $this->actingAs($admin)
         ->post(route('jual.store'), validJualPayload($vehicle, [
             'selling_price' => '20000000000000',
-            'payment_type' => 'down_payment',
-            'payment_amount' => '10000000000000',
-            'intertine_expenses' => [
-                ['name' => 'KR Jual', 'cost' => '10000000000000'],
-                ['name' => 'OP Survei', 'cost' => 0],
-                ['name' => 'Fee CMO', 'cost' => 0],
-            ],
+            'down_payment' => '10000000000000',
+            'down_payment_date' => '2026-10-23',
         ]));
 
     $saleNote = SaleNote::query()->sole();
@@ -383,25 +446,7 @@ it('accepts a nominal above the former validation ceiling', function () {
 
     expect((float) $vehicle->fresh()->selling_price)->toBe(20000000000000.0)
         ->and((float) $vehicle->fresh()->down_payment)->toBe(10000000000000.0)
-        ->and((float) $vehicle->fresh()->remaining_payment)->toBe(10000000000000.0)
-        ->and((float) $vehicle->fresh()->intertine_expenses[0]['cost'])->toBe(10000000000000.0);
-});
-
-it('requires each sales cost category to be entered only once', function () {
-    $vehicle = createJualVehicle();
-
-    $this->actingAs(User::factory()->create())
-        ->post(route('jual.store'), validJualPayload($vehicle, [
-            'intertine_expenses' => [
-                ['name' => 'KR Jual', 'cost' => 100000],
-                ['name' => 'OP Survei', 'cost' => 200000],
-                ['name' => 'KR Jual', 'cost' => 300000],
-            ],
-        ]))
-        ->assertSessionHasErrors('intertine_expenses.2.name');
-
-    expect(SaleNote::query()->count())->toBe(0)
-        ->and($vehicle->fresh()->sell_date)->toBeNull();
+        ->and((float) $vehicle->fresh()->remaining_payment)->toBe(10000000000000.0);
 });
 
 it('prepopulates an existing jual note when its edit form is opened', function () {
@@ -413,7 +458,8 @@ it('prepopulates an existing jual note when its edit form is opened', function (
         ->get(route('jual.edit', $saleNote))
         ->assertOk()
         ->assertSee('value="Dewi Jual"', false)
-        ->assertSee('value="92000000"', false)
+        ->assertSee('value="92.000.000,00"', false)
+        ->assertSee('name="planned_payment_date"', false)
         ->assertSee(route('jual.update', $saleNote), false);
 });
 
@@ -425,22 +471,29 @@ it('updates buyer identity and the canonical vehicle sale attributes', function 
     $this->actingAs($creator)
         ->put(route('jual.update', $saleNote), [
             'nama_konsumen' => 'Dewi Utami',
+            'buyer_nik' => '3174012345678901',
+            'buyer_phone' => '081234567890',
+            'buyer_address' => 'Jl. Merdeka No. 1',
             'selling_price' => 94000000,
-            'payment_type' => 'down_payment',
-            'payment_amount' => 0,
+            'down_payment' => 0,
+            'down_payment_date' => null,
+            'settlement_amount' => 0,
+            'settlement_date' => null,
+            'leasing_disbursement' => 0,
+            'leasing_disbursement_date' => null,
             'sell_date' => '2026-10-24',
-            'intertine_expenses' => [
-                ['name' => 'KR Jual', 'cost' => 0],
-                ['name' => 'OP Survei', 'cost' => 0],
-                ['name' => 'Fee CMO', 'cost' => 0],
-            ],
+            'planned_payment_date' => '2026-11-24',
         ])
         ->assertRedirect(route('jual.show', $saleNote))
         ->assertSessionHas('success');
 
     expect($saleNote->refresh()->nama_konsumen)->toBe('Dewi Utami')
+        ->and($saleNote->buyer_nik)->toBe('3174012345678901')
+        ->and($saleNote->buyer_phone)->toBe('081234567890')
+        ->and($saleNote->buyer_address)->toBe('Jl. Merdeka No. 1')
         ->and($vehicle->refresh()->sell_date)->toBe('2026-10-24')
-        ->and((float) $vehicle->selling_price)->toBe(94000000.0);
+        ->and((float) $vehicle->selling_price)->toBe(94000000.0)
+        ->and($vehicle->planned_payment_date)->toBe('2026-11-24');
 });
 
 it('deletes a jual note without deleting its vehicle', function () {

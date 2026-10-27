@@ -797,6 +797,12 @@
         max-width: none;
     }
 
+    .page-shell--transaction-form .transaction-form.transaction-form--master .payment-inputs--remaining > input[type="date"] {
+        flex-basis: clamp(150px, 10vw, 190px);
+        width: clamp(150px, 10vw, 190px);
+        min-width: clamp(150px, 10vw, 190px);
+    }
+
     .page-shell--transaction-form .transaction-form.transaction-form--master .payment-inputs {
         display: flex !important;
         align-items: center;

@@ -79,7 +79,7 @@ test('initial master provisioning refuses to create another master account', fun
     expect(User::query()->where('role', 'master')->count())->toBe(1);
 });
 
-test('valid credentials start a session and redirect to the intended route', function () {
+test('valid master credentials redirect to the admin dashboard instead of an intended route', function () {
     $user = User::factory()->master()->create([
         'username' => 'master_toko',
         'password' => 'password',
@@ -91,9 +91,55 @@ test('valid credentials start a session and redirect to the intended route', fun
     $this->post(route('login.store'), [
         'username' => 'master_toko',
         'password' => 'password',
-    ])->assertRedirect(route('transactions.index'));
+    ])->assertRedirect(route('dashboard'))
+        ->assertSessionMissing('url.intended');
 
     $this->assertAuthenticatedAs($user);
+});
+
+test('logging in as another role after logout clears stale intended routes and refreshes the login form', function () {
+    User::factory()->marketing()->create([
+        'username' => 'marketing_user',
+        'password' => 'password',
+    ]);
+    $master = User::factory()->master()->create([
+        'username' => 'master_toko',
+        'password' => 'password',
+    ]);
+
+    $initialLoginForm = $this->get(route('login'))->assertOk();
+    preg_match('/name="_token" value="([^"]+)"/', $initialLoginForm->getContent(), $initialToken);
+
+    $this->get(route('marketing.stok.index'))
+        ->assertRedirect(route('login'));
+
+    $this->post(route('login.store'), [
+        'username' => 'marketing_user',
+        'password' => 'password',
+    ])->assertRedirect(route('marketing.stok.index'));
+
+    $this->withSession(['url.intended' => route('marketing.stok.index')])
+        ->post(route('logout'))
+        ->assertStatus(303)
+        ->assertRedirect(route('login'))
+        ->assertSessionMissing('url.intended');
+
+    $this->assertGuest();
+
+    $freshLoginForm = $this->get(route('login'))->assertOk();
+    preg_match('/name="_token" value="([^"]+)"/', $freshLoginForm->getContent(), $freshToken);
+
+    expect($freshLoginForm->headers->get('Cache-Control'))->toBe('no-store, private')
+        ->and($initialToken[1] ?? null)->not->toBeNull()
+        ->and($freshToken[1] ?? null)->not->toBe($initialToken[1] ?? null);
+
+    $this->post(route('login.store'), [
+        'username' => 'master_toko',
+        'password' => 'password',
+    ])->assertRedirect(route('dashboard'))
+        ->assertSessionMissing('url.intended');
+
+    $this->assertAuthenticatedAs($master);
 });
 
 test('invalid credentials return a generic login error and preserve the username', function () {

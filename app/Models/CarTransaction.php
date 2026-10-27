@@ -35,6 +35,7 @@ class CarTransaction extends Model
         'settlement_date',
         'leasing_disbursement',
         'leasing_disbursement_date',
+        'planned_payment_date',
         'setor_price',
         'opening_price',
         'leasing_ripan',

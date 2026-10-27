@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Services\RoleDashboardResolver;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
 
 class AuthController extends Controller
 {
-    public function create(): View
+    public function __construct(private RoleDashboardResolver $roleDashboardResolver) {}
+
+    public function create(): Response
     {
-        return view('auth.login');
+        return response()->view('auth.login')->header('Cache-Control', 'no-store, private');
     }
 
     public function store(Request $request): RedirectResponse
@@ -28,21 +32,30 @@ class AuthController extends Controller
         }
 
         $request->session()->regenerate();
+        $request->session()->forget('url.intended');
 
-        if ($request->user()?->role === 'marketing') {
-            return redirect()->route('marketing.stok.index');
+        $user = $request->user();
+
+        if (! $user instanceof User) {
+            abort(403);
         }
 
-        return redirect()->intended('/');
+        $routeName = $this->roleDashboardResolver->routeNameFor($user);
+
+        abort_if($routeName === null, 403);
+
+        return redirect()->route($routeName);
     }
 
     public function destroy(Request $request): RedirectResponse
     {
         Auth::logout();
-
+        $request->session()->forget('url.intended');
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login')->with('success', 'Anda berhasil logout.');
+        return redirect()->route('login')
+            ->setStatusCode(303)
+            ->with('success', 'Anda berhasil logout.');
     }
 }

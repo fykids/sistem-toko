@@ -1,6 +1,8 @@
 <?php
 
-use App\Http\Middleware\RedirectMarketingToCatalog;
+use App\Http\Middleware\RedirectToRoleDashboard;
+use App\Models\User;
+use App\Services\RoleDashboardResolver;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -14,9 +16,21 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->redirectGuestsTo('/login');
-        $middleware->redirectUsersTo('/');
+        $middleware->redirectUsersTo(function (Request $request): string {
+            $user = $request->user();
+
+            if (! $user instanceof User) {
+                abort(403);
+            }
+
+            $routeName = app(RoleDashboardResolver::class)->routeNameFor($user);
+
+            abort_if($routeName === null, 403);
+
+            return route($routeName);
+        });
         $middleware->alias([
-            'marketing.catalog' => RedirectMarketingToCatalog::class,
+            'role.dashboard' => RedirectToRoleDashboard::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

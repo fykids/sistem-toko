@@ -174,7 +174,7 @@ test('marketing can view available vehicle specifications and leasing simulation
         ->assertDontSee('gross_profit');
 });
 
-test('marketing cannot view a sold vehicle or access the catalog as another role', function () {
+test('marketing cannot view a sold vehicle and other roles return to their dashboard', function () {
     $marketingUser = User::factory()->marketing()->create();
     $soldVehicle = createMarketingCatalogVehicle([
         'sell_date' => '2026-03-01',
@@ -187,7 +187,7 @@ test('marketing cannot view a sold vehicle or access the catalog as another role
 
     $this->actingAs(User::factory()->create())
         ->get(route('marketing.stok.index'))
-        ->assertForbidden();
+        ->assertRedirect(route('dashboard'));
 });
 
 test('marketing catalog rejects invalid year ranges', function () {
