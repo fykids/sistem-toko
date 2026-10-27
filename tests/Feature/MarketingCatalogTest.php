@@ -23,6 +23,7 @@ function createMarketingCatalogVehicle(array $attributes = []): CarTransaction
 }
 
 test('marketing login redirects to the read-only stock catalog and blocks internal routes', function () {
+    User::factory()->master()->create();
     $marketingUser = User::factory()->marketing()->create([
         'username' => 'marketing_user',
         'password' => 'password',

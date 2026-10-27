@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\CarTransaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -15,6 +16,8 @@ test('users are identified by unique usernames instead of email addresses', func
 });
 
 test('guests can render the login form', function () {
+    User::factory()->master()->create();
+
     $this->get(route('login'))
         ->assertOk()
         ->assertSee('name="username"', false)
@@ -23,7 +26,20 @@ test('guests can render the login form', function () {
 });
 
 test('login page does not create a default master account', function () {
-    $this->get(route('login'))->assertOk();
+    $this->get(route('login'))->assertRedirect(route('setup-master.create'));
+    $this->get('/')->assertRedirect(route('setup-master.create'));
+
+    $this->get(route('setup-master.create'))
+        ->assertOk()
+        ->assertSee('name="name"', false)
+        ->assertSee('name="username"', false)
+        ->assertSee('name="password"', false)
+        ->assertSee('name="password_confirmation"', false);
+
+    $this->post(route('login.store'), [
+        'username' => 'admin',
+        'password' => 'password',
+    ])->assertRedirect(route('setup-master.create'));
 
     expect(User::query()->count())->toBe(0);
 });
@@ -34,7 +50,7 @@ test('login page does not promote an existing username to master', function () {
         'password' => 'existing-password',
     ]);
 
-    $this->get(route('login'))->assertOk();
+    $this->get(route('login'))->assertRedirect(route('setup-master.create'));
 
     $existingUser->refresh();
 
@@ -77,6 +93,115 @@ test('initial master provisioning refuses to create another master account', fun
         ->assertExitCode(1);
 
     expect(User::query()->where('role', 'master')->count())->toBe(1);
+});
+
+test('emergency command resets only the first master password and preserves application data', function () {
+    $master = User::factory()->master()->create([
+        'username' => 'master_first',
+        'password' => 'original-master-password',
+    ]);
+    $otherMaster = User::factory()->master()->create([
+        'username' => 'master_second',
+        'password' => 'another-master-password',
+    ]);
+    $otherUser = User::factory()->create([
+        'username' => 'admin_account',
+        'password' => 'admin-password',
+    ]);
+    $transaction = CarTransaction::create([
+        'plate_number' => 'B 1234 TST',
+        'brand' => 'Toyota',
+        'model' => 'Avanza',
+        'year' => 2022,
+        'transmission' => 'Automatic',
+        'color' => 'Hitam',
+        'buy_date' => '2026-09-01',
+        'buy_price' => 50000000,
+        'selling_price' => 60000000,
+    ]);
+
+    $userCount = User::query()->count();
+    $transactionCount = CarTransaction::query()->count();
+
+    $this->artisan('app:reset-master-password')
+        ->expectsOutput('Password akun Master berhasil direset menjadi: 123456')
+        ->assertExitCode(0);
+
+    $master->refresh();
+    $otherMaster->refresh();
+    $otherUser->refresh();
+    $transaction->refresh();
+
+    expect(Hash::check('123456', $master->password))->toBeTrue()
+        ->and(Hash::check('original-master-password', $master->password))->toBeFalse()
+        ->and(Hash::check('another-master-password', $otherMaster->password))->toBeTrue()
+        ->and(Hash::check('admin-password', $otherUser->password))->toBeTrue()
+        ->and($transaction->plate_number)->toBe('B 1234 TST')
+        ->and($transaction->selling_price)->toBe(60000000)
+        ->and(User::query()->count())->toBe($userCount)
+        ->and(CarTransaction::query()->count())->toBe($transactionCount);
+
+    $this->post(route('login.store'), [
+        'username' => 'master_first',
+        'password' => '123456',
+    ])->assertRedirect(route('dashboard'));
+
+    $this->assertAuthenticatedAs($master);
+});
+
+test('emergency password reset reports failure when no master account exists', function () {
+    $this->artisan('app:reset-master-password')
+        ->expectsOutput('A Master account does not exist.')
+        ->assertExitCode(1);
+
+    expect(User::query()->count())->toBe(0)
+        ->and(CarTransaction::query()->count())->toBe(0);
+});
+
+test('the first master can be created through the setup wizard and is logged in', function () {
+    $this->post(route('setup-master.store'), [
+        'name' => 'Master Showroom',
+        'username' => 'master_toko',
+        'password' => 'a-unique-master-secret',
+        'password_confirmation' => 'a-unique-master-secret',
+    ])->assertRedirect(route('dashboard'));
+
+    $master = User::query()->where('username', 'master_toko')->sole();
+
+    $this->assertAuthenticatedAs($master);
+    $this->get(route('setup-master.create'))->assertNotFound();
+
+    expect($master->role)->toBe('master')
+        ->and(Hash::check('a-unique-master-secret', $master->password))->toBeTrue();
+});
+
+test('the setup wizard rejects passwords shorter than twelve characters', function () {
+    $this->from(route('setup-master.create'))
+        ->post(route('setup-master.store'), [
+            'name' => 'Master Showroom',
+            'username' => 'master_toko',
+            'password' => 'short',
+            'password_confirmation' => 'short',
+        ])->assertRedirect(route('setup-master.create'))
+        ->assertSessionHasErrors('password');
+
+    $this->assertGuest();
+    expect(User::query()->count())->toBe(0);
+});
+
+test('the setup wizard rejects direct access after a master account exists', function () {
+    User::factory()->master()->create();
+
+    $this->get(route('setup-master.create'))->assertNotFound();
+    $this->post(route('setup-master.store'), [
+        'name' => 'Second Master',
+        'username' => 'second_master',
+        'password' => 'a-unique-master-secret',
+        'password_confirmation' => 'a-unique-master-secret',
+    ])->assertNotFound();
+
+    expect(User::query()->where('role', 'master')->count())->toBe(1);
+    $this->assertGuest();
 });
 
 test('valid master credentials redirect to the admin dashboard instead of an intended route', function () {
@@ -143,6 +268,7 @@ test('logging in as another role after logout clears stale intended routes and r
 });
 
 test('invalid credentials return a generic login error and preserve the username', function () {
+    User::factory()->master()->create();
     User::factory()->create([
         'username' => 'admin',
         'password' => 'password',
@@ -161,6 +287,8 @@ test('invalid credentials return a generic login error and preserve the username
 });
 
 test('missing username is rejected before attempting authentication', function () {
+    User::factory()->master()->create();
+
     $this->from(route('login'))->post(route('login.store'), [
         'username' => '',
         'password' => 'password',
@@ -171,6 +299,8 @@ test('missing username is rejected before attempting authentication', function (
 });
 
 test('login attempts are rate limited by username and client address', function () {
+    User::factory()->master()->create();
+
     foreach (range(1, 5) as $attempt) {
         $this->from(route('login'))->post(route('login.store'), [
             'username' => 'unknown_user',
@@ -185,7 +315,7 @@ test('login attempts are rate limited by username and client address', function 
 });
 
 test('authenticated users can log out and return to the login page', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->master()->create();
     $this->actingAs($user);
 
     $this->post(route('logout'))

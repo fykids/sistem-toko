@@ -38,6 +38,9 @@
         @php($taxItemsByName = $taxItemsForForm->keyBy(fn($taxItem) => strtolower($taxItem['name'] ?? '')))
         @php($primaryTaxItem = $taxItemsByName->get('pajak') ?? $taxItemsForForm->first())
         @php($otherTaxItems = $taxItemsForForm->reject(fn($taxItem) => $taxItem === $primaryTaxItem || in_array(strtolower($taxItem['name'] ?? ''), ['pajak', 'bbn', 'etle'], true))->values())
+        @php($intertineInput = old('intertine_expenses', $transaction?->intertine_expenses ?? []))
+        @php($intertineItems = collect(is_array($intertineInput) ? $intertineInput : [])->filter(fn($expense) => is_array($expense))->values())
+        @php($krJualExpense = $intertineItems->first(fn(array $expense) => strtolower(trim($expense['name'] ?? '')) === 'kr jual'))
         <div class="field-grid costs-vertical-grid">
             <div class="form-group"><label for="purchase-operational">OPS (Rp)</label>
                 <div class="cost-inputs">
@@ -53,6 +56,18 @@
                         inputmode="decimal" data-rupiah-input>
                 </div>
             </div>
+            @can('viewSensitiveData', \App\Models\CarTransaction::class)
+                <input type="hidden" name="intertine_expenses[0][name]" value="KR Jual">
+                <div class="form-group intertine-expense-item">
+                    <label for="intertine-expense-cost-0">KR Jual</label>
+                    <div class="cost-inputs">
+                        <input id="intertine-expense-cost-0" type="text"
+                            name="intertine_expenses[0][cost]"
+                            value="{{ old('intertine_expenses.0.cost', data_get($krJualExpense, 'cost')) }}"
+                            placeholder="Rp 0" inputmode="decimal" data-rupiah-input>
+                    </div>
+                </div>
+            @endcan
             <input type="hidden" name="tax_items[0][name]"
                 value="{{ old('tax_items.0.name', data_get($primaryTaxItem, 'name', 'Pajak')) }}">
             <input type="hidden" name="tax_items[0][payment_status]"

@@ -3,18 +3,17 @@
 namespace App\Console\Commands;
 
 use App\Models\User;
+use App\Services\UserService;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 #[Signature('app:create-master-user')]
 #[Description('Create the initial Master account using operator-supplied credentials')]
 class CreateMasterUser extends Command
 {
-    public function handle(): int
+    public function handle(UserService $userService): int
     {
         if (User::query()->where('role', 'master')->exists()) {
             $this->error('A Master account already exists.');
@@ -24,7 +23,7 @@ class CreateMasterUser extends Command
 
         $name = $this->ask('Name');
         $username = $this->ask('Username');
-        $password = $this->secret('Password (minimum 12 characters)');
+        $password = $this->secret('Password (minimum 6 characters)');
         $passwordConfirmation = $this->secret('Confirm password');
 
         $validator = Validator::make([
@@ -41,7 +40,7 @@ class CreateMasterUser extends Command
                 'max:255',
                 'unique:users,username',
             ],
-            'password' => ['required', 'string', 'min:12', 'confirmed'],
+            'password' => ['required', 'string', 'min:6', 'confirmed'],
         ]);
 
         if ($validator->fails()) {
@@ -52,23 +51,13 @@ class CreateMasterUser extends Command
             return self::FAILURE;
         }
 
-        $created = DB::transaction(function () use ($name, $username, $password): bool {
-            if (User::query()->where('role', 'master')->exists()) {
-                return false;
-            }
+        $master = $userService->createInitialMaster([
+            'name' => $name,
+            'username' => $username,
+            'password' => $password,
+        ]);
 
-            $user = new User;
-            $user->forceFill([
-                'name' => $name,
-                'username' => $username,
-                'password' => Hash::make($password),
-                'role' => 'master',
-            ])->save();
-
-            return true;
-        });
-
-        if (! $created) {
+        if ($master === null) {
             $this->error('A Master account already exists.');
 
             return self::FAILURE;

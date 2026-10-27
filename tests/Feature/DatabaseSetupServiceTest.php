@@ -20,6 +20,7 @@ it('creates and migrates a missing SQLite database before handling requests', fu
 
     try {
         (new AppServiceProvider(app()))->boot(app(DatabaseSetupService::class));
+        User::factory()->master()->create();
 
         $this->from(route('login'))->post(route('login.store'), [
             'username' => 'missing_user',
