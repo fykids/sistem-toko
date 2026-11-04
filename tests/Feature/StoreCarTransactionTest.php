@@ -319,6 +319,15 @@ test('it stores leasing simulations and restores their values when editing a tra
             'installment_4yr' => 2150000,
             'installment_5yr' => 2000000,
         ],
+        [
+            'name' => 'GARUDA FINANCE',
+            'disbursement' => 85000000,
+            'selling_price' => 150000000,
+            'dp' => 65000000,
+            'installment_3yr' => 2100000,
+            'installment_4yr' => 1950000,
+            'installment_5yr' => 1800000,
+        ],
     ];
 
     $response = $this->post(route('transactions.store'), [
@@ -330,7 +339,7 @@ test('it stores leasing simulations and restores their values when editing a tra
         'color' => 'HITAM',
         'buy_date' => '2026-10-12',
         'buy_price' => 500000,
-        'leasing_options' => $leasingOptions,
+        'leasing_options' => [...$leasingOptions, ['name' => '']],
     ]);
 
     $response->assertRedirect(route('transactions.index'));
@@ -342,7 +351,9 @@ test('it stores leasing simulations and restores their values when editing a tra
     $this->get(route('transactions.edit', $transaction))
         ->assertOk()
         ->assertSee('name="leasing_options[0][disbursement]"', false)
-        ->assertSee('value="93000000"', false);
+        ->assertSee('value="93000000"', false)
+        ->assertSee('name="leasing_options[1][name]"', false)
+        ->assertSee('value="GARUDA FINANCE"', false);
 });
 
 test('it renders every leasing option inside a dedicated form card', function () {
@@ -366,8 +377,24 @@ test('it renders every leasing option inside a dedicated form card', function ()
         ->assertSee('data-leasing-dp', false)
         ->assertSee('readonly', false)
         ->assertSee('name="leasing_options[6][installment_5yr]"', false)
+        ->assertSee('id="add-leasing-option"', false)
+        ->assertSee('id="leasing-option-template"', false)
+        ->assertSee('data-max-items="50"', false)
         ->assertDontSee('Simulasi pembiayaan')
         ->assertDontSee('Data kendaraan akan ditampilkan di sini');
+});
+
+test('it escapes custom leasing names when rendering the form', function () {
+    $this->withSession([
+        '_old_input' => [
+            'leasing_options' => [
+                ['name' => '<script>alert(1)</script>'],
+            ],
+        ],
+    ])->get(route('transactions.create'))
+        ->assertOk()
+        ->assertSee('&lt;script&gt;alert(1)&lt;/script&gt;', false)
+        ->assertDontSee('<script>alert(1)</script>', false);
 });
 
 test('it renders the leasing vehicle summary from old vehicle input', function () {
@@ -423,6 +450,28 @@ test('it rejects unrecognized leasing fields without saving a transaction', func
 
     $response->assertRedirect(route('transactions.create'))
         ->assertSessionHasErrors('leasing_options.0');
+    $this->assertDatabaseCount('car_transactions', 0);
+});
+
+test('it rejects leasing information beyond the per-transaction limit', function () {
+    $leasingOptions = collect(range(1, 51))
+        ->map(fn ($index) => ['name' => "Leasing {$index}"])
+        ->all();
+
+    $response = $this->from(route('transactions.create'))->post(route('transactions.store'), [
+        'plate_number' => 'B 1234 CD',
+        'brand' => 'TOYOTA',
+        'model' => 'INNOVA',
+        'year' => 2014,
+        'transmission' => 'MANUAL',
+        'color' => 'HITAM',
+        'buy_date' => '2026-10-12',
+        'buy_price' => 500000,
+        'leasing_options' => $leasingOptions,
+    ]);
+
+    $response->assertRedirect(route('transactions.create'))
+        ->assertSessionHasErrors('leasing_options');
     $this->assertDatabaseCount('car_transactions', 0);
 });
 

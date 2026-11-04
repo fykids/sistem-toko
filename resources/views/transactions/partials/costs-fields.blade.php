@@ -75,10 +75,14 @@
             <input type="hidden" name="tax_items[0][payment_note]"
                 value="{{ old('tax_items.0.payment_note', data_get($primaryTaxItem, 'payment_note')) }}">
             <div class="form-group tax-cost-group"><label for="tax-price">Biaya Pajak</label>
-                <div class="cost-inputs cost-inputs--dated">
+                <div class="cost-inputs cost-inputs--dated cost-inputs--tax">
                     <input id="tax-price" type="text" name="tax_items[0][cost]"
                         value="{{ old('tax_items.0.cost') ?? data_get($primaryTaxItem, 'cost') }}" placeholder="Rp 0"
                         inputmode="decimal" data-rupiah-input>
+                    <input id="tax-estimated-cost" type="text" name="tax_items[0][estimated_cost]"
+                        value="{{ old('tax_items.0.estimated_cost', data_get($primaryTaxItem, 'estimated_cost')) }}"
+                        placeholder="Estimasi Rp 0" aria-label="Estimasi biaya pajak" inputmode="decimal"
+                        data-rupiah-input>
                     <input id="tax-date" type="date" name="tax_items[0][date]"
                         value="{{ old('tax_items.0.date', data_get($primaryTaxItem, 'date')) }}">
                 </div>
@@ -89,10 +93,14 @@
             <input type="hidden" name="tax_items[1][payment_note]"
                 value="{{ old('tax_items.1.payment_note', data_get($taxItemsByName->get('bbn'), 'payment_note')) }}">
             <div class="form-group tax-cost-group"><label for="bbn-price">Biaya BBN</label>
-                <div class="cost-inputs cost-inputs--dated">
+                <div class="cost-inputs cost-inputs--dated cost-inputs--tax">
                     <input id="bbn-price" type="text" name="tax_items[1][cost]"
                         value="{{ old('tax_items.1.cost', data_get($taxItemsByName->get('bbn'), 'cost')) }}"
                         placeholder="Rp 0" inputmode="decimal" data-rupiah-input>
+                    <input id="bbn-estimated-cost" type="text" name="tax_items[1][estimated_cost]"
+                        value="{{ old('tax_items.1.estimated_cost', data_get($taxItemsByName->get('bbn'), 'estimated_cost')) }}"
+                        placeholder="Estimasi Rp 0" aria-label="Estimasi biaya BBN" inputmode="decimal"
+                        data-rupiah-input>
                     <input id="bbn-date" type="date" name="tax_items[1][date]"
                         value="{{ old('tax_items.1.date', data_get($taxItemsByName->get('bbn'), 'date')) }}">
                 </div>
@@ -103,10 +111,14 @@
             <input type="hidden" name="tax_items[2][payment_note]"
                 value="{{ old('tax_items.2.payment_note', data_get($taxItemsByName->get('etle'), 'payment_note')) }}">
             <div class="form-group tax-cost-group"><label for="etle-price">Biaya ETLE</label>
-                <div class="cost-inputs">
+                <div class="cost-inputs cost-inputs--tax">
                     <input id="etle-price" type="text" name="tax_items[2][cost]"
                         value="{{ old('tax_items.2.cost', data_get($taxItemsByName->get('etle'), 'cost')) }}"
                         placeholder="Rp 0" inputmode="decimal" data-rupiah-input>
+                    <input id="etle-estimated-cost" type="text" name="tax_items[2][estimated_cost]"
+                        value="{{ old('tax_items.2.estimated_cost', data_get($taxItemsByName->get('etle'), 'estimated_cost')) }}"
+                        placeholder="Estimasi Rp 0" aria-label="Estimasi biaya ETLE" inputmode="decimal"
+                        data-rupiah-input>
                 </div>
             </div>
             @foreach ($otherTaxItems as $index => $taxItem)
@@ -116,6 +128,8 @@
                 value="{{ old("tax_items.{$taxItemIndex}.date", $taxItem['date'] ?? '') }}">
             <input type="hidden" name="tax_items[{{ $taxItemIndex }}][cost]"
                 value="{{ old("tax_items.{$taxItemIndex}.cost", $taxItem['cost'] ?? '') }}">
+            <input type="hidden" name="tax_items[{{ $taxItemIndex }}][estimated_cost]"
+                value="{{ old("tax_items.{$taxItemIndex}.estimated_cost", $taxItem['estimated_cost'] ?? '') }}">
             <input type="hidden" name="tax_items[{{ $taxItemIndex }}][payment_status]"
                 value="{{ old("tax_items.{$taxItemIndex}.payment_status", $taxItem['payment_status'] ?? '') }}">
             <input type="hidden" name="tax_items[{{ $taxItemIndex }}][payment_note]"

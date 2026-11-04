@@ -66,6 +66,13 @@ return [
             'transaction_mode' => 'DEFERRED',
         ],
 
+        // ADD KONEKSI D1
+        'd1' => [
+            'driver' => 'd1',
+            'prefix' => '',
+            'database' => env('CLOUDFLARE_D1_BINDING', 'DB'),
+        ],
+
         'mysql' => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),

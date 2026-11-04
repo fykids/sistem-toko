@@ -2,6 +2,12 @@
     padding: 16px 18px 19px;
 }
 
+.leasing-table-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+}
+
 .leasing-card-wrapper .section-heading {
     flex-wrap: wrap;
 }
@@ -121,6 +127,16 @@
     background: var(--color-surface);
 }
 
+.leasing-custom-table .leasing-name-input {
+    min-width: 0;
+    text-align: left;
+}
+
+.leasing-remove-button {
+    display: flex;
+    margin: 4px 0 0 auto;
+}
+
 .leasing-custom-table tbody tr:nth-child(even) .td-leasing-label {
     background: var(--color-surface-muted);
 }
@@ -225,4 +241,3 @@
         transition: none;
     }
 }
-

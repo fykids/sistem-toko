@@ -39,6 +39,8 @@
                 required></div>
         <div class="form-group"><label>Biaya (Rp)</label><input type="text" name="tax_items[__INDEX__][cost]"
                 placeholder="Rp 0" inputmode="decimal" data-rupiah-input required></div>
+        <div class="form-group"><label>Estimasi (Rp)</label><input type="text" name="tax_items[__INDEX__][estimated_cost]"
+                placeholder="Rp 0" inputmode="decimal" data-rupiah-input></div>
         <div class="form-group"><label>Status Pembayaran</label><select name="tax_items[__INDEX__][payment_status]"
                 class="item-payment-status" required>
                 <option value="">Pilih status</option>

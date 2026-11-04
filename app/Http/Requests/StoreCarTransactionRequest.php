@@ -5,7 +5,6 @@ namespace App\Http\Requests;
 use App\Models\CarTransaction;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
 class StoreCarTransactionRequest extends FormRequest
@@ -33,12 +32,17 @@ class StoreCarTransactionRequest extends FormRequest
         if ($leasingOptions === null) {
             $this->merge(['leasing_options' => []]);
         } elseif (is_array($leasingOptions)) {
+            $leasingOptions = array_filter(
+                $leasingOptions,
+                fn ($option): bool => ! is_array($option)
+                    || collect($option)->contains(fn ($value): bool => filled($value)),
+            );
             $this->merge(['leasing_options' => array_values($leasingOptions)]);
         }
 
         foreach ([
             'additional_repairs' => ['name', 'date', 'cost', 'payment_status', 'payment_note'],
-            'tax_items' => ['date', 'cost'],
+            'tax_items' => ['date', 'cost', 'estimated_cost'],
             'intertine_expenses' => ['name', 'cost'],
         ] as $field => $meaningfulKeys) {
             $items = $this->input($field);
@@ -166,23 +170,24 @@ class StoreCarTransactionRequest extends FormRequest
             'additional_repairs.*.payment_status' => ['required', 'in:lunas,belum_lunas,panjar,lainnya'],
             'additional_repairs.*.payment_note' => ['nullable', 'string', 'max:255'],
             'tax_items' => ['nullable', 'array', 'max:50'],
-            'tax_items.*' => ['array:name,date,cost,payment_status,payment_note'],
+            'tax_items.*' => ['array:name,date,cost,estimated_cost,payment_status,payment_note'],
             'tax_items.*.name' => ['required', 'string', 'max:100'],
             'tax_items.*.date' => ['nullable', 'date'],
             'tax_items.*.cost' => ['required', 'numeric', 'min:0'],
+            'tax_items.*.estimated_cost' => ['nullable', 'numeric', 'min:0'],
             'tax_items.*.payment_status' => ['nullable', 'in:lunas,belum_lunas,panjar,lainnya'],
             'tax_items.*.payment_note' => ['nullable', 'string', 'max:255'],
             'intertine_expenses' => ['nullable', 'array', 'max:50'],
             'intertine_expenses.*' => ['array:name,cost'],
             'intertine_expenses.*.name' => ['required', 'string', 'max:100'],
             'intertine_expenses.*.cost' => ['required', 'numeric', 'min:0'],
-            'leasing_options' => ['nullable', 'array', 'max:7'],
+            'leasing_options' => ['nullable', 'array', 'max:50'],
             'leasing_options.*' => ['array:name,disbursement,selling_price,dp,installment_3yr,installment_4yr,installment_5yr'],
             'leasing_options.*.name' => [
                 'required',
                 'string',
+                'max:100',
                 'distinct:strict',
-                Rule::in(['BCA', 'MUF', 'BUANA', 'ADIRA', 'SINAR MAS', 'WORI', 'WOM']),
             ],
             'leasing_options.*.disbursement' => ['nullable', 'numeric', 'min:0'],
             'leasing_options.*.selling_price' => ['nullable', 'numeric', 'min:0'],

@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('car_transactions', function (Blueprint $table) {
             $table->id();
-            
+
             // Informasi Kendaraan
             $table->string('plate_number');
             $table->string('manager_name')->nullable(); // Pengurus
@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('chassis_number')->nullable(); // No Rangka
             $table->string('engine_number')->nullable(); // No Mesin
             $table->string('owner_name')->nullable(); // Atas Nama
-            
+
             // Tanggal & Durasi
             $table->date('buy_date');
             $table->date('sell_date')->nullable();
@@ -32,14 +32,14 @@ return new class extends Migration
             $table->decimal('buy_price', 15, 2)->default(0); // Modal Beli
             $table->decimal('purchase_operational', 15, 2)->default(0); // OP Pembelian/Uang Jalan
             $table->decimal('tax_cost', 15, 2)->default(0); // Biaya Pajak
-            
+
             // Biaya Perbaikan (Detail Opsional/Total)
             $table->decimal('battery_cost', 15, 2)->default(0); // Ganti Aki
             $table->decimal('undercarriage_cost', 15, 2)->default(0); // Service Kaki-kaki
             $table->decimal('bumper_paint_cost', 15, 2)->default(0); // Cat Bumper
             $table->decimal('oil_change_cost', 15, 2)->default(0); // Ganti Oli
             $table->decimal('total_repair_cost', 15, 2)->default(0);
-            
+
             $table->decimal('total_capital', 15, 2)->default(0); // Total Modal
 
             // Penjualan & Pembayaran

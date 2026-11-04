@@ -395,6 +395,55 @@
         });
     }
 
+    function setupLeasingList() {
+        const leasingList = document.getElementById('leasing-options');
+        const leasingTemplate = document.getElementById('leasing-option-template');
+        const addButton = document.getElementById('add-leasing-option');
+
+        if (!leasingList || !leasingTemplate || !addButton) {
+            return;
+        }
+
+        let nextIndex = Number(leasingList.dataset.nextIndex);
+        const maxItems = Number(leasingList.dataset.maxItems);
+
+        const updateAddButton = () => {
+            addButton.disabled = leasingList.querySelectorAll('.repeatable-item').length >= maxItems;
+        };
+
+        addButton.addEventListener('click', () => {
+            if (leasingList.querySelectorAll('.repeatable-item').length >= maxItems) {
+                return;
+            }
+
+            const rowMarkup = leasingTemplate.innerHTML.replaceAll('__INDEX__', nextIndex++);
+            leasingList.insertAdjacentHTML('beforeend', rowMarkup);
+
+            const newRow = leasingList.lastElementChild;
+            const newSellingPriceInput = newRow?.querySelector('[data-leasing-selling-price]');
+            if (newSellingPriceInput && sellingPriceInput) {
+                newSellingPriceInput.value = sellingPriceInput.value;
+            }
+
+            updateLeasingDownPayments();
+            updateAddButton();
+        });
+
+        leasingList.addEventListener('click', (event) => {
+            const removeButton = event.target.closest('.remove-item');
+            if (!removeButton) {
+                return;
+            }
+
+            removeButton.closest('.repeatable-item')?.remove();
+            updateLeasingDownPayments();
+            updateAddButton();
+        });
+
+        updateAddButton();
+    }
+
     setupItemList('additional-repairs', 'repair-item-template', 'add-repair');
     setupItemList('tax-items', 'tax-item-template', 'add-tax-item');
+    setupLeasingList();
 })();
