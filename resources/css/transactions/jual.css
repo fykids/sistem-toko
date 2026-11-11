@@ -1,16 +1,20 @@
 .page-shell--jual {
-    --jual-accent: #087e8b;
-    --jual-accent-strong: #075d67;
-    --jual-accent-soft: #e8f8f8;
-    --jual-accent-border: #b9e2e3;
+    --jual-accent: #156d53;
+    --jual-accent-strong: #105941;
+    --jual-accent-soft: #eaf5f1;
+    --jual-accent-border: #cfe5db;
 }
 
 .page-shell--jual .jual-heading {
     border: 1px solid var(--jual-accent-border);
-    background: linear-gradient(120deg, var(--jual-accent-soft), var(--color-card-surface));
+    background: var(--jual-accent-soft);
 }
 
 .page-shell--jual .jual-heading .showroom-page-eyebrow {
+    color: var(--jual-accent);
+}
+
+.page-shell--jual .jual-heading h1 {
     color: var(--jual-accent);
 }
 
@@ -19,6 +23,19 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 12px;
+}
+
+.page-shell--jual .btn-accent {
+    border-color: var(--jual-accent);
+    border-radius: var(--radius-button);
+    background: var(--jual-accent);
+    color: #fff;
+}
+
+.page-shell--jual .btn-accent:hover:not(:disabled) {
+    border-color: var(--jual-accent-strong);
+    background: var(--jual-accent-strong);
+    color: #fff;
 }
 
 .page-shell--jual .jual-delete-form {
@@ -62,11 +79,55 @@
     font-weight: 600;
 }
 
+.page-shell--jual .jual-index-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.page-shell--jual .jual-status-filters {
+    gap: 8px;
+}
+
+.page-shell--jual .jual-create-action {
+    min-height: 40px;
+    border-color: var(--jual-accent);
+    border-radius: var(--radius-button);
+    background: var(--jual-accent);
+    color: #fff;
+}
+
+.page-shell--jual .jual-create-action:hover {
+    border-color: var(--jual-accent-strong);
+    background: var(--jual-accent-strong);
+    color: #fff;
+}
+
+.page-shell--jual-entry .jual-form-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+}
+
 @media (max-width: 680px) {
-    .page-shell--jual .jual-heading,
-    .page-shell--jual .jual-page-actions {
+    .page-shell--jual .jual-heading {
         align-items: stretch;
         flex-direction: column;
+    }
+
+    .page-shell--jual .jual-index-toolbar {
+        align-items: stretch;
+    }
+
+    .page-shell--jual .jual-status-filters {
+        gap: 6px;
+    }
+
+    .page-shell--jual .jual-create-action {
+        width: 100%;
     }
 
     .page-shell--jual .jual-detail-list {
@@ -76,9 +137,31 @@
 
 .page-shell--jual-entry.page-shell--transaction-form .transaction-form.transaction-form--master,
 .page-shell--jual-entry.page-shell--transaction-form .transaction-form.transaction-form--admin {
-    width: min(100%, 768px);
-    max-width: 768px;
-    margin-inline: auto;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.page-shell--jual-entry .jual-form {
+    width: 100%;
+}
+
+.page-shell--jual-entry .sell-module-form-section .sell-vehicle-readonly-fields,
+.page-shell--jual-entry .sell-module-form-section .sell-consumer-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 18px;
+    row-gap: 10px;
+}
+
+.page-shell--jual-entry .sell-module-form-section .sell-vehicle-fields > .sell-form-row,
+.page-shell--jual-entry .sell-module-form-section .sell-vehicle-fields > .sell-vehicle-readonly-fields,
+.page-shell--jual-entry .sell-module-form-section .sell-vehicle-fields > .form-help {
+    grid-column: 1 / -1;
+}
+
+.page-shell--jual-entry .sell-module-form-section .sell-consumer-fields > .sell-form-row:nth-child(3) {
+    grid-column: 1 / -1;
 }
 
 .page-shell--jual-entry .sell-module-form-section > .section-heading {
@@ -303,5 +386,10 @@
     .page-shell--jual-entry .sell-module-form-section .sell-payment-row {
         grid-template-columns: minmax(108px, 0.38fr) minmax(0, 1fr);
         gap: 8px;
+    }
+
+    .page-shell--jual-entry .sell-module-form-section .sell-vehicle-readonly-fields,
+    .page-shell--jual-entry .sell-module-form-section .sell-consumer-fields {
+        grid-template-columns: minmax(0, 1fr);
     }
 }

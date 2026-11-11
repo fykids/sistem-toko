@@ -1,0 +1,8 @@
+name = "sistem-showroom"
+compatibility_date = "2026-11-01"
+pages_build_output_dir = "dist"
+
+[[d1_databases]]
+binding = "sistem_showroom_db"
+database_name = "sistem_showroom_db"
+database_id = "170c0629-77fb-4f16-81da-949f62c6f59f"

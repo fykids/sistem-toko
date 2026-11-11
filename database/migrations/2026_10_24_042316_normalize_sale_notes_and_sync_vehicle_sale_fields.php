@@ -23,30 +23,35 @@ return new class extends Migration
         if ($legacyColumns !== []) {
             $columnsToRead = ['car_transaction_id', ...$legacyColumns];
             DB::table('sale_notes')
-                ->orderBy('id')
-                ->get($columnsToRead)
-                ->each(function (object $saleNote): void {
-                    $vehicleAttributes = [];
+                ->select(['id', ...$columnsToRead])
+                ->chunkById(500, function ($saleNotes): void {
+                    foreach ($saleNotes as $saleNote) {
+                        $vehicleAttributes = [];
 
-                    if (property_exists($saleNote, 'deal_price')) {
-                        $vehicleAttributes['selling_price'] = $saleNote->deal_price;
+                        if (property_exists($saleNote, 'deal_price')) {
+                            $vehicleAttributes['selling_price'] = $saleNote->deal_price;
+                        }
+
+                        if (property_exists($saleNote, 'sell_date')) {
+                            $vehicleAttributes['sell_date'] = $saleNote->sell_date;
+                        }
+
+                        if ($vehicleAttributes === []) {
+                            continue;
+                        }
+
+                        DB::table('car_transactions')
+                            ->where('id', $saleNote->car_transaction_id)
+                            ->whereNull('sell_date')
+                            ->update($vehicleAttributes);
                     }
+                }, 'id');
 
-                    if (property_exists($saleNote, 'sell_date')) {
-                        $vehicleAttributes['sell_date'] = $saleNote->sell_date;
-                    }
-
-                    if ($vehicleAttributes === []) {
-                        return;
-                    }
-
-                    DB::table('car_transactions')
-                        ->where('id', $saleNote->car_transaction_id)
-                        ->whereNull('sell_date')
-                        ->update($vehicleAttributes);
+            if (Schema::hasIndex('sale_notes', 'sale_notes_sell_date_index')) {
+                Schema::table('sale_notes', function (Blueprint $table): void {
+                    $table->dropIndex('sale_notes_sell_date_index');
                 });
-
-            DB::statement('DROP INDEX IF EXISTS sale_notes_sell_date_index');
+            }
 
             Schema::table('sale_notes', function (Blueprint $table) use ($legacyColumns): void {
                 $table->dropColumn($legacyColumns);

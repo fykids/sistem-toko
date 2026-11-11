@@ -9,8 +9,11 @@ beforeEach(function () {
     $this->actingAs(User::factory()->master()->create());
 });
 
-test('the application returns a successful response', function () {
-    $response = $this->get('/');
+test('the application root redirects into the SPA', function () {
+    $this->get('/')
+        ->assertRedirect('/app/dashboard');
 
-    $response->assertStatus(200);
+    $this->get('/app/dashboard')
+        ->assertOk()
+        ->assertSee('id="app"', false);
 });

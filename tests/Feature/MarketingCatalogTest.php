@@ -65,22 +65,20 @@ test('marketing catalog lists only available vehicles and paginates ten per page
         'selling_price' => 120000000,
     ]);
 
-    $response = $this->get(route('marketing.stok.index'));
+    $this->get(route('marketing.stok.index'))
+        ->assertRedirect('/app/marketing');
 
-    $response->assertOk()
-        ->assertSee('Katalog mobil')
-        ->assertSee('11 unit tersedia')
-        ->assertSee('B 0011 MKT')
-        ->assertDontSee($soldVehicle->plate_number)
-        ->assertDontSee('data-app-menu-toggle', false)
-        ->assertDontSee('data-sidebar-database', false)
-        ->assertSee('page=2', false);
-
-    expect(substr_count($response->getContent(), '<article'))->toBe(10);
-
-    $this->get(route('marketing.stok.index', ['page' => 2]))
+    $this->getJson(route('api.spa.marketing.vehicles.index'))
         ->assertOk()
-        ->assertSee('B 0001 MKT');
+        ->assertJsonPath('summary.available_count', 11)
+        ->assertJsonPath('data.0.plate_number', 'B 0011 MKT')
+        ->assertJsonCount(10, 'data')
+        ->assertJsonMissing(['plate_number' => $soldVehicle->plate_number]);
+
+    $this->getJson(route('api.spa.marketing.vehicles.index', ['page' => 2]))
+        ->assertOk()
+        ->assertJsonPath('data.0.plate_number', 'B 0001 MKT')
+        ->assertJsonCount(1, 'data');
 });
 
 test('marketing can search, filter transmission and filter the year range', function () {
@@ -109,26 +107,25 @@ test('marketing can search, filter transmission and filter the year range', func
         'transmission' => 'Automatic',
     ]);
 
-    $this->get(route('marketing.stok.index', [
+    $this->getJson(route('api.spa.marketing.vehicles.index', [
         'q' => 'honda',
         'transmission' => 'otomatis',
         'year_from' => 2020,
         'year_to' => 2022,
     ]))
         ->assertOk()
-        ->assertSee('D 1234 HND')
-        ->assertDontSee('D 5678 MT')
-        ->assertDontSee('B 1111 TYT');
+        ->assertJsonPath('data.0.plate_number', 'D 1234 HND')
+        ->assertJsonCount(1, 'data');
 
-    $this->get(route('marketing.stok.index', ['transmission' => 'manual']))
+    $this->getJson(route('api.spa.marketing.vehicles.index', ['transmission' => 'manual']))
         ->assertOk()
-        ->assertSee('D 5678 MT')
-        ->assertDontSee('D 1234 HND');
+        ->assertJsonPath('data.0.plate_number', 'D 5678 MT')
+        ->assertJsonCount(1, 'data');
 
-    $this->get(route('marketing.stok.index', ['year_to' => 2020]))
+    $this->getJson(route('api.spa.marketing.vehicles.index', ['year_to' => 2020]))
         ->assertOk()
-        ->assertSee('D 5678 MT')
-        ->assertDontSee('D 1234 HND');
+        ->assertJsonPath('data.0.plate_number', 'D 5678 MT')
+        ->assertJsonCount(1, 'data');
 });
 
 test('marketing can view available vehicle specifications and leasing simulations', function () {
@@ -158,21 +155,22 @@ test('marketing can view available vehicle specifications and leasing simulation
         ]],
     ]);
 
-    $this->get(route('marketing.stok.show', $vehicle))
+    $this->getJson(route('api.spa.marketing.vehicles.show', $vehicle))
         ->assertOk()
-        ->assertSee('Toyota Avanza')
-        ->assertSee('MHKA1AA1234567890')
-        ->assertSee('42.000')
-        ->assertSee('Pemilik Pertama')
-        ->assertSee('Pajak Hidup')
-        ->assertSee('Rp 135.000.000')
-        ->assertSee('BCA Finance')
-        ->assertSee('Rp 3.200.000')
-        ->assertSee('Marketing Showroom')
-        ->assertDontSee('data-app-menu-toggle', false)
-        ->assertDontSee('data-sidebar-database', false)
-        ->assertDontSee('total_capital')
-        ->assertDontSee('gross_profit');
+        ->assertJsonPath('data.brand', 'Toyota')
+        ->assertJsonPath('data.model', 'Avanza')
+        ->assertJsonPath('data.chassis_number', 'MHKA1AA1234567890')
+        ->assertJsonPath('data.mileage_km', 42000)
+        ->assertJsonPath('data.owner_name', 'Pemilik Pertama')
+        ->assertJsonPath('data.tax_status.label', 'Hidup')
+        ->assertJsonPath('data.opening_price', 135000000)
+        ->assertJsonPath('data.leasing_options.0.name', 'BCA Finance')
+        ->assertJsonPath('data.leasing_options.0.installment_3yr', 3200000)
+        ->assertJsonMissingPath('data.total_capital')
+        ->assertJsonMissingPath('data.gross_profit');
+
+    $this->get(route('marketing.stok.show', $vehicle))
+        ->assertRedirect('/app/marketing/'.$vehicle->id);
 });
 
 test('marketing cannot view a sold vehicle and other roles return to their dashboard', function () {
@@ -183,12 +181,21 @@ test('marketing cannot view a sold vehicle and other roles return to their dashb
     ]);
 
     $this->actingAs($marketingUser)
-        ->get(route('marketing.stok.show', $soldVehicle))
+        ->getJson(route('api.spa.marketing.vehicles.show', $soldVehicle))
         ->assertNotFound();
 
     $this->actingAs(User::factory()->create())
         ->get(route('marketing.stok.index'))
         ->assertRedirect(route('dashboard'));
+});
+
+test('marketing receives the Vue shell for catalog deep links', function () {
+    $this->actingAs(User::factory()->marketing()->create());
+
+    $this->get('/app/marketing')
+        ->assertOk()
+        ->assertSee('id="app"', false)
+        ->assertSee('assets/spa-', false);
 });
 
 test('marketing catalog rejects invalid year ranges', function () {
@@ -206,8 +213,7 @@ test('master can create an account with the marketing role', function () {
     $this->actingAs(User::factory()->master()->create());
 
     $this->get(route('users.index'))
-        ->assertOk()
-        ->assertSee('value="marketing"', false);
+        ->assertRedirect('/app/users');
 
     $this->post(route('users.store'), [
         'name' => 'Marketing Baru',

@@ -1,36 +1,17 @@
 <?php
 
+use App\Models\CarTransaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 
 uses(RefreshDatabase::class);
 
-test('master can list users and create an account with an explicitly selected role', function () {
+test('master account management opens the SPA and preserves account creation', function () {
     $this->actingAs(User::factory()->master()->create());
 
     $this->get(route('users.index'))
-        ->assertOk()
-        ->assertSee('Manajemen Akun')
-        ->assertSee('Showroom')
-        ->assertSee('Tambah akun')
-        ->assertSee('data-app-menu-toggle', false)
-        ->assertSee('id="app-navigation"', false)
-        ->assertSee('data-profile-menu', false)
-        ->assertDontSee('data-profile-menu-database', false)
-        ->assertSee('data-sidebar-database', false)
-        ->assertSee(route('dashboard').'#database', false)
-        ->assertSee('class="showroom-content users-page"', false)
-        ->assertSee('class="showroom-dashboard-heading"', false)
-        ->assertSee('class="panel showroom-inventory users-table-card"', false)
-        ->assertSee('class="toolbar"', false)
-        ->assertSee('class="showroom-primary-action"', false)
-        ->assertSee('data-user-search', false)
-        ->assertSee('Menampilkan 1 pengguna')
-        ->assertSee('Daftar Pengguna')
-        ->assertSee('Tanggal dibuat')
-        ->assertSee(route('dashboard').'#inventaris', false)
-        ->assertSee(route('dashboard').'#laporan', false);
+        ->assertRedirect('/app/users');
 
     $this->post(route('users.store'), [
         'name' => 'Admin Baru',
@@ -46,9 +27,7 @@ test('master can list users and create an account with an explicitly selected ro
         ->and(Hash::check('secure-password', $user->password))->toBeTrue();
 
     $this->get(route('users.index'))
-        ->assertOk()
-        ->assertSee('role="status"', false)
-        ->assertSee('Akun berhasil dibuat.');
+        ->assertRedirect('/app/users');
 });
 
 test('master user list paginates ten matching accounts and retains the search query', function () {
@@ -59,21 +38,17 @@ test('master user list paginates ten matching accounts and retains the search qu
         ->create();
     $this->actingAs($master);
 
-    $response = $this->get(route('users.index', ['q' => 'Needle']));
+    $this->getJson(route('api.spa.users.index', ['q' => 'Needle']))
+        ->assertOk()
+        ->assertJsonPath('summary.search', 'Needle')
+        ->assertJsonPath('meta.current_page', 1)
+        ->assertJsonCount(10, 'data')
+        ->assertJsonPath('links.next', route('api.spa.users.index', ['q' => 'Needle', 'page' => 2]));
 
-    $response->assertOk()
-        ->assertSee('value="Needle"', false)
-        ->assertSee('page=2', false)
-        ->assertSee('q=Needle', false);
-
-    expect(substr_count($response->getContent(), 'data-user-row'))->toBe(10);
-
-    $pageTwo = $this->get(route('users.index', ['q' => 'Needle', 'page' => 2]));
-
-    $pageTwo->assertOk()
-        ->assertSee('Needle Account 11');
-
-    expect(substr_count($pageTwo->getContent(), 'data-user-row'))->toBe(1);
+    $this->getJson(route('api.spa.users.index', ['q' => 'Needle', 'page' => 2]))
+        ->assertOk()
+        ->assertJsonPath('data.0.name', 'Needle Account 11')
+        ->assertJsonCount(1, 'data');
 });
 
 test('master can update account details and leave its password unchanged', function () {
@@ -121,6 +96,38 @@ test('master can delete another user but cannot delete itself or the final maste
     $this->assertDatabaseMissing('users', ['id' => $otherMaster->id]);
 });
 
+test('deleting a sale note creator preserves the sale note and clears its creator reference', function () {
+    $master = User::factory()->master()->create();
+    $creator = User::factory()->create();
+    $vehicle = CarTransaction::query()->create([
+        'plate_number' => 'B 1234 USER',
+        'brand' => 'Toyota',
+        'model' => 'Yaris',
+        'year' => 2024,
+        'transmission' => 'Automatic',
+        'color' => 'Silver',
+        'buy_date' => '2026-10-01',
+        'buy_price' => 65000000,
+        'sell_date' => '2026-10-20',
+        'selling_price' => 92000000,
+    ]);
+    $saleNote = $vehicle->saleNote()->create([
+        'nama_konsumen' => 'Pembeli',
+        'created_by' => $creator->id,
+    ]);
+
+    $this->actingAs($master)
+        ->delete(route('users.destroy', $creator))
+        ->assertRedirect(route('users.index'))
+        ->assertSessionHas('success', 'Akun berhasil dihapus.');
+
+    $this->assertModelExists($saleNote);
+    $this->assertDatabaseHas('sale_notes', [
+        'id' => $saleNote->id,
+        'created_by' => null,
+    ]);
+});
+
 test('admin receives forbidden responses for user management endpoints', function () {
     $admin = User::factory()->create();
     $managedUser = User::factory()->create();
@@ -145,38 +152,33 @@ test('admin receives forbidden responses for user management endpoints', functio
     $this->delete(route('users.destroy', $managedUser))->assertForbidden();
 });
 
-test('only masters see user and database management in the showroom sidebar', function () {
+test('the SPA shell exposes role metadata for management navigation', function () {
     $this->actingAs(User::factory()->master()->create())
-        ->get(route('transactions.index'))
+        ->get('/app/dashboard')
         ->assertOk()
-        ->assertSee(route('users.index'), false)
-        ->assertDontSee('data-profile-menu-database', false)
-        ->assertSee('data-sidebar-database', false)
-        ->assertSee('data-database-modal', false);
+        ->assertSee('\u0022role\u0022:\u0022master\u0022', false)
+        ->assertSee('id="app"', false);
 
     $this->actingAs(User::factory()->create())
-        ->get(route('transactions.index'))
+        ->get('/app/dashboard')
         ->assertOk()
-        ->assertDontSee(route('users.index'), false)
-        ->assertDontSee('data-profile-menu-database', false)
-        ->assertDontSee('data-sidebar-database', false)
-        ->assertDontSee('data-database-modal', false);
+        ->assertSee('\u0022role\u0022:\u0022admin\u0022', false)
+        ->assertSee('id="app"', false);
+
+    $this->getJson(route('api.spa.users.index'))->assertForbidden();
 });
 
-test('final master cannot be demoted to admin', function () {
+test('the account API rejects demoting the final master to admin', function () {
     $master = User::factory()->master()->create();
     $this->actingAs($master);
 
-    $this->from(route('users.index'))->followingRedirects()->put(route('users.update', $master), [
+    $this->putJson(route('api.spa.users.update', $master), [
         'name' => $master->name,
         'username' => $master->username,
         'password' => '',
         'role' => 'admin',
-        '_form' => 'edit',
-        '_user_id' => $master->id,
-    ])->assertOk()
-        ->assertSee('role="alert"', false)
-        ->assertSee('Sistem harus mempertahankan minimal satu akun Master.');
+    ])->assertUnprocessable()
+        ->assertJsonValidationErrors('role');
 
     expect($master->refresh()->role)->toBe('master');
 });

@@ -9,6 +9,7 @@ use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 
 uses(RefreshDatabase::class);
@@ -17,15 +18,15 @@ beforeEach(function () {
     $this->actingAs(User::factory()->master()->create());
 });
 
-test('it renders SQLite backup and import actions on the dashboard', function () {
-    $response = $this->get(route('transactions.index'));
+test('the master receives the SPA shell and backup endpoints', function () {
+    $this->get('/app/dashboard')
+        ->assertOk()
+        ->assertSee('id="app"', false)
+        ->assertSee('window.spaUser', false);
 
-    $response->assertOk()
-        ->assertSee('Backup SQLite', false)
-        ->assertSee(route('transactions.export'), false)
-        ->assertSee(route('transactions.import'), false)
-        ->assertSee('type="file"', false)
-        ->assertSee('accept=".sqlite,.db"', false);
+    expect(Route::has('api.spa.transactions.import'))->toBeTrue();
+
+    $this->get(route('transactions.export'))->assertDownload();
 });
 
 test('it downloads an intact SQLite backup containing transactions and sale notes', function () {
@@ -324,8 +325,19 @@ test('it imports transactions from SQLite backups with newly generated IDs', fun
         'color' => 'Hitam',
         'buy_date' => '2026-10-17',
         'buy_price' => 125000000,
+        'vehicle_photo_path' => 'vehicle-photos/backup-cover.jpg',
         'tax_items' => [['name' => 'Pajak', 'cost' => 1250000]],
         'leasing_options' => [['name' => 'BCA', 'disbursement' => 90000000, 'dp' => 35000000]],
+    ]);
+    $sourceTransaction->vehiclePhotos()->create([
+        'path' => 'vehicle-photos/backup-cover.jpg',
+        'is_cover' => true,
+        'position' => 0,
+    ]);
+    $sourceTransaction->vehiclePhotos()->create([
+        'path' => 'vehicle-photos/backup-interior.jpg',
+        'is_cover' => false,
+        'position' => 1,
     ]);
 
     $backupPath = app(TransactionBackupService::class)->createBackup();
@@ -356,7 +368,9 @@ test('it imports transactions from SQLite backups with newly generated IDs', fun
     expect($importedTransaction->id)->not->toBe($sourceId)
         ->and((float) $importedTransaction->buy_price)->toBe(125000000.0)
         ->and($importedTransaction->tax_items)->toBe([['name' => 'Pajak', 'cost' => 1250000]])
-        ->and($importedTransaction->leasing_options)->toBe([['name' => 'BCA', 'disbursement' => 90000000, 'dp' => 35000000]]);
+        ->and($importedTransaction->leasing_options)->toBe([['name' => 'BCA', 'disbursement' => 90000000, 'dp' => 35000000]])
+        ->and($importedTransaction->vehiclePhotos)->toHaveCount(2)
+        ->and($importedTransaction->vehicle_photo_path)->toBe('vehicle-photos/backup-cover.jpg');
 
     $this->assertDatabaseCount('car_transactions', 3);
 });

@@ -6,19 +6,12 @@ use Illuminate\Support\Facades\Hash;
 
 uses(RefreshDatabase::class);
 
-test('masters and admins can render account settings in the shared application shell', function (string $role) {
+test('masters and admins open SPA account settings from the legacy URL', function (string $role) {
     $user = User::factory()->create(['role' => $role]);
 
     $this->actingAs($user)
         ->get(route('profile.edit'))
-        ->assertOk()
-        ->assertViewIs('settings.index')
-        ->assertSee('Pengaturan Akun Master')
-        ->assertSee('Kelola informasi username dan kata sandi akses akun Anda.')
-        ->assertSee('data-app-menu-toggle', false)
-        ->assertSee('id="app-navigation"', false)
-        ->assertSee('data-profile-menu', false)
-        ->assertSee(route('profile.update'), false);
+        ->assertRedirect('/app/settings');
 })->with(['master', 'admin']);
 
 test('users can update their profile without changing the existing password', function () {

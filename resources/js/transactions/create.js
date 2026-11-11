@@ -1,4 +1,11 @@
-(() => {
+let vehiclePhotoPreviewUrls = [];
+
+document.addEventListener('turbo:before-cache', () => {
+    vehiclePhotoPreviewUrls.forEach((url) => URL.revokeObjectURL(url));
+    vehiclePhotoPreviewUrls = [];
+});
+
+document.addEventListener('turbo:load', () => {
     const transactionForm = document.querySelector('.transaction-form');
     if (!transactionForm || transactionForm.classList.contains('sell-module-form')) {
         return;
@@ -33,9 +40,11 @@
     const leasingVehicleName = document.getElementById('leasing-vehicle-name');
     const vehiclePhotoInput = document.getElementById('vehicle-photo-input');
     const vehiclePhotoButton = document.getElementById('vehicle-photo-button');
-    const vehiclePhotoPreview = document.getElementById('vehicle-photo-preview');
+    const vehiclePhotoDropzone = document.getElementById('vehicle-photo-dropzone');
+    const vehiclePhotoGallery = document.getElementById('vehicle-photo-gallery');
     const vehiclePhotoPlaceholder = document.getElementById('vehicle-photo-placeholder');
-    let vehiclePhotoPreviewUrl = null;
+    const vehiclePhotoStatus = document.getElementById('vehicle-photo-status');
+    let selectedVehiclePhotos = [];
     const vehicleSummaryFields = [
         'brand',
         'model',
@@ -58,29 +67,164 @@
         leasingVehicleName.textContent = vehicleName || 'Lengkapi data kendaraan';
     }
 
-    if (vehiclePhotoInput && vehiclePhotoPreview && vehiclePhotoPlaceholder) {
-        vehiclePhotoButton?.addEventListener('click', () => vehiclePhotoInput.click());
+    if (vehiclePhotoInput && vehiclePhotoGallery && vehiclePhotoPlaceholder) {
+        function visiblePhotoCards() {
+            return [...vehiclePhotoGallery.querySelectorAll('[data-photo-card]')]
+                .filter((card) => !card.hidden);
+        }
 
-        vehiclePhotoInput.addEventListener('change', () => {
-            const [photo] = vehiclePhotoInput.files ?? [];
+        function updatePhotoPlaceholder() {
+            vehiclePhotoPlaceholder.hidden = visiblePhotoCards().length > 0;
+        }
 
-            if (!photo || !photo.type.startsWith('image/')) {
+        function selectDefaultCover() {
+            const checkedCover = transactionForm.querySelector('input[name="foto_utama"]:checked');
+            if (checkedCover && !checkedCover.closest('[data-photo-card]')?.hidden) {
                 return;
             }
 
-            if (vehiclePhotoButton) {
-                vehiclePhotoButton.textContent = 'Ganti foto';
+            if (checkedCover) {
+                checkedCover.checked = false;
             }
 
-            if (vehiclePhotoPreviewUrl) {
-                URL.revokeObjectURL(vehiclePhotoPreviewUrl);
+            const firstAvailableCover = visiblePhotoCards().at(0)?.querySelector('input[name="foto_utama"]');
+            if (firstAvailableCover) {
+                firstAvailableCover.checked = true;
+            }
+        }
+
+        function clearNewPhotoPreviews() {
+            vehiclePhotoGallery.querySelectorAll('[data-new-photo-card]').forEach((card) => card.remove());
+            vehiclePhotoPreviewUrls.forEach((url) => URL.revokeObjectURL(url));
+            vehiclePhotoPreviewUrls = [];
+        }
+
+        function syncPhotoInput() {
+            const transfer = new DataTransfer();
+            selectedVehiclePhotos.forEach((photo) => transfer.items.add(photo));
+            vehiclePhotoInput.files = transfer.files;
+        }
+
+        function renderNewPhotoPreviews() {
+            clearNewPhotoPreviews();
+
+            selectedVehiclePhotos.forEach((photo, index) => {
+                const token = `new:${index}`;
+                const card = document.createElement('article');
+                const image = document.createElement('img');
+                const actions = document.createElement('div');
+                const coverLabel = document.createElement('label');
+                const coverInput = document.createElement('input');
+                const removeButton = document.createElement('button');
+                const previewUrl = URL.createObjectURL(photo);
+                const alreadyHasCover = transactionForm.querySelector('input[name="foto_utama"]:checked');
+
+                card.className = 'vehicle-photo-item';
+                card.dataset.photoCard = '';
+                card.dataset.newPhotoCard = '';
+                card.dataset.photoToken = token;
+                image.src = previewUrl;
+                image.alt = `Pratinjau ${photo.name}`;
+                actions.className = 'vehicle-photo-item-actions';
+                coverLabel.className = 'vehicle-photo-cover-choice';
+                coverInput.type = 'radio';
+                coverInput.name = 'foto_utama';
+                coverInput.value = token;
+                coverInput.checked = !alreadyHasCover || Boolean(alreadyHasCover.closest('[data-photo-card]')?.hidden);
+                coverLabel.append(coverInput, document.createTextNode(' Foto utama'));
+                removeButton.className = 'vehicle-photo-remove';
+                removeButton.type = 'button';
+                removeButton.dataset.removeNewPhoto = String(index);
+                removeButton.textContent = 'Hapus';
+                actions.append(coverLabel, removeButton);
+                card.append(image, actions);
+                vehiclePhotoGallery.append(card);
+                vehiclePhotoPreviewUrls.push(previewUrl);
+            });
+
+            updatePhotoPlaceholder();
+            selectDefaultCover();
+        }
+
+        function addVehiclePhotos(files) {
+            const supportedPhotos = [...files].filter((photo) =>
+                ['image/jpeg', 'image/png', 'image/webp'].includes(photo.type),
+            );
+            const remainingSlots = 20 - selectedVehiclePhotos.length
+                - vehiclePhotoGallery.querySelectorAll(
+                    '[data-photo-card]:not([data-new-photo-card]):not([hidden])',
+                ).length;
+            const photosToAdd = supportedPhotos.slice(0, Math.max(remainingSlots, 0));
+
+            if (photosToAdd.length < supportedPhotos.length && vehiclePhotoStatus) {
+                vehiclePhotoStatus.textContent = 'Maksimal 20 foto kendaraan dapat dipilih.';
+            } else if (vehiclePhotoStatus) {
+                vehiclePhotoStatus.textContent = '';
             }
 
-            vehiclePhotoPreviewUrl = URL.createObjectURL(photo);
-            vehiclePhotoPreview.src = vehiclePhotoPreviewUrl;
-            vehiclePhotoPreview.hidden = false;
-            vehiclePhotoPlaceholder.hidden = true;
+            selectedVehiclePhotos.push(...photosToAdd);
+            syncPhotoInput();
+            renderNewPhotoPreviews();
+        }
+
+        vehiclePhotoButton?.addEventListener('click', () => vehiclePhotoInput.click());
+        vehiclePhotoDropzone?.addEventListener('click', () => vehiclePhotoInput.click());
+        vehiclePhotoDropzone?.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                vehiclePhotoInput.click();
+            }
         });
+        vehiclePhotoDropzone?.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            vehiclePhotoDropzone.classList.add('is-dragging');
+        });
+        vehiclePhotoDropzone?.addEventListener('dragleave', () => {
+            vehiclePhotoDropzone.classList.remove('is-dragging');
+        });
+        vehiclePhotoDropzone?.addEventListener('drop', (event) => {
+            event.preventDefault();
+            vehiclePhotoDropzone.classList.remove('is-dragging');
+            addVehiclePhotos(event.dataTransfer?.files ?? []);
+        });
+        vehiclePhotoInput.addEventListener('change', () => {
+            addVehiclePhotos(vehiclePhotoInput.files ?? []);
+            vehiclePhotoInput.value = '';
+        });
+
+        vehiclePhotoGallery.addEventListener('click', (event) => {
+            const removeButton = event.target.closest('[data-remove-photo], [data-remove-new-photo]');
+            if (!removeButton) {
+                return;
+            }
+
+            const card = removeButton.closest('[data-photo-card]');
+            const newPhotoIndex = removeButton.dataset.removeNewPhoto;
+
+            if (newPhotoIndex !== undefined) {
+                selectedVehiclePhotos.splice(Number(newPhotoIndex), 1);
+                syncPhotoInput();
+                renderNewPhotoPreviews();
+                return;
+            }
+
+            card.hidden = true;
+            const removalInput = card.querySelector('[data-remove-photo-input], [data-remove-legacy-input]');
+            if (removalInput) {
+                removalInput.disabled = false;
+            }
+
+            const coverInput = card.querySelector('input[name="foto_utama"]');
+            if (coverInput) {
+                coverInput.checked = false;
+            }
+
+            selectDefaultCover();
+            updatePhotoPlaceholder();
+        });
+
+        updatePhotoPlaceholder();
+        selectDefaultCover();
     }
 
     function toNumericAmount(value) {
@@ -446,4 +590,4 @@
     setupItemList('additional-repairs', 'repair-item-template', 'add-repair');
     setupItemList('tax-items', 'tax-item-template', 'add-tax-item');
     setupLeasingList();
-})();
+});

@@ -29,7 +29,9 @@ it('creates and migrates a missing SQLite database before handling requests', fu
 
         $this->actingAs(User::factory()->create())
             ->get(route('dashboard'))
-            ->assertOk();
+            ->assertRedirect('/app/dashboard');
+
+        $this->get('/app/dashboard')->assertOk()->assertSee('id="app"', false);
 
         expect(file_exists($databasePath))->toBeTrue()
             ->and(DB::table('sessions')->exists())->toBeTrue();

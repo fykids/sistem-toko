@@ -11,6 +11,12 @@ use Illuminate\Validation\Validator;
 
 class StoreSellRequest extends FormRequest
 {
+    private const NON_NEGATIVE_AMOUNT_RULES = [
+        'numeric',
+        'min:0',
+        'max:9999999999999.99',
+    ];
+
     protected function prepareForValidation(): void
     {
         $amounts = [];
@@ -61,12 +67,12 @@ class StoreSellRequest extends FormRequest
             'buyer_nik' => ['nullable', 'digits:16'],
             'buyer_phone' => ['nullable', 'string', 'max:30'],
             'buyer_address' => ['nullable', 'string', 'max:2000'],
-            'selling_price' => ['required', 'numeric', 'min:0'],
-            'down_payment' => ['required', 'numeric', 'min:0'],
+            'selling_price' => ['required', ...self::NON_NEGATIVE_AMOUNT_RULES],
+            'down_payment' => ['required', ...self::NON_NEGATIVE_AMOUNT_RULES],
             'down_payment_date' => ['nullable', 'date'],
-            'settlement_amount' => ['required', 'numeric', 'min:0'],
+            'settlement_amount' => ['required', ...self::NON_NEGATIVE_AMOUNT_RULES],
             'settlement_date' => ['nullable', 'date'],
-            'leasing_disbursement' => ['required', 'numeric', 'min:0'],
+            'leasing_disbursement' => ['required', ...self::NON_NEGATIVE_AMOUNT_RULES],
             'leasing_disbursement_date' => ['nullable', 'date'],
             'sell_date' => ['required', 'date'],
             'planned_payment_date' => ['nullable', 'date'],

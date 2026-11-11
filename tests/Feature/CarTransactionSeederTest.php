@@ -37,10 +37,11 @@ test('the ten seeded vehicles fill one page in the inventory view', function () 
     app(CarTransactionSeeder::class)->run();
 
     $this->actingAs(User::factory()->master()->create())
-        ->get(route('transactions.index', ['view' => 'inventory']))
+        ->getJson(route('api.spa.dashboard', ['view' => 'inventory']))
         ->assertOk()
-        ->assertViewHas('transactions', fn ($transactions): bool => $transactions->perPage() === 10
-            && $transactions->count() === 10
-            && $transactions->total() === 10
-            && ! $transactions->hasMorePages());
+        ->assertJsonPath('meta.per_page', 10)
+        ->assertJsonCount(10, 'data')
+        ->assertJsonPath('meta.total', 10)
+        ->assertJsonPath('meta.current_page', 1)
+        ->assertJsonPath('meta.last_page', 1);
 });

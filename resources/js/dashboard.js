@@ -1,6 +1,15 @@
-const layout = document.querySelector('[data-showroom-layout]');
+import * as Turbo from '@hotwired/turbo';
 
-if (layout) {
+let dashboardListeners;
+
+document.addEventListener('turbo:load', () => {
+    dashboardListeners?.abort();
+    dashboardListeners = new AbortController();
+
+    const layout = document.querySelector('[data-showroom-layout]');
+    if (!layout) {
+        return;
+    }
     const databaseModal = document.querySelector('[data-database-modal]');
     const databaseSidebarLinks = document.querySelectorAll('[data-sidebar-database]');
     const databaseCloseButtons = document.querySelectorAll('[data-database-close]');
@@ -86,7 +95,7 @@ if (layout) {
         targetUrl.searchParams.delete('page');
         targetUrl.searchParams.set('view', view);
         targetUrl.hash = view === 'sales' ? 'penjualan' : view;
-        window.location.assign(targetUrl);
+        Turbo.visit(targetUrl.toString());
     };
 
     layout.querySelectorAll('[data-dashboard-nav]').forEach((link) => {
@@ -118,7 +127,7 @@ if (layout) {
         setDashboardView(view, false);
     };
 
-    window.addEventListener('hashchange', viewFromHash);
+    window.addEventListener('hashchange', viewFromHash, { signal: dashboardListeners.signal });
     viewFromHash();
 
     if (databaseModal && modalDialog) {
@@ -231,4 +240,4 @@ if (layout) {
             fileInput.dispatchEvent(new Event('change', { bubbles: true }));
         });
     }
-}
+});

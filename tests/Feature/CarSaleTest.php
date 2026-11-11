@@ -19,9 +19,8 @@ it('does not register the removed sales endpoints', function () {
 it('keeps the legacy dashboard sales anchor and the independent jual module', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('dashboard'))
-        ->assertOk()
-        ->assertSee(route('dashboard').'#penjualan', false)
-        ->assertSee(route('jual.index'), false);
+        ->assertRedirect('/app/dashboard');
 
-    $this->get(route('jual.index'))->assertOk();
+    $this->get(route('jual.index'))->assertRedirect('/app/jual');
+    $this->getJson(route('api.spa.jual.index'))->assertOk();
 });

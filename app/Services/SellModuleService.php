@@ -7,12 +7,30 @@ use App\Models\SaleNote;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\LazyCollection;
 use Illuminate\Validation\ValidationException;
 
 class SellModuleService
 {
+    private const MAX_DECIMAL_AMOUNT = 9999999999999.99;
+
+    private const VEHICLE_SELECTION_COLUMNS = [
+        'id',
+        'plate_number',
+        'manager_name',
+        'chassis_number',
+        'engine_number',
+        'mileage_km',
+        'brand',
+        'model',
+        'year',
+        'transmission',
+        'color',
+        'owner_name',
+    ];
+
     public function listNotes(User $user, string $status = 'all'): LengthAwarePaginator
     {
         $canViewSensitiveData = $user->can('viewSensitiveData', CarTransaction::class);
@@ -72,6 +90,15 @@ class SellModuleService
                 ]);
             }
 
+            if (
+                (float) $vehicle->settlement_amount + (float) $attributes['amount']
+                > self::MAX_DECIMAL_AMOUNT
+            ) {
+                throw ValidationException::withMessages([
+                    'amount' => 'Akumulasi pelunasan melebihi batas maksimum yang dapat disimpan.',
+                ]);
+            }
+
             $lockedSaleNote->payments()->create([
                 'amount' => $attributes['amount'],
                 'payment_method' => $attributes['payment_method'],
@@ -102,11 +129,11 @@ class SellModuleService
     /**
      * @return LazyCollection<int, CarTransaction>
      */
-    public function availableVehicles(bool $canViewSensitiveData): LazyCollection
+    public function availableVehicles(): LazyCollection
     {
         return $this->availableVehiclesQuery()
             ->orderBy('plate_number')
-            ->cursor($this->vehicleColumns($canViewSensitiveData));
+            ->cursor(self::VEHICLE_SELECTION_COLUMNS);
     }
 
     public function hasAvailableVehicles(): bool
@@ -114,7 +141,7 @@ class SellModuleService
         return $this->availableVehiclesQuery()->exists();
     }
 
-    public function findAvailableVehicle(int $vehicleId, bool $canViewSensitiveData): ?CarTransaction
+    public function findAvailableVehicle(int $vehicleId): ?CarTransaction
     {
         if ($vehicleId < 1) {
             return null;
@@ -122,7 +149,7 @@ class SellModuleService
 
         return $this->availableVehiclesQuery()
             ->whereKey($vehicleId)
-            ->first($this->vehicleColumns($canViewSensitiveData));
+            ->first(self::VEHICLE_SELECTION_COLUMNS);
     }
 
     /**
@@ -142,31 +169,37 @@ class SellModuleService
     {
         $vehicleId = (int) $attributes['car_transaction_id'];
 
-        return DB::transaction(function () use ($attributes, $creator, $vehicleId): SaleNote {
-            $vehicle = CarTransaction::query()
-                ->whereKey($vehicleId)
-                ->lockForUpdate()
-                ->firstOrFail();
+        try {
+            return DB::transaction(function () use ($attributes, $creator, $vehicleId): SaleNote {
+                $vehicle = CarTransaction::query()
+                    ->whereKey($vehicleId)
+                    ->lockForUpdate()
+                    ->firstOrFail();
 
-            if (
-                $vehicle->sell_date !== null
-                || $vehicle->saleNote()->exists()
-            ) {
-                throw ValidationException::withMessages([
-                    'car_transaction_id' => 'Kendaraan ini sudah memiliki data Jual.',
+                if (
+                    $vehicle->sell_date !== null
+                    || $vehicle->saleNote()->exists()
+                ) {
+                    throw ValidationException::withMessages([
+                        'car_transaction_id' => 'Kendaraan ini sudah memiliki data Jual.',
+                    ]);
+                }
+
+                $vehicle->forceFill($this->vehicleSaleAttributes($vehicle, $attributes))->save();
+
+                return $vehicle->saleNote()->create([
+                    'nama_konsumen' => $attributes['nama_konsumen'],
+                    'buyer_nik' => $attributes['buyer_nik'] ?? null,
+                    'buyer_phone' => $attributes['buyer_phone'] ?? null,
+                    'buyer_address' => $attributes['buyer_address'] ?? null,
+                    'created_by' => $creator->id,
                 ]);
-            }
-
-            $vehicle->forceFill($this->vehicleSaleAttributes($vehicle, $attributes))->save();
-
-            return $vehicle->saleNote()->create([
-                'nama_konsumen' => $attributes['nama_konsumen'],
-                'buyer_nik' => $attributes['buyer_nik'] ?? null,
-                'buyer_phone' => $attributes['buyer_phone'] ?? null,
-                'buyer_address' => $attributes['buyer_address'] ?? null,
-                'created_by' => $creator->id,
+            });
+        } catch (UniqueConstraintViolationException) {
+            throw ValidationException::withMessages([
+                'car_transaction_id' => 'Kendaraan ini sudah memiliki data Jual.',
             ]);
-        });
+        }
     }
 
     /**

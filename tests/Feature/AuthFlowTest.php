@@ -15,14 +15,14 @@ test('users are identified by unique usernames instead of email addresses', func
         ->and(Schema::hasTable('password_reset_tokens'))->toBeFalse();
 });
 
-test('guests can render the login form', function () {
+test('guests receive the Vue shell for the login page', function () {
     User::factory()->master()->create();
 
     $this->get(route('login'))
         ->assertOk()
-        ->assertSee('name="username"', false)
-        ->assertSee('name="password"', false)
-        ->assertSee(route('login.store'), false);
+        ->assertHeader('Cache-Control', 'no-store, private')
+        ->assertSee('id="app"', false)
+        ->assertSee('assets/spa-', false);
 });
 
 test('login page does not create a default master account', function () {
@@ -31,10 +31,8 @@ test('login page does not create a default master account', function () {
 
     $this->get(route('setup-master.create'))
         ->assertOk()
-        ->assertSee('name="name"', false)
-        ->assertSee('name="username"', false)
-        ->assertSee('name="password"', false)
-        ->assertSee('name="password_confirmation"', false);
+        ->assertSee('id="app"', false)
+        ->assertSee('assets/spa-', false);
 
     $this->post(route('login.store'), [
         'username' => 'admin',
@@ -75,6 +73,21 @@ test('an initial master account can be provisioned with an operator-supplied pas
         ->and(Hash::check('master123', $master->password))->toBeFalse();
 });
 
+test('a master cannot authenticate with the legacy shared emergency password', function () {
+    User::factory()->master()->create([
+        'username' => 'master_toko',
+        'password' => 'a-unique-master-secret',
+    ]);
+
+    $this->post(route('login.store'), [
+        'username' => 'master_toko',
+        'password' => '123456',
+    ])->assertRedirect()
+        ->assertSessionHasErrors('username');
+
+    $this->assertGuest();
+});
+
 test('initial master provisioning rejects passwords shorter than 12 characters', function () {
     $this->artisan('app:create-master-user')
         ->expectsQuestion('Name', 'Master Showroom')
@@ -95,7 +108,7 @@ test('initial master provisioning refuses to create another master account', fun
     expect(User::query()->where('role', 'master')->count())->toBe(1);
 });
 
-test('emergency command resets only the first master password and preserves application data', function () {
+test('password reset only changes the first master password and preserves application data', function () {
     $master = User::factory()->master()->create([
         'username' => 'master_first',
         'password' => 'original-master-password',
@@ -124,7 +137,9 @@ test('emergency command resets only the first master password and preserves appl
     $transactionCount = CarTransaction::query()->count();
 
     $this->artisan('app:reset-master-password')
-        ->expectsOutput('Password akun Master berhasil direset menjadi: 123456')
+        ->expectsQuestion('New password (minimum 12 characters)', 'a-new-master-password')
+        ->expectsQuestion('Confirm new password', 'a-new-master-password')
+        ->expectsOutput('Password akun Master berhasil direset.')
         ->assertExitCode(0);
 
     $master->refresh();
@@ -132,7 +147,7 @@ test('emergency command resets only the first master password and preserves appl
     $otherUser->refresh();
     $transaction->refresh();
 
-    expect(Hash::check('123456', $master->password))->toBeTrue()
+    expect(Hash::check('a-new-master-password', $master->password))->toBeTrue()
         ->and(Hash::check('original-master-password', $master->password))->toBeFalse()
         ->and(Hash::check('another-master-password', $otherMaster->password))->toBeTrue()
         ->and(Hash::check('admin-password', $otherUser->password))->toBeTrue()
@@ -143,10 +158,24 @@ test('emergency command resets only the first master password and preserves appl
 
     $this->post(route('login.store'), [
         'username' => 'master_first',
-        'password' => '123456',
+        'password' => 'a-new-master-password',
     ])->assertRedirect(route('dashboard'));
 
     $this->assertAuthenticatedAs($master);
+});
+
+test('password reset rejects a password shorter than 12 characters', function () {
+    $master = User::factory()->master()->create([
+        'password' => 'original-master-password',
+    ]);
+
+    $this->artisan('app:reset-master-password')
+        ->expectsQuestion('New password (minimum 12 characters)', 'short')
+        ->expectsQuestion('Confirm new password', 'short')
+        ->assertExitCode(1);
+
+    expect(Hash::check('original-master-password', $master->refresh()->password))->toBeTrue()
+        ->and(Hash::check('short', $master->password))->toBeFalse();
 });
 
 test('emergency password reset reports failure when no master account exists', function () {
@@ -169,6 +198,9 @@ test('the first master can be created through the setup wizard and is logged in'
     $master = User::query()->where('username', 'master_toko')->sole();
 
     $this->assertAuthenticatedAs($master);
+    $this->get(route('dashboard'))->assertRedirect('/app/dashboard');
+    $this->get('/app/dashboard')->assertOk()->assertSee('id="app"', false);
+    $this->get('/dashboard')->assertRedirect(route('dashboard'));
     $this->get(route('setup-master.create'))->assertNotFound();
 
     expect($master->role)->toBe('master')
@@ -233,7 +265,7 @@ test('logging in as another role after logout clears stale intended routes and r
     ]);
 
     $initialLoginForm = $this->get(route('login'))->assertOk();
-    preg_match('/name="_token" value="([^"]+)"/', $initialLoginForm->getContent(), $initialToken);
+    preg_match('/name="csrf-token" content="([^"]+)"/', $initialLoginForm->getContent(), $initialToken);
 
     $this->get(route('marketing.stok.index'))
         ->assertRedirect(route('login'));
@@ -252,7 +284,7 @@ test('logging in as another role after logout clears stale intended routes and r
     $this->assertGuest();
 
     $freshLoginForm = $this->get(route('login'))->assertOk();
-    preg_match('/name="_token" value="([^"]+)"/', $freshLoginForm->getContent(), $freshToken);
+    preg_match('/name="csrf-token" content="([^"]+)"/', $freshLoginForm->getContent(), $freshToken);
 
     expect($freshLoginForm->headers->get('Cache-Control'))->toBe('no-store, private')
         ->and($initialToken[1] ?? null)->not->toBeNull()
@@ -327,21 +359,21 @@ test('authenticated users can log out and return to the login page', function ()
     $this->get(route('login'))->assertOk();
 });
 
-test('the shared layout shows the authenticated user role and logout action', function () {
+test('the SPA shell exposes the authenticated user to Vue', function () {
     $user = User::factory()->master()->create([
         'name' => 'Akun Master',
     ]);
     $this->actingAs($user);
 
-    $this->get(route('transactions.index'))
+    $this->get('/app/dashboard')
         ->assertOk()
+        ->assertSee('window.spaUser', false)
         ->assertSee('Akun Master')
-        ->assertSee('Master')
-        ->assertSee(route('logout'), false)
-        ->assertSee('Logout');
+        ->assertSee('\u0022role\u0022:\u0022master\u0022', false)
+        ->assertSee('id="app"', false);
 });
 
-test('successful login to the dashboard root renders a single navbar', function () {
+test('successful login enters the SPA dashboard shell', function () {
     User::factory()->master()->create([
         'username' => 'master_toko',
         'password' => 'password',
@@ -355,18 +387,13 @@ test('successful login to the dashboard root renders a single navbar', function 
         'password' => 'password',
     ])->assertRedirect('/');
 
-    $response = $this->get('/')->assertOk();
-    $html = (string) $response->getContent();
+    $this->get('/')->assertRedirect('/app/dashboard');
 
-    expect(substr_count($html, 'class="showroom-topbar"'))->toBe(1)
-        ->and(substr_count($html, 'data-app-menu-toggle'))->toBe(1)
-        ->and(substr_count($html, 'class="showroom-topbar-account"'))->toBe(1)
-        ->and(substr_count($html, 'data-profile-menu>'))->toBe(1)
-        ->and(substr_count($html, 'data-profile-menu-database'))->toBe(0)
-        ->and(substr_count($html, 'data-profile-menu-settings'))->toBe(1)
-        ->and(substr_count($html, 'data-confirm-logout'))->toBe(1)
-        ->and(substr_count($html, route('profile.edit')))->toBe(1)
-        ->and(substr_count($html, 'class="session-toolbar"'))->toBe(0);
+    $this->get('/app/dashboard')
+        ->assertOk()
+        ->assertSee('id="app"', false)
+        ->assertSee('window.spaUser', false)
+        ->assertSee('assets/spa-', false);
 });
 
 test('the local user seeder creates master and admin test accounts', function () {

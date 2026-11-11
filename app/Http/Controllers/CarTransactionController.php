@@ -5,51 +5,32 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreCarTransactionRequest;
 use App\Models\CarTransaction;
 use App\Models\User;
-use App\Presenters\TransactionPresenter;
 use App\Services\CarTransactionService;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\View\View;
 
 class CarTransactionController extends Controller
 {
-    public function index(Request $request, TransactionPresenter $presenter): View
+    public function index(Request $request): RedirectResponse
     {
-        $filters = $request->validate([
-            'start_date' => ['nullable', 'date'],
-            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
-            'q' => ['nullable', 'string', 'max:255'],
-            'view' => ['nullable', 'in:dashboard,inventory,sales,reports'],
-        ]);
-
-        return view(
-            'transactions.index',
-            $presenter->dashboard($this->authenticatedUser($request), $filters),
-        );
+        return redirect('/app/dashboard'.($request->getQueryString() ? '?'.$request->getQueryString() : ''));
     }
 
-    public function create(Request $request): View
+    public function create(Request $request): RedirectResponse
     {
         Gate::authorize('create', CarTransaction::class);
 
-        return view('transactions.create', [
-            'transaction' => null,
-            'canViewSensitiveData' => $this->authenticatedUser($request)
-                ->can('viewSensitiveData', CarTransaction::class),
-        ]);
+        return redirect('/app/transactions/create'.($request->getQueryString() ? '?'.$request->getQueryString() : ''));
     }
 
-    public function edit(CarTransaction $transaction, Request $request): View
+    public function edit(CarTransaction $transaction): RedirectResponse
     {
         Gate::authorize('update', $transaction);
 
-        return view('transactions.create', [
-            'transaction' => $transaction,
-            'canViewSensitiveData' => $this->authenticatedUser($request)
-                ->can('viewSensitiveData', CarTransaction::class),
-        ]);
+        return redirect("/app/transactions/{$transaction->getKey()}/edit");
     }
 
     public function store(
@@ -58,10 +39,19 @@ class CarTransactionController extends Controller
     ): RedirectResponse {
         $validated = $request->validated();
         $user = $this->authenticatedUser($request);
-        $photo = $request->file('vehicle_photo');
-        unset($validated['vehicle_photo']);
+        $photos = $this->uploadedVehiclePhotos($request);
+        $coverPhoto = $validated['foto_utama']
+            ?? ($request->hasFile('vehicle_photo') ? 'new:'.count($request->file('foto_kendaraan', [])) : null);
+        unset(
+            $validated['foto_kendaraan'],
+            $validated['foto_utama'],
+            $validated['hapus_foto'],
+            $validated['hapus_foto_legacy'],
+            $validated['vehicle_photo'],
+        );
+        $validated = $this->mapSellerDetails($validated);
 
-        $carTransactionService->create($validated, $photo, $user);
+        $carTransactionService->create($validated, $photos, $coverPhoto, $user);
 
         return redirect()->route('transactions.index')->with('success', 'Data transaksi berhasil disimpan!');
     }
@@ -73,10 +63,34 @@ class CarTransactionController extends Controller
     ): RedirectResponse {
         $validated = $request->validated();
         $user = $this->authenticatedUser($request);
-        $photo = $request->file('vehicle_photo');
-        unset($validated['vehicle_photo']);
+        $photos = $this->uploadedVehiclePhotos($request);
+        $coverPhoto = $validated['foto_utama']
+            ?? ($request->hasFile('vehicle_photo') ? 'new:'.count($request->file('foto_kendaraan', [])) : null);
+        $removedPhotoIds = $validated['hapus_foto'] ?? [];
+        $removeLegacyPhoto = (bool) ($validated['hapus_foto_legacy'] ?? false);
 
-        $carTransactionService->update($transaction, $validated, $photo, $user);
+        if ($request->hasFile('vehicle_photo') && $request->file('foto_kendaraan') === null) {
+            $removedPhotoIds = $transaction->vehiclePhotos()->pluck('id')->all();
+            $removeLegacyPhoto = true;
+        }
+        unset(
+            $validated['foto_kendaraan'],
+            $validated['foto_utama'],
+            $validated['hapus_foto'],
+            $validated['hapus_foto_legacy'],
+            $validated['vehicle_photo'],
+        );
+        $validated = $this->mapSellerDetails($validated);
+
+        $carTransactionService->update(
+            $transaction,
+            $validated,
+            $photos,
+            $coverPhoto,
+            $removedPhotoIds,
+            $removeLegacyPhoto,
+            $user,
+        );
 
         return redirect()->route('transactions.index')->with('success', 'Data transaksi berhasil diperbarui!');
     }
@@ -94,17 +108,10 @@ class CarTransactionController extends Controller
 
     public function show(
         CarTransaction $transaction,
-        Request $request,
-        TransactionPresenter $presenter,
-    ): View {
+    ): RedirectResponse {
         Gate::authorize('view', $transaction);
 
-        return view('transactions.show', [
-            'transaction' => $presenter->transactionDetail(
-                $transaction,
-                $this->authenticatedUser($request),
-            ),
-        ]);
+        return redirect("/app/transactions/{$transaction->getKey()}");
     }
 
     private function authenticatedUser(Request $request): User
@@ -116,5 +123,41 @@ class CarTransactionController extends Controller
         }
 
         return $user;
+    }
+
+    /**
+     * @return array<int, UploadedFile>
+     */
+    private function uploadedVehiclePhotos(Request $request): array
+    {
+        $photos = $request->file('foto_kendaraan', []);
+        $photos = is_array($photos) ? array_values($photos) : [];
+        $legacyPhoto = $request->file('vehicle_photo');
+
+        if ($legacyPhoto instanceof UploadedFile) {
+            $photos[] = $legacyPhoto;
+        }
+
+        return $photos;
+    }
+
+    /**
+     * @param  array<string, mixed>  $attributes
+     * @return array<string, mixed>
+     */
+    private function mapSellerDetails(array $attributes): array
+    {
+        foreach ([
+            'nama_penjual' => 'seller_name',
+            'nik_penjual' => 'seller_nik',
+            'no_hp_penjual' => 'seller_phone',
+            'alamat_penjual' => 'seller_address',
+            'nama_broker' => 'broker_name',
+        ] as $requestField => $column) {
+            $attributes[$column] = $attributes[$requestField] ?? null;
+            unset($attributes[$requestField]);
+        }
+
+        return $attributes;
     }
 }

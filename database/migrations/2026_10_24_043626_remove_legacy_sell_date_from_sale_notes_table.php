@@ -26,7 +26,11 @@ return new class extends Migration
                 }
             });
 
-        DB::statement('DROP INDEX IF EXISTS sale_notes_sell_date_index');
+        if (Schema::hasIndex('sale_notes', 'sale_notes_sell_date_index')) {
+            Schema::table('sale_notes', function (Blueprint $table): void {
+                $table->dropIndex('sale_notes_sell_date_index');
+            });
+        }
 
         Schema::table('sale_notes', function (Blueprint $table): void {
             $table->dropColumn('sell_date');

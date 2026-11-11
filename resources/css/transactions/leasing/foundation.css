@@ -17,9 +17,21 @@
     display: grid;
     align-items: start;
     grid-column: 1 / -1;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 17px;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 24px;
     min-width: 0;
+}
+
+.leasing-layout-column {
+    min-width: 0;
+}
+
+.leasing-layout-column--vehicle-admin {
+    grid-column: span 7;
+}
+
+.leasing-layout-column--leasing {
+    grid-column: span 5;
 }
 
 .transaction-form .leasing-card-wrapper {
@@ -29,4 +41,3 @@
 .transaction-form .leasing-photo-layout > .leasing-card-wrapper {
     grid-column: auto;
 }
-

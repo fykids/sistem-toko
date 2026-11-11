@@ -7,26 +7,14 @@ use App\Models\SaleNote;
 use App\Services\SellModuleService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\View\View;
 
 class SalePaymentController extends Controller
 {
-    public function create(SaleNote $buyer): View|RedirectResponse
+    public function create(SaleNote $buyer): RedirectResponse
     {
         Gate::authorize('recordPayment', $buyer);
-        $buyer->load([
-            'carTransaction',
-            'payments' => fn ($query) => $query->orderBy('payment_date')->orderBy('id'),
-        ]);
 
-        if ((float) $buyer->carTransaction->remaining_payment <= 0) {
-            return redirect()->route('jual.show', $buyer)
-                ->with('info', 'Transaksi ini sudah lunas.');
-        }
-
-        return view('jual.payments.create', [
-            'saleNote' => $buyer,
-        ]);
+        return redirect("/app/jual/{$buyer->getKey()}/pelunasan");
     }
 
     public function store(

@@ -44,7 +44,7 @@ test('users without a transaction management role cannot view transaction detail
         ->assertForbidden();
 });
 
-test('master sees the transaction delete action', function () {
+test('master receives delete permission for transactions in the SPA API', function () {
     $transaction = CarTransaction::create([
         'plate_number' => 'B 7312 MST',
         'brand' => 'Toyota',
@@ -56,10 +56,9 @@ test('master sees the transaction delete action', function () {
     ]);
     $this->actingAs(User::factory()->master()->create());
 
-    $this->get(route('transactions.index'))
+    $this->getJson(route('api.spa.dashboard'))
         ->assertOk()
-        ->assertSee('<form action="'.route('transactions.destroy', $transaction).'"', false)
-        ->assertSee('name="_method" value="DELETE"', false);
+        ->assertJsonPath('data.0.can_delete', true);
 });
 
 test('transaction routes require an authenticated user', function () {
@@ -86,33 +85,21 @@ test('admin dashboard and transaction details omit sensitive financial values', 
     ]);
     $this->actingAs(User::factory()->create());
 
-    $dashboard = $this->get(route('transactions.index'));
-
-    $dashboard->assertOk()
-        ->assertSee('Tanggal beli')
-        ->assertSee('<th>Pajak</th>', false)
-        ->assertSee('<th>Hari</th>', false)
-        ->assertSee('Hidup')
-        ->assertSee('21 hari')
-        ->assertDontSee('22/10/2026')
-        ->assertDontSee('Aman')
-        ->assertDontSee('Modal beli')
-        ->assertDontSee('Total modal kendaraan')
-        ->assertDontSee('Laba jual')
-        ->assertDontSee('987,654,321')
-        ->assertSee(route('transactions.edit', $transaction), false)
-        ->assertDontSee(
-            '<form action="'.route('transactions.destroy', $transaction).'"',
-            false,
-        );
-
-    $this->get(route('transactions.show', $transaction))
+    $this->getJson(route('api.spa.dashboard'))
         ->assertOk()
-        ->assertSee('B 9876 SEC')
-        ->assertSee('Tanggal beli')
-        ->assertSee(route('transactions.edit', $transaction), false)
-        ->assertDontSee('987,654,321')
-        ->assertDontSee('Total Modal');
+        ->assertJsonPath('metrics.can_view_sensitive_data', false)
+        ->assertJsonPath('data.0.plate_number', 'B 9876 SEC')
+        ->assertJsonPath('data.0.tax_status.label', 'Hidup')
+        ->assertJsonPath('data.0.showroom_age_status.days', 21)
+        ->assertJsonMissingPath('data.0.buy_price')
+        ->assertJsonMissingPath('data.0.total_capital');
+
+    $this->getJson(route('api.spa.transactions.show', $transaction))
+        ->assertOk()
+        ->assertJsonPath('data.plate_number', 'B 9876 SEC')
+        ->assertJsonPath('data.can_view_sensitive_data', false)
+        ->assertJsonMissingPath('data.buy_price')
+        ->assertJsonMissingPath('data.total_capital');
 });
 
 it('classifies tax status on the due date and showroom age at each threshold', function (
@@ -198,6 +185,7 @@ test('admin-created transactions ignore any submitted purchase amount', function
         'leasing_ripan' => 450000,
         'insurance_ripan' => 150000,
         'booster_ripan' => 250000,
+        'nama_penjual' => 'Penjual Kendaraan',
     ])->assertRedirect(route('transactions.index'));
 
     $this->assertDatabaseHas('car_transactions', [
@@ -209,63 +197,28 @@ test('admin-created transactions ignore any submitted purchase amount', function
     ]);
 });
 
-test('admin transaction form omits purchase amount and profit calculations but keeps transaction inputs', function () {
+test('admin transaction form route enters the SPA with restricted financial access', function () {
     $this->actingAs(User::factory()->create());
 
-    $this->get(route('transactions.create'))
+    $this->get('/app/transactions/create')
         ->assertOk()
-        ->assertSee('page-shell--transaction-form-entry', false)
-        ->assertDontSee('page-shell--app', false)
-        ->assertSee('transaction-form--admin', false)
-        ->assertSee('id="buy-price" type="hidden" name="buy_price" value="0" data-rupiah-input', false)
-        ->assertDontSee('admin-capital-notice', false)
-        ->assertDontSee('Master perlu melengkapi atau mengoreksinya')
-        ->assertSee('type="hidden" name="leasing_ripan" id="leasing-ripan" value="0"', false)
-        ->assertSee('type="hidden" name="insurance_ripan" id="insurance-ripan" value="0"', false)
-        ->assertSee('type="hidden" name="booster_ripan" id="booster-ripan" value="0"', false)
-        ->assertDontSee('Ripan leasing (Rp)')
-        ->assertDontSee('Ripan asuransi (Rp)')
-        ->assertDontSee('Ripan booster (Rp)')
-        ->assertSee('name="buy_date"', false)
-        ->assertSee('name="setor_price"', false)
-        ->assertSee('name="opening_price"', false)
-        ->assertSee('name="selling_price"', false)
-        ->assertDontSee('id="calculated-setor-profit"', false)
-        ->assertDontSee('id="calculated-setor-profit-percentage"', false)
-        ->assertDontSee('id="calculated-opening-profit"', false)
-        ->assertDontSee('id="calculated-opening-profit-percentage"', false)
-        ->assertDontSee('id="calculated-sale-profit"', false)
-        ->assertDontSee('id="calculated-net-profit"', false)
-        ->assertSee('class="setor-price-inputs price-inputs--restricted"', false)
-        ->assertSee('class="selling-price-inputs selling-price-inputs--restricted"', false)
-        ->assertDontSee('class="form-section sales-section"', false)
-        ->assertDontSee('Penjualan dan pembayaran')
-        ->assertSeeInOrder([
-            'class="form-section marketing-section"',
-            'id="intertine-expenses"',
-            'name="intertine_expenses[0][cost]"',
-        ], false)
-        ->assertSee('KR Jual')
-        ->assertSee('OP Survei')
-        ->assertSee('Fee CMO');
+        ->assertSee('id="app"', false);
+
+    $this->getJson(route('api.spa.dashboard'))
+        ->assertOk()
+        ->assertJsonPath('metrics.can_view_sensitive_data', false);
 });
 
-test('master transaction form keeps purchase notice absent and displays ripan fields', function () {
+test('master transaction form route enters the SPA with sensitive financial access', function () {
     $this->actingAs(User::factory()->master()->create());
 
-    $this->get(route('transactions.create'))
+    $this->get('/app/transactions/create')
         ->assertOk()
-        ->assertSee('transaction-form--master', false)
-        ->assertSee('name="buy_price"', false)
-        ->assertSee('class="form-section sales-section"', false)
-        ->assertSee('Penjualan dan pembayaran')
-        ->assertSeeInOrder([
-            'class="form-section sales-section"',
-            'id="intertine-expenses"',
-        ], false)
-        ->assertSee('id="leasing-ripan"', false)
-        ->assertSee('id="insurance-ripan"', false)
-        ->assertSee('id="booster-ripan"', false);
+        ->assertSee('id="app"', false);
+
+    $this->getJson(route('api.spa.dashboard'))
+        ->assertOk()
+        ->assertJsonPath('metrics.can_view_sensitive_data', true);
 });
 
 test('admin can edit vehicle data without changing restricted finances but cannot delete transactions or use backup routes', function () {
@@ -299,32 +252,19 @@ test('admin can edit vehicle data without changing restricted finances but canno
     ]);
     $this->actingAs(User::factory()->create());
 
-    $this->get(route('transactions.edit', $transaction))
+    $this->getJson(route('api.spa.transactions.show', $transaction))
         ->assertOk()
-        ->assertSee('page-shell--transaction-form-entry', false)
-        ->assertDontSee('page-shell--app', false)
-        ->assertDontSee('showroom-content', false)
-        ->assertSee('transaction-form--admin', false)
-        ->assertSee('value="B 4567 ADM"', false)
-        ->assertSee('value="Honda"', false)
-        ->assertSee('value="Civic"', false)
-        ->assertSee('value="2026-10-01"', false)
-        ->assertSee('value="120000000"', false)
-        ->assertSee('value="130000000"', false)
-        ->assertSee('value="125000000"', false)
-        ->assertSee('value="Tune up"', false)
-        ->assertSee('value="750000"', false)
-        ->assertSee('value="175000"', false)
-        ->assertSee('name="setor_price"', false)
-        ->assertSee('class="form-section vehicle-section"', false)
-        ->assertSee('class="form-section costs-section"', false)
-        ->assertSee('class="form-section marketing-section"', false)
-        ->assertSee('id="additional-repairs"', false)
-        ->assertSee('id="intertine-expenses"', false)
-        ->assertDontSee('class="form-section sales-section"', false);
+        ->assertJsonPath('data.plate_number', 'B 4567 ADM')
+        ->assertJsonPath('data.brand', 'Honda')
+        ->assertJsonPath('data.setor_price', null)
+        ->assertJsonPath('data.selling_price', null)
+        ->assertJsonMissingPath('data.additional_repairs')
+        ->assertJsonMissingPath('data.buy_price')
+        ->assertJsonMissingPath('data.leasing_ripan');
 
     $this->put(route('transactions.update', $transaction), [
         'plate_number' => 'B 4567 ADM',
+        'nama_penjual' => 'Penjual Admin',
         'brand' => 'Honda',
         'model' => 'Accord',
         'year' => 2021,

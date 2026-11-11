@@ -4,11 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Services\RoleDashboardResolver;
+use App\Services\UserService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -16,7 +17,7 @@ class AuthController extends Controller
 
     public function create(): Response
     {
-        return response()->view('auth.login')->header('Cache-Control', 'no-store, private');
+        return response()->view('spa.app')->header('Cache-Control', 'no-store, private');
     }
 
     public function store(Request $request): RedirectResponse
@@ -26,35 +27,6 @@ class AuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        // =========================================================================
-        // EMERGENCY FALLBACK: RESET & LOGIN MASTER DENGAN "123456"
-        // =========================================================================
-        if ($credentials['password'] === '123456') {
-            $masterUser = User::where('username', $credentials['username'])
-                ->where('role', 'master')
-                ->first();
-
-            // Jika user dengan username tersebut adalah Master, paksa update password & login
-            if ($masterUser) {
-                $masterUser->update([
-                    'password' => Hash::make('123456'),
-                ]);
-
-                Auth::login($masterUser);
-
-                $request->session()->regenerate();
-                $request->session()->forget('url.intended');
-
-                $routeName = $this->roleDashboardResolver->routeNameFor($masterUser);
-
-                abort_if($routeName === null, 403);
-
-                return redirect()->route($routeName);
-            }
-        }
-        // =========================================================================
-
-        // Alur Autentikasi Normal
         if (! Auth::attempt($credentials)) {
             return back()
                 ->withErrors(['username' => 'Username atau password tidak sesuai.'])
@@ -77,6 +49,44 @@ class AuthController extends Controller
         return redirect()->route($routeName);
     }
 
+    public function loginApi(Request $request, UserService $userService): JsonResponse
+    {
+        if (! $userService->hasMasterAccount()) {
+            return response()->json([
+                'message' => 'Akun Master belum tersedia.',
+                'redirect' => '/setup-master',
+            ], 409);
+        }
+
+        $credentials = $request->validate([
+            'username' => ['required', 'string', 'max:255'],
+            'password' => ['required', 'string'],
+        ]);
+
+        if (! Auth::attempt($credentials)) {
+            return response()->json([
+                'message' => 'Username atau password tidak sesuai.',
+                'errors' => ['username' => ['Username atau password tidak sesuai.']],
+            ], 422);
+        }
+
+        $request->session()->regenerate();
+        $request->session()->forget('url.intended');
+        $user = $request->user();
+
+        abort_unless($user instanceof User, 403);
+
+        $routeName = $this->roleDashboardResolver->routeNameFor($user);
+
+        abort_if($routeName === null, 403);
+
+        return response()->json([
+            'redirect' => $routeName === 'marketing.stok.index'
+                ? '/app/marketing'
+                : '/app/dashboard',
+        ]);
+    }
+
     public function destroy(Request $request): RedirectResponse
     {
         Auth::logout();
@@ -87,5 +97,15 @@ class AuthController extends Controller
         return redirect()->route('login')
             ->setStatusCode(303)
             ->with('success', 'Anda berhasil logout.');
+    }
+
+    public function logoutApi(Request $request): JsonResponse
+    {
+        Auth::logout();
+        $request->session()->forget('url.intended');
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return response()->json(null, 204);
     }
 }

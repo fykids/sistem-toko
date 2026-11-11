@@ -68,7 +68,7 @@ function createJualSaleNote(
     ]);
 }
 
-it('registers jual independently and removes the former sales endpoint', function () {
+it('registers Jual as a separate SPA module and removes the former sales endpoint', function () {
     expect(route('jual.index'))->toEndWith('/jual')
         ->and(route('jual.create'))->toEndWith('/jual/create')
         ->and(Route::has('sales.index'))->toBeFalse()
@@ -77,63 +77,31 @@ it('registers jual independently and removes the former sales endpoint', functio
 
     $this->actingAs(User::factory()->create())
         ->get(route('transactions.index'))
-        ->assertOk()
-        ->assertSee(route('dashboard').'#penjualan', false)
-        ->assertSee(route('jual.create'), false)
-        ->assertSee(route('jual.index'), false)
-        ->assertSee('Input / Transaksi Jual')
-        ->assertSee('Laporan Penjualan');
+        ->assertRedirect('/app/dashboard');
 
+    $this->get(route('jual.index'))->assertRedirect('/app/jual');
     $this->get('/sales')->assertNotFound();
+    $this->getJson(route('api.spa.jual.index'))->assertOk();
 });
 
-it('renders the independent jual list and role-specific form without leasing', function () {
+it('provides Jual list and role-specific form data through the SPA API', function () {
+    createJualVehicle();
+
     $this->actingAs(User::factory()->create())
-        ->get(route('jual.index'))
+        ->getJson(route('api.spa.jual.index'))
         ->assertOk()
-        ->assertSee('Menu Jual')
-        ->assertSee(route('jual.create'), false);
+        ->assertJsonPath('status', 'all');
 
-    $response = $this->get(route('jual.create'));
-
-    $response
+    $this->getJson(route('api.spa.jual.create'))
         ->assertOk()
-        ->assertSee('jual-form')
-        ->assertSee('transaction-form--admin')
-        ->assertSee('class="section-heading"', false)
-        ->assertSee('class="section-content', false)
-        ->assertSee('class="btn btn-accent"', false)
-        ->assertSee('class="btn btn-secondary"', false)
-        ->assertSee('name="selling_price"', false)
-        ->assertSee('name="down_payment"', false)
-        ->assertSee('name="down_payment_date"', false)
-        ->assertSee('name="settlement_amount"', false)
-        ->assertSee('name="settlement_date"', false)
-        ->assertSee('name="leasing_disbursement"', false)
-        ->assertSee('name="leasing_disbursement_date"', false)
-        ->assertSee('name="planned_payment_date"', false)
-        ->assertSee('name="buyer_nik"', false)
-        ->assertSee('name="buyer_phone"', false)
-        ->assertSee('name="buyer_address"', false)
-        ->assertSee('class="sell-payment-row"', false)
-        ->assertSee('Tanggal konsumen melakukan pembayaran')
-        ->assertSee('Tanggal rencana pembayaran (jatuh tempo)')
-        ->assertDontSee('Harga Jual (Rp)</option>')
-        ->assertDontSee('payment_type', false)
-        ->assertDontSee('payment_amount', false)
-        ->assertDontSee('intertine_expenses', false)
-        ->assertDontSee('leasing-custom-table', false)
-        ->assertDontSee('data-jual-vehicle-preview', false)
-        ->assertDontSee('Pilihan Leasing')
-        ->assertDontSee('leasing_options');
-
-    expect(substr_count($response->getContent(), 'class="form-section sell-module-form-section"'))->toBe(1);
+        ->assertJsonPath('data.can_view_sensitive_data', false)
+        ->assertJsonPath('data.has_available_vehicles', true)
+        ->assertJsonPath('data.vehicles.0.plate_number', 'B 1122 JUAL');
 
     $this->actingAs(User::factory()->master()->create())
-        ->get(route('jual.create'))
+        ->getJson(route('api.spa.jual.create'))
         ->assertOk()
-        ->assertSee('transaction-form--master')
-        ->assertDontSee('Pilihan Leasing');
+        ->assertJsonPath('data.can_view_sensitive_data', true);
 });
 
 it('shows only the selected vehicle details from stock without exposing unrelated values', function () {
@@ -166,26 +134,23 @@ it('shows only the selected vehicle details from stock without exposing unrelate
     ]);
 
     $this->actingAs(User::factory()->create())
-        ->get(route('jual.create', ['vehicle' => $vehicle->id]))
+        ->getJson(route('api.spa.jual.create', ['vehicle' => $vehicle->id]))
         ->assertOk()
-        ->assertSee('B 1122 JUAL')
-        ->assertSee('value="Toyota"', false)
-        ->assertSee('data-jual-vehicle-field="manager_name"', false)
-        ->assertSee('data-jual-vehicle-field="owner_name"', false)
-        ->assertDontSee('Informasi Pembayaran Leasing')
-        ->assertDontSee('Rincian biaya perbaikan')
-        ->assertDontSee('Rincian pajak')
-        ->assertDontSee('Rincian biaya intertine')
-        ->assertDontSee('Harga setor')
-        ->assertDontSee('Ripan booster')
-        ->assertDontSee('Rp 3,000,000');
+        ->assertJsonPath('data.selected_vehicle.plate_number', 'B 1122 JUAL')
+        ->assertJsonPath('data.selected_vehicle.brand', 'Toyota')
+        ->assertJsonMissingPath('data.selected_vehicle.leasing_options')
+        ->assertJsonMissingPath('data.selected_vehicle.additional_repairs')
+        ->assertJsonMissingPath('data.selected_vehicle.tax_items')
+        ->assertJsonMissingPath('data.selected_vehicle.intertine_expenses')
+        ->assertJsonMissingPath('data.selected_vehicle.setor_price')
+        ->assertJsonMissingPath('data.selected_vehicle.booster_ripan');
 
     $this->actingAs(User::factory()->master()->create())
-        ->get(route('jual.create', ['vehicle' => $vehicle->id]))
+        ->getJson(route('api.spa.jual.create', ['vehicle' => $vehicle->id]))
         ->assertOk()
-        ->assertDontSee('Modal beli')
-        ->assertDontSee('Ripan booster')
-        ->assertDontSee('Rp 3,000,000');
+        ->assertJsonPath('data.selected_vehicle.plate_number', 'B 1122 JUAL')
+        ->assertJsonMissingPath('data.selected_vehicle.buy_price')
+        ->assertJsonMissingPath('data.selected_vehicle.booster_ripan');
 });
 
 it('renders every available vehicle while preserving the requested vehicle preview', function () {
@@ -204,16 +169,15 @@ it('renders every available vehicle while preserving the requested vehicle previ
     $selectedVehicle = $vehicles->last();
 
     $response = $this->actingAs(User::factory()->create())
-        ->get(route('jual.create', ['vehicle' => $selectedVehicle->id]));
+        ->getJson(route('api.spa.jual.create', ['vehicle' => $selectedVehicle->id]));
 
     $response->assertOk()
-        ->assertSee($vehicles->first()->plate_number)
-        ->assertSee($selectedVehicle->plate_number);
+        ->assertJsonCount(12, 'data.vehicles')
+        ->assertJsonPath('data.selected_vehicle.id', $selectedVehicle->id);
 
-    expect(substr_count($response->getContent(), 'data-vehicle-preview='))
-        ->toBe($vehicles->count())
-        ->and(substr_count($response->getContent(), $selectedVehicle->plate_number))
-        ->toBeGreaterThan(1);
+    expect(collect($response->json('data.vehicles'))->pluck('plate_number'))
+        ->toContain($vehicles->first()->plate_number)
+        ->toContain($selectedVehicle->plate_number);
 });
 
 it('renders the jual form when buyers has no vehicle relationship column', function () {
@@ -224,9 +188,9 @@ it('renders the jual form when buyers has no vehicle relationship column', funct
     });
 
     $this->actingAs(User::factory()->create())
-        ->get(route('jual.create'))
+        ->getJson(route('api.spa.jual.create'))
         ->assertOk()
-        ->assertSee($vehicle->plate_number);
+        ->assertJsonPath('data.vehicles.0.plate_number', $vehicle->plate_number);
 });
 
 it('shows sensitive financial columns only to masters in the jual list', function () {
@@ -235,28 +199,22 @@ it('shows sensitive financial columns only to masters in the jual list', functio
     createJualSaleNote($vehicle, $creator);
 
     $this->actingAs(User::factory()->create())
-        ->get(route('jual.index'))
+        ->getJson(route('api.spa.jual.index'))
         ->assertOk()
-        ->assertDontSee('Dewi Jual')
-        ->assertDontSee('Modal beli')
-        ->assertDontSee('Total modal')
-        ->assertDontSee('Laba deal')
-        ->assertDontSee('65,000,000');
+        ->assertJsonCount(0, 'data');
 
     $this->actingAs($creator)
-        ->get(route('jual.index'))
+        ->getJson(route('api.spa.jual.index'))
         ->assertOk()
-        ->assertSee('Dewi Jual')
-        ->assertDontSee('Modal beli')
-        ->assertDontSee('65,000,000');
+        ->assertJsonPath('data.0.nama_konsumen', 'Dewi Jual')
+        ->assertJsonPath('can_view_sensitive_data', false)
+        ->assertJsonMissingPath('data.0.car_transaction.buy_price');
 
     $this->actingAs(User::factory()->master()->create())
-        ->get(route('jual.index'))
+        ->getJson(route('api.spa.jual.index'))
         ->assertOk()
-        ->assertSee('Modal beli')
-        ->assertSee('Total modal')
-        ->assertSee('Laba deal')
-        ->assertSee('65,000,000');
+        ->assertJsonPath('can_view_sensitive_data', true)
+        ->assertJsonPath('data.0.car_transaction.buy_price', 65000000);
 });
 
 it('stores a jual record and updates vehicle stock and sale details atomically', function () {
@@ -264,11 +222,11 @@ it('stores a jual record and updates vehicle stock and sale details atomically',
     $admin = User::factory()->create();
 
     $response = $this->actingAs($admin)
-        ->post(route('jual.store'), validJualPayload($vehicle));
+        ->postJson(route('api.spa.jual.store'), validJualPayload($vehicle));
 
     $saleNote = SaleNote::query()->sole();
-    $response->assertRedirect(route('jual.show', $saleNote))
-        ->assertSessionHas('success');
+    $response->assertCreated()
+        ->assertJsonPath('data.id', $saleNote->id);
 
     $this->assertDatabaseHas('sale_notes', [
         'id' => $saleNote->id,
@@ -280,22 +238,22 @@ it('stores a jual record and updates vehicle stock and sale details atomically',
     expect($vehicle->refresh()->sell_date)->toBe('2026-10-23')
         ->and((float) $vehicle->selling_price)->toBe(92000000.0);
 
-    $this->get(route('jual.create'))
+    $this->getJson(route('api.spa.jual.create'))
         ->assertOk()
-        ->assertDontSee('B 1122 JUAL');
-    $this->get(route('nota-penjualan.create'))
-        ->assertOk()
-        ->assertDontSee('B 1122 JUAL');
+        ->assertJsonPath('data.has_available_vehicles', false)
+        ->assertJsonCount(0, 'data.vehicles');
+    $this->getJson('/api/spa/sale-notes/create')
+        ->assertNotFound();
 
-    $this->get(route('jual.show', $saleNote))
+    $this->getJson(route('api.spa.jual.show', $saleNote))
         ->assertOk()
-        ->assertSee('Dewi Jual')
-        ->assertSee('B 1122 JUAL');
+        ->assertJsonPath('data.nama_konsumen', 'Dewi Jual')
+        ->assertJsonPath('data.car_transaction.plate_number', 'B 1122 JUAL');
 
-    $this->get(route('dashboard'))
+    $this->getJson(route('api.spa.dashboard', ['view' => 'sales']))
         ->assertOk()
-        ->assertSee('B 1122 JUAL')
-        ->assertSee('Terjual');
+        ->assertJsonPath('data.0.plate_number', 'B 1122 JUAL')
+        ->assertJsonPath('data.0.status', 'sold');
 });
 
 it('stores all received payment amounts and preserves vehicle costs omitted from the form', function () {
@@ -361,14 +319,14 @@ it('stores all actual payment dates with the corresponding amounts', function ()
         ->and((float) $vehicle->fresh()->remaining_payment)->toBe(45000000.0)
         ->and($vehicle->fresh()->planned_payment_date)->toBe('2026-11-26');
 
-    $this->get(route('jual.show', $saleNote))
+    $this->getJson(route('api.spa.jual.show', $saleNote))
         ->assertOk()
-        ->assertSee('Tanggal pelunasan diterima')
-        ->assertSee('Tanggal pencairan leasing')
-        ->assertSee('Rencana pembayaran')
-        ->assertSee('3174012345678901')
-        ->assertSee('081234567890')
-        ->assertSee('Jl. Merdeka No. 1');
+        ->assertJsonPath('data.buyer_nik', '3174012345678901')
+        ->assertJsonPath('data.buyer_phone', '081234567890')
+        ->assertJsonPath('data.buyer_address', 'Jl. Merdeka No. 1')
+        ->assertJsonPath('data.car_transaction.settlement_date', '2026-10-25')
+        ->assertJsonPath('data.car_transaction.leasing_disbursement_date', '2026-10-26')
+        ->assertJsonPath('data.car_transaction.planned_payment_date', '2026-11-26');
 });
 
 it('requires a planned payment date while any balance remains', function () {
@@ -436,31 +394,46 @@ it('accepts a nominal above the former validation ceiling', function () {
 
     $response = $this->actingAs($admin)
         ->post(route('jual.store'), validJualPayload($vehicle, [
-            'selling_price' => '20000000000000',
-            'down_payment' => '10000000000000',
+            'selling_price' => '2000000000000',
+            'down_payment' => '1000000000000',
             'down_payment_date' => '2026-10-23',
         ]));
 
     $saleNote = SaleNote::query()->sole();
     $response->assertRedirect(route('jual.show', $saleNote));
 
-    expect((float) $vehicle->fresh()->selling_price)->toBe(20000000000000.0)
-        ->and((float) $vehicle->fresh()->down_payment)->toBe(10000000000000.0)
-        ->and((float) $vehicle->fresh()->remaining_payment)->toBe(10000000000000.0);
+    expect((float) $vehicle->fresh()->selling_price)->toBe(2000000000000.0)
+        ->and((float) $vehicle->fresh()->down_payment)->toBe(1000000000000.0)
+        ->and((float) $vehicle->fresh()->remaining_payment)->toBe(1000000000000.0);
 });
 
-it('prepopulates an existing jual note when its edit form is opened', function () {
+it('rejects a sale nominal that exceeds decimal column precision', function () {
+    $vehicle = createJualVehicle();
+
+    $this->actingAs(User::factory()->create())
+        ->from(route('jual.create'))
+        ->post(route('jual.store'), validJualPayload($vehicle, [
+            'selling_price' => '10000000000000',
+            'down_payment' => '0',
+        ]))
+        ->assertRedirect(route('jual.create'))
+        ->assertSessionHasErrors('selling_price');
+
+    expect(SaleNote::query()->count())->toBe(0)
+        ->and($vehicle->fresh()->sell_date)->toBeNull();
+});
+
+it('provides existing Jual values to the SPA edit form', function () {
     $vehicle = createJualVehicle();
     $creator = User::factory()->create();
     $saleNote = createJualSaleNote($vehicle, $creator);
 
     $this->actingAs($creator)
-        ->get(route('jual.edit', $saleNote))
+        ->getJson(route('api.spa.jual.show', $saleNote))
         ->assertOk()
-        ->assertSee('value="Dewi Jual"', false)
-        ->assertSee('value="92.000.000,00"', false)
-        ->assertSee('name="planned_payment_date"', false)
-        ->assertSee(route('jual.update', $saleNote), false);
+        ->assertJsonPath('data.nama_konsumen', 'Dewi Jual')
+        ->assertJsonPath('data.car_transaction.selling_price', 92000000)
+        ->assertJsonPath('data.car_transaction.planned_payment_date', '2026-11-23');
 });
 
 it('updates buyer identity and the canonical vehicle sale attributes', function () {
@@ -511,9 +484,9 @@ it('deletes a jual note without deleting its vehicle', function () {
     expect($vehicle->refresh()->sell_date)->toBeNull()
         ->and((float) $vehicle->selling_price)->toBe(0.0);
 
-    $this->get(route('jual.create'))
+    $this->getJson(route('api.spa.jual.create'))
         ->assertOk()
-        ->assertSee('B 1122 JUAL');
+        ->assertJsonPath('data.vehicles.0.plate_number', 'B 1122 JUAL');
 });
 
 it('prevents an admin from viewing another admins sale record', function () {
@@ -523,21 +496,21 @@ it('prevents an admin from viewing another admins sale record', function () {
     $otherAdmin = User::factory()->create();
 
     $this->actingAs($otherAdmin)
-        ->get(route('jual.index'))
+        ->getJson(route('api.spa.jual.index'))
         ->assertOk()
-        ->assertDontSee('Dewi Jual');
+        ->assertJsonCount(0, 'data');
 
-    $this->get(route('jual.show', $saleNote))->assertForbidden();
+    $this->getJson(route('api.spa.jual.show', $saleNote))->assertForbidden();
     $this->get(route('jual.edit', $saleNote))->assertForbidden();
-    $this->get(route('nota-penjualan.index'))
+    $this->getJson(route('api.spa.sale-notes.index'))
         ->assertOk()
-        ->assertDontSee('Dewi Jual');
-    $this->get(route('nota-penjualan.show', $saleNote))->assertForbidden();
+        ->assertJsonCount(0, 'data');
+    $this->getJson(route('api.spa.sale-notes.show', $saleNote))->assertForbidden();
 
     $this->actingAs(User::factory()->master()->create())
-        ->get(route('nota-penjualan.index'))
+        ->getJson(route('api.spa.sale-notes.index'))
         ->assertOk()
-        ->assertSee('Dewi Jual');
+        ->assertJsonPath('data.0.nama_konsumen', 'Dewi Jual');
 });
 
 it('does not grant jual access to roles outside admin and master', function () {

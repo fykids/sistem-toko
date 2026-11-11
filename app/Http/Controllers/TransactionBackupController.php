@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\TransactionBackupService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -68,8 +69,10 @@ class TransactionBackupController extends Controller
         ]);
     }
 
-    public function import(Request $request, TransactionBackupService $backupService): RedirectResponse
-    {
+    public function import(
+        Request $request,
+        TransactionBackupService $backupService,
+    ): RedirectResponse|JsonResponse {
         $validated = $request->validate([
             'backup' => ['required', 'file', 'max:51200', 'extensions:sqlite,db'],
         ]);
@@ -79,6 +82,13 @@ class TransactionBackupController extends Controller
         } catch (InvalidArgumentException $exception) {
             throw ValidationException::withMessages([
                 'backup' => $exception->getMessage(),
+            ]);
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => "Backup berhasil digabungkan. {$importedCount} transaksi baru ditambahkan.",
+                'imported_count' => $importedCount,
             ]);
         }
 

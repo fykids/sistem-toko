@@ -1,12 +1,15 @@
 <?php
 
+use App\Exceptions\DatabaseOperationFailedException;
 use App\Http\Middleware\RedirectToRoleDashboard;
 use App\Models\User;
 use App\Services\RoleDashboardResolver;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -37,4 +40,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+        $exceptions->render(function (QueryException $exception, Request $request): Response {
+            return (new DatabaseOperationFailedException($exception))->render($request);
+        });
     })->create();

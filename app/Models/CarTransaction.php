@@ -5,6 +5,7 @@ namespace App\Models;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class CarTransaction extends Model
@@ -46,6 +47,11 @@ class CarTransaction extends Model
         'intertine_expenses',
         'leasing_options',
         'vehicle_photo_path',
+        'seller_name',
+        'seller_nik',
+        'seller_phone',
+        'seller_address',
+        'broker_name',
     ];
 
     protected function casts(): array
@@ -61,6 +67,11 @@ class CarTransaction extends Model
     public function saleNote(): HasOne
     {
         return $this->hasOne(SaleNote::class, 'car_transaction_id');
+    }
+
+    public function vehiclePhotos(): HasMany
+    {
+        return $this->hasMany(VehiclePhoto::class)->orderBy('position')->orderBy('id');
     }
 
     /** @return array{label: string, badgeClass: string} */

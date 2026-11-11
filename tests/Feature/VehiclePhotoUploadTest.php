@@ -23,10 +23,12 @@ function validVehiclePhotoTransactionData(): array
         'color' => 'Hitam',
         'buy_date' => '2026-10-01',
         'buy_price' => 100000000,
+        'seller_name' => 'Penjual Kendaraan',
+        'nama_penjual' => 'Penjual Kendaraan',
     ];
 }
 
-test('it places the photo section beside leasing and previews an existing photo', function () {
+test('the SPA transaction detail API exposes an existing vehicle photo', function () {
     Storage::fake('public');
 
     $photoPath = 'vehicle-photos/avanza.jpg';
@@ -35,15 +37,103 @@ test('it places the photo section beside leasing and previews an existing photo'
         'vehicle_photo_path' => $photoPath,
     ]);
 
-    $response = $this->get(route('transactions.edit', $transaction));
+    $this->get("/app/transactions/{$transaction->id}/edit")
+        ->assertOk()
+        ->assertSee('id="app"', false);
 
-    $response->assertOk()
-        ->assertSee('class="leasing-photo-layout"', false)
-        ->assertSee('<span class="section-number">05</span>', false)
-        ->assertSee('<span class="section-number">06</span>', false)
-        ->assertSee('enctype="multipart/form-data"', false)
-        ->assertSee('id="vehicle-photo-input"', false)
-        ->assertSee(Storage::disk('public')->url($photoPath), false);
+    $this->getJson(route('api.spa.transactions.show', $transaction))
+        ->assertOk()
+        ->assertJsonPath('data.vehicle_photo_url', Storage::disk('public')->url($photoPath));
+});
+
+test('it redirects to the transaction list when the edited transaction does not exist', function () {
+    $this->get(route('transactions.edit', 999999))
+        ->assertRedirect(route('transactions.index'))
+        ->assertSessionHas('error', 'Data transaksi tidak ditemukan.');
+});
+
+test('it stores multiple photos and uses the selected photo as the cover', function () {
+    Storage::fake('public');
+
+    $response = $this->post(route('transactions.store'), array_replace(validVehiclePhotoTransactionData(), [
+        'nama_penjual' => 'Dewi Penjual',
+        'nik_penjual' => '1234567890123456',
+        'no_hp_penjual' => '08123456789',
+        'alamat_penjual' => 'Jl. Contoh No. 1',
+        'nama_broker' => 'Budi Broker',
+        'foto_kendaraan' => [
+            UploadedFile::fake()->image('avanza-depan.jpg'),
+            UploadedFile::fake()->image('avanza-samping.webp'),
+        ],
+        'foto_utama' => 'new:1',
+    ]));
+
+    $response->assertRedirect(route('transactions.index'));
+    $transaction = CarTransaction::query()->firstOrFail();
+    $photos = $transaction->vehiclePhotos()->orderBy('position')->get();
+
+    expect($transaction->seller_name)->toBe('Dewi Penjual')
+        ->and($transaction->seller_nik)->toBe('1234567890123456')
+        ->and($transaction->seller_phone)->toBe('08123456789')
+        ->and($transaction->seller_address)->toBe('Jl. Contoh No. 1')
+        ->and($transaction->broker_name)->toBe('Budi Broker')
+        ->and($photos)->toHaveCount(2)
+        ->and($photos->where('is_cover', true))->toHaveCount(1)
+        ->and($transaction->vehicle_photo_path)->toBe($photos[1]->path);
+
+    Storage::disk('public')->assertExists($photos[0]->path);
+    Storage::disk('public')->assertExists($photos[1]->path);
+});
+
+test('it removes selected gallery photos and changes the cover without deleting retained photos', function () {
+    Storage::fake('public');
+
+    $firstPath = 'vehicle-photos/front.jpg';
+    $secondPath = 'vehicle-photos/interior.jpg';
+    Storage::disk('public')->put($firstPath, 'front');
+    Storage::disk('public')->put($secondPath, 'interior');
+    $transaction = CarTransaction::create(validVehiclePhotoTransactionData() + [
+        'vehicle_photo_path' => $firstPath,
+    ]);
+    $firstPhoto = $transaction->vehiclePhotos()->create([
+        'path' => $firstPath,
+        'is_cover' => true,
+        'position' => 0,
+    ]);
+    $secondPhoto = $transaction->vehiclePhotos()->create([
+        'path' => $secondPath,
+        'is_cover' => false,
+        'position' => 1,
+    ]);
+
+    $this->put(route('transactions.update', $transaction), validVehiclePhotoTransactionData() + [
+        'hapus_foto' => [$firstPhoto->id],
+        'foto_utama' => 'existing:'.$secondPhoto->id,
+    ])->assertRedirect(route('transactions.index'));
+
+    expect($transaction->fresh()->vehicle_photo_path)->toBe($secondPath)
+        ->and($transaction->vehiclePhotos()->where('is_cover', true)->value('path'))->toBe($secondPath);
+
+    $this->assertDatabaseMissing('vehicle_photos', ['id' => $firstPhoto->id]);
+    $this->assertDatabaseHas('vehicle_photos', ['id' => $secondPhoto->id, 'is_cover' => true]);
+    Storage::disk('public')->assertMissing($firstPath);
+    Storage::disk('public')->assertExists($secondPath);
+});
+
+test('it rejects invalid seller identity and broker input without saving transaction data', function () {
+    Storage::fake('public');
+
+    $this->from(route('transactions.create'))
+        ->post(route('transactions.store'), array_replace(validVehiclePhotoTransactionData(), [
+            'nama_penjual' => '',
+            'nik_penjual' => '12345',
+            'nama_broker' => str_repeat('B', 256),
+        ]))
+        ->assertRedirect(route('transactions.create'))
+        ->assertSessionHasErrors(['nama_penjual', 'nik_penjual', 'nama_broker']);
+
+    $this->assertDatabaseCount('car_transactions', 0);
+    $this->assertDatabaseCount('vehicle_photos', 0);
 });
 
 test('it stores an uploaded vehicle photo and displays it on transaction details', function () {
@@ -59,9 +149,10 @@ test('it stores an uploaded vehicle photo and displays it on transaction details
     expect($transaction->vehicle_photo_path)->toStartWith('vehicle-photos/');
     Storage::disk('public')->assertExists($transaction->vehicle_photo_path);
 
-    $this->get(route('transactions.show', $transaction))
+    $this->getJson(route('api.spa.transactions.show', $transaction))
         ->assertOk()
-        ->assertSee(Storage::disk('public')->url($transaction->vehicle_photo_path), false);
+        ->assertJsonPath('data.vehicle_photo_url', Storage::disk('public')->url($transaction->vehicle_photo_path))
+        ->assertJsonPath('data.vehicle_photos.0.url', Storage::disk('public')->url($transaction->vehicle_photo_path));
 });
 
 test('it replaces a photo on update and retains the existing photo when no replacement is uploaded', function () {

@@ -1,8 +1,28 @@
 .vehicle-photo-card {
-    align-self: start;
-    height: fit-content;
     min-width: 0;
     overflow: hidden;
+}
+
+.vehicle-admin-photo-layout {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 12px;
+    min-width: 0;
+}
+
+.vehicle-admin-photo-layout > .form-section {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.vehicle-admin-photo-layout .section-heading {
+    flex: 0 0 auto;
+}
+
+.vehicle-admin-photo-layout .section-content {
+    flex: 1;
 }
 
 .vehicle-photo-content {
@@ -27,18 +47,138 @@
     width: 100%;
     min-height: 44px;
     padding: 9px 14px;
-    border: 1px solid var(--color-border-strong);
+    border: 1px solid var(--color-primary-border-strong);
     border-radius: var(--radius-control);
-    background: var(--color-surface);
-    color: var(--leasing-ink);
+    background: var(--color-primary-subtle);
+    color: var(--color-primary);
     font: inherit;
     font-weight: 700;
     text-align: left;
     cursor: pointer;
 }
 
+.vehicle-photo-dropzone {
+    display: grid;
+    min-height: 76px;
+    place-items: center;
+    padding: 12px;
+    border: 1px dashed var(--color-border-strong);
+    border-radius: var(--radius-control);
+    color: var(--leasing-muted);
+    text-align: center;
+    cursor: pointer;
+}
+
+.vehicle-photo-dropzone:focus-visible,
+.vehicle-photo-dropzone.is-dragging {
+    outline: 3px solid var(--color-primary-focus-outline);
+    outline-offset: 2px;
+    background: var(--color-surface-subtle);
+}
+
+.vehicle-photo-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(116px, 1fr));
+    gap: 8px;
+    min-width: 0;
+}
+
+.vehicle-photo-item {
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-table);
+    background: var(--color-surface);
+}
+
+.vehicle-photo-item[hidden] {
+    display: none;
+}
+
+.vehicle-photo-item > img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    background: var(--color-surface-subtle);
+}
+
+.vehicle-photo-item:has(input[name="foto_utama"]:checked) {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.vehicle-photo-item-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    padding: 6px;
+    font-size: var(--font-size-caption);
+}
+
+.vehicle-photo-cover-choice {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+}
+
+.vehicle-photo-remove {
+    border: 0;
+    background: transparent;
+    color: var(--color-danger-validation);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.vehicle-administration-content {
+    display: grid;
+    align-content: start;
+    gap: 8px;
+}
+
+.vehicle-administration-subheading {
+    margin: 0;
+    color: var(--leasing-ink);
+    font-size: var(--font-size-sm);
+    font-weight: 800;
+}
+
+.vehicle-administration-fields {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+}
+
+.page-shell--transaction-form .transaction-form .vehicle-administration-field {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    min-width: 0;
+    margin-bottom: 0;
+}
+
+.page-shell--transaction-form .transaction-form .vehicle-administration-field > label {
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+}
+
+.vehicle-administration-fields input,
+.vehicle-administration-content > .form-group input {
+    width: 100%;
+    min-width: 0;
+}
+
+.vehicle-administration-error {
+    color: var(--color-danger-validation);
+}
+
 .vehicle-photo-button:hover {
-    border-color: var(--color-border-hover);
+    border-color: var(--color-primary);
     background: var(--color-surface-subtle);
 }
 
@@ -78,4 +218,3 @@
     font-size: var(--font-size-md);
     font-weight: 700;
 }
-

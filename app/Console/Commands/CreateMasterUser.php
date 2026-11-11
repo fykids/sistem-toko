@@ -23,7 +23,7 @@ class CreateMasterUser extends Command
 
         $name = $this->ask('Name');
         $username = $this->ask('Username');
-        $password = $this->secret('Password (minimum 6 characters)');
+        $password = $this->secret('Password (minimum 12 characters)');
         $passwordConfirmation = $this->secret('Confirm password');
 
         $validator = Validator::make([
@@ -40,7 +40,7 @@ class CreateMasterUser extends Command
                 'max:255',
                 'unique:users,username',
             ],
-            'password' => ['required', 'string', 'min:6', 'confirmed'],
+            'password' => ['required', 'string', 'min:12', 'confirmed'],
         ]);
 
         if ($validator->fails()) {

@@ -62,89 +62,91 @@ const formatCurrencyInput = (input, preserveCaret = false) => {
     }
 };
 
-document.querySelectorAll('.sell-module-form').forEach((form) => {
-    const vehicleSelect = form.querySelector('[data-jual-vehicle-select]');
-    const currentVehicleInput = form.querySelector('[data-jual-current-vehicle]');
-    const vehicleFields = form.querySelector('[data-jual-vehicle-fields]');
-    const sellingPrice = form.querySelector('[data-jual-selling-price]');
-    const paymentInputs = [...form.querySelectorAll('[data-jual-payment-amount]')];
-    const remainingPayment = form.querySelector('[data-jual-remaining-payment]');
-    const plannedPaymentDate = form.querySelector('[data-jual-planned-payment-date]');
+document.addEventListener('turbo:load', () => {
+    document.querySelectorAll('.sell-module-form').forEach((form) => {
+        const vehicleSelect = form.querySelector('[data-jual-vehicle-select]');
+        const currentVehicleInput = form.querySelector('[data-jual-current-vehicle]');
+        const vehicleFields = form.querySelector('[data-jual-vehicle-fields]');
+        const sellingPrice = form.querySelector('[data-jual-selling-price]');
+        const paymentInputs = [...form.querySelectorAll('[data-jual-payment-amount]')];
+        const remainingPayment = form.querySelector('[data-jual-remaining-payment]');
+        const plannedPaymentDate = form.querySelector('[data-jual-planned-payment-date]');
 
-    const selectedVehicle = () => {
-        const json = vehicleSelect?.selectedOptions[0]?.dataset.vehiclePreview
-            ?? currentVehicleInput?.value;
+        const selectedVehicle = () => {
+            const json = vehicleSelect?.selectedOptions[0]?.dataset.vehiclePreview
+                ?? currentVehicleInput?.value;
 
-        return json ? JSON.parse(json) : null;
-    };
+            return json ? JSON.parse(json) : null;
+        };
 
-    const updateRemainingPayment = () => {
-        if (!remainingPayment || !sellingPrice) {
-            return;
-        }
-
-        const paidAmount = paymentInputs.reduce((total, input) => total + parseAmount(input.value), 0);
-        const balance = Math.max(parseAmount(sellingPrice.value) - paidAmount, 0);
-
-        remainingPayment.textContent = currencyFormatter.format(balance);
-
-        if (plannedPaymentDate) {
-            plannedPaymentDate.required = balance > 0;
-        }
-    };
-
-    const updateVehicleFields = (vehicle) => {
-        vehicleFields?.querySelectorAll('[data-jual-vehicle-field]').forEach((field) => {
-            const value = vehicle?.[field.dataset.jualVehicleField];
-            field.value = value === null || value === undefined ? '' : String(value);
-        });
-    };
-
-    const updatePaymentValues = (vehicle) => {
-        if (sellingPrice) {
-            sellingPrice.value = formatAmount(vehicle?.selling_price ?? 0);
-        }
-
-        paymentInputs.forEach((input) => {
-            input.value = formatAmount(vehicle?.[input.name] ?? 0);
-        });
-
-        Object.values(paymentDateFields).forEach((dateField) => {
-            const input = form.elements.namedItem(dateField);
-
-            if (input instanceof HTMLInputElement) {
-                input.value = vehicle?.[dateField] ?? '';
+        const updateRemainingPayment = () => {
+            if (!remainingPayment || !sellingPrice) {
+                return;
             }
+
+            const paidAmount = paymentInputs.reduce((total, input) => total + parseAmount(input.value), 0);
+            const balance = Math.max(parseAmount(sellingPrice.value) - paidAmount, 0);
+
+            remainingPayment.textContent = currencyFormatter.format(balance);
+
+            if (plannedPaymentDate) {
+                plannedPaymentDate.required = balance > 0;
+            }
+        };
+
+        const updateVehicleFields = (vehicle) => {
+            vehicleFields?.querySelectorAll('[data-jual-vehicle-field]').forEach((field) => {
+                const value = vehicle?.[field.dataset.jualVehicleField];
+                field.value = value === null || value === undefined ? '' : String(value);
+            });
+        };
+
+        const updatePaymentValues = (vehicle) => {
+            if (sellingPrice) {
+                sellingPrice.value = formatAmount(vehicle?.selling_price ?? 0);
+            }
+
+            paymentInputs.forEach((input) => {
+                input.value = formatAmount(vehicle?.[input.name] ?? 0);
+            });
+
+            Object.values(paymentDateFields).forEach((dateField) => {
+                const input = form.elements.namedItem(dateField);
+
+                if (input instanceof HTMLInputElement) {
+                    input.value = vehicle?.[dateField] ?? '';
+                }
+            });
+
+            const plannedDate = form.elements.namedItem('planned_payment_date');
+            if (plannedDate instanceof HTMLInputElement) {
+                plannedDate.value = vehicle?.planned_payment_date ?? '';
+            }
+
+            updateRemainingPayment();
+        };
+
+        form.querySelectorAll('[data-rupiah-input]').forEach((input) => {
+            input.value = formatAmount(parseAmount(input.value));
+            input.addEventListener('input', () => formatCurrencyInput(input, true));
         });
 
-        const plannedDate = form.elements.namedItem('planned_payment_date');
-        if (plannedDate instanceof HTMLInputElement) {
-            plannedDate.value = vehicle?.planned_payment_date ?? '';
-        }
+        sellingPrice?.addEventListener('input', updateRemainingPayment);
+        paymentInputs.forEach((input) => input.addEventListener('input', updateRemainingPayment));
 
+        vehicleSelect?.addEventListener('change', () => {
+            const vehicle = selectedVehicle();
+            updateVehicleFields(vehicle);
+            updatePaymentValues(vehicle);
+        });
+
+        updateVehicleFields(selectedVehicle());
         updateRemainingPayment();
-    };
 
-    form.querySelectorAll('[data-rupiah-input]').forEach((input) => {
-        input.value = formatAmount(parseAmount(input.value));
-        input.addEventListener('input', () => formatCurrencyInput(input, true));
-    });
-
-    sellingPrice?.addEventListener('input', updateRemainingPayment);
-    paymentInputs.forEach((input) => input.addEventListener('input', updateRemainingPayment));
-
-    vehicleSelect?.addEventListener('change', () => {
-        const vehicle = selectedVehicle();
-        updateVehicleFields(vehicle);
-        updatePaymentValues(vehicle);
-    });
-
-    updateVehicleFields(selectedVehicle());
-    updateRemainingPayment();
-
-    form.addEventListener('submit', () => {
-        form.querySelectorAll('[data-rupiah-input]').forEach((input) => {
-            input.value = input.value.replace(/\./g, '').replace(',', '.');
+        form.addEventListener('submit', () => {
+            form.querySelectorAll('[data-rupiah-input]').forEach((input) => {
+                input.value = input.value.replace(/\./g, '').replace(',', '.');
+            });
         });
     });
 });

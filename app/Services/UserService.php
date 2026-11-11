@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -16,9 +17,9 @@ class UserService
         return User::query()->where('role', 'master')->exists();
     }
 
-    public function resetMasterPassword(): ?User
+    public function resetMasterPassword(string $password): ?User
     {
-        return DB::transaction(function (): ?User {
+        return DB::transaction(function () use ($password): ?User {
             $master = User::query()
                 ->where('role', 'master')
                 ->orderBy('id')
@@ -30,7 +31,7 @@ class UserService
             }
 
             $master->forceFill([
-                'password' => Hash::make('123456'),
+                'password' => Hash::make($password),
             ])->save();
 
             return $master;
@@ -74,17 +75,23 @@ class UserService
      */
     public function createUser(array $data): User
     {
-        return DB::transaction(function () use ($data): User {
-            $user = new User;
-            $user->forceFill([
-                'name' => $data['name'],
-                'username' => $data['username'],
-                'password' => Hash::make($data['password']),
-                'role' => $data['role'],
-            ])->save();
+        try {
+            return DB::transaction(function () use ($data): User {
+                $user = new User;
+                $user->forceFill([
+                    'name' => $data['name'],
+                    'username' => $data['username'],
+                    'password' => Hash::make($data['password']),
+                    'role' => $data['role'],
+                ])->save();
 
-            return $user;
-        });
+                return $user;
+            });
+        } catch (UniqueConstraintViolationException) {
+            throw ValidationException::withMessages([
+                'username' => 'Username tersebut sudah digunakan.',
+            ]);
+        }
     }
 
     /**
@@ -92,33 +99,39 @@ class UserService
      */
     public function updateUser(User $user, array $data): User
     {
-        return DB::transaction(function () use ($user, $data): User {
-            $masterCount = User::query()
-                ->where('role', 'master')
-                ->lockForUpdate()
-                ->count();
-            $managedUser = User::query()->lockForUpdate()->findOrFail($user->getKey());
+        try {
+            return DB::transaction(function () use ($user, $data): User {
+                $masterCount = User::query()
+                    ->where('role', 'master')
+                    ->lockForUpdate()
+                    ->count();
+                $managedUser = User::query()->lockForUpdate()->findOrFail($user->getKey());
 
-            if ($managedUser->role === 'master' && $data['role'] === 'admin' && $masterCount <= 1) {
-                throw ValidationException::withMessages([
-                    'role' => 'Sistem harus mempertahankan minimal satu akun Master.',
-                ]);
-            }
+                if ($managedUser->role === 'master' && $data['role'] === 'admin' && $masterCount <= 1) {
+                    throw ValidationException::withMessages([
+                        'role' => 'Sistem harus mempertahankan minimal satu akun Master.',
+                    ]);
+                }
 
-            $attributes = [
-                'name' => $data['name'],
-                'username' => $data['username'],
-                'role' => $data['role'],
-            ];
+                $attributes = [
+                    'name' => $data['name'],
+                    'username' => $data['username'],
+                    'role' => $data['role'],
+                ];
 
-            if (filled($data['password'] ?? null)) {
-                $attributes['password'] = Hash::make($data['password']);
-            }
+                if (filled($data['password'] ?? null)) {
+                    $attributes['password'] = Hash::make($data['password']);
+                }
 
-            $managedUser->forceFill($attributes)->save();
+                $managedUser->forceFill($attributes)->save();
 
-            return $managedUser;
-        });
+                return $managedUser;
+            });
+        } catch (UniqueConstraintViolationException) {
+            throw ValidationException::withMessages([
+                'username' => 'Username tersebut sudah digunakan.',
+            ]);
+        }
     }
 
     public function deleteUser(User $user): bool

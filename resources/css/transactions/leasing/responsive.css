@@ -38,11 +38,10 @@
     .page-shell--transaction-form .leasing-photo-layout {
         grid-template-columns: minmax(0, 1fr);
     }
-}
 
-@media (min-width: 821px) and (max-width: 1100px) {
-    .page-shell--transaction-form .leasing-photo-layout {
-        grid-template-columns: minmax(0, 1fr);
+    .page-shell--transaction-form .leasing-layout-column--leasing,
+    .page-shell--transaction-form .leasing-layout-column--vehicle-admin {
+        grid-column: 1 / -1;
     }
 }
 

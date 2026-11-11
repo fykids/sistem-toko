@@ -8,6 +8,7 @@ use App\Models\CarTransaction;
 use App\Models\SaleNote;
 use App\Models\SalePayment;
 use App\Models\User;
+use App\Models\VehiclePhoto;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
@@ -19,6 +20,8 @@ use SQLite3Exception;
 class TransactionBackupService
 {
     private const TABLE = 'car_transactions';
+
+    private const VEHICLE_PHOTO_TABLE = 'vehicle_photos';
 
     private const BUYER_TABLE = 'buyers';
 
@@ -53,6 +56,12 @@ class TransactionBackupService
                 self::TABLE,
                 Schema::getColumnListing(self::TABLE),
                 CarTransaction::query()->orderBy('id')->cursor(),
+            );
+            $this->writeTable(
+                $database,
+                self::VEHICLE_PHOTO_TABLE,
+                Schema::getColumnListing(self::VEHICLE_PHOTO_TABLE),
+                VehiclePhoto::query()->orderBy('id')->cursor(),
             );
             $this->writeTable(
                 $database,
@@ -151,6 +160,7 @@ class TransactionBackupService
             }
             $saleNoteResult = $this->readOptionalTable($database, self::SALE_NOTE_TABLE);
             $salePaymentResult = $this->readOptionalTable($database, self::SALE_PAYMENT_TABLE);
+            $vehiclePhotoResult = $this->readOptionalTable($database, self::VEHICLE_PHOTO_TABLE);
             $sourceUserIds = [];
 
             if ($saleNoteResult instanceof \SQLite3Result) {
@@ -168,9 +178,17 @@ class TransactionBackupService
             }
 
             $rules = (new StoreCarTransactionRequest)->rules();
+            $rules = array_replace($rules, [
+                'nama_penjual' => ['nullable', 'string', 'max:255'],
+                'nik_penjual' => ['nullable', 'digits:16'],
+                'no_hp_penjual' => ['nullable', 'string', 'max:30'],
+                'alamat_penjual' => ['nullable', 'string', 'max:5000'],
+                'nama_broker' => ['nullable', 'string', 'max:255'],
+            ]);
 
             return DB::transaction(function () use (
                 $result,
+                $vehiclePhotoResult,
                 $buyerResult,
                 $saleNoteResult,
                 $salePaymentResult,
@@ -224,7 +242,14 @@ class TransactionBackupService
                         $fillableAttributes[$column] = $value;
                     }
 
-                    $validator = Validator::make($fillableAttributes, $rules);
+                    $validationAttributes = array_replace($fillableAttributes, [
+                        'nama_penjual' => $fillableAttributes['seller_name'] ?? null,
+                        'nik_penjual' => $fillableAttributes['seller_nik'] ?? null,
+                        'no_hp_penjual' => $fillableAttributes['seller_phone'] ?? null,
+                        'alamat_penjual' => $fillableAttributes['seller_address'] ?? null,
+                        'nama_broker' => $fillableAttributes['broker_name'] ?? null,
+                    ]);
+                    $validator = Validator::make($validationAttributes, $rules);
 
                     if ($validator->fails()) {
                         throw new InvalidArgumentException(
@@ -232,7 +257,7 @@ class TransactionBackupService
                         );
                     }
 
-                    $transaction->fill($validator->validated());
+                    $transaction->fill($fillableAttributes);
 
                     if (array_key_exists('days_held', $record)) {
                         $transaction->setAttribute('days_held', $record['days_held']);
@@ -244,7 +269,51 @@ class TransactionBackupService
                     $transaction->save();
                     $transactionIds[(int) $record['id']] = $transaction->id;
 
+                    if ($vehiclePhotoResult === null && filled($transaction->vehicle_photo_path)) {
+                        $transaction->vehiclePhotos()->create([
+                            'path' => $transaction->vehicle_photo_path,
+                            'is_cover' => true,
+                            'position' => 0,
+                        ]);
+                    }
+
                     $importedCount++;
+                }
+
+                if ($vehiclePhotoResult instanceof \SQLite3Result) {
+                    $photoRules = [
+                        'car_transaction_id' => ['required', 'integer'],
+                        'path' => ['required', 'string', 'max:255'],
+                        'is_cover' => ['required', 'boolean'],
+                        'position' => ['required', 'integer', 'min:0', 'max:65535'],
+                    ];
+
+                    while ($record = $vehiclePhotoResult->fetchArray(SQLITE3_ASSOC)) {
+                        $sourceTransactionId = (int) $record['car_transaction_id'];
+                        $importedTransactionId = $transactionIds[$sourceTransactionId] ?? null;
+
+                        if ($importedTransactionId === null) {
+                            throw new InvalidArgumentException(
+                                'Foto kendaraan pada file backup tidak memiliki transaksi kendaraan.',
+                            );
+                        }
+
+                        $attributes = [
+                            'car_transaction_id' => $importedTransactionId,
+                            'path' => $record['path'],
+                            'is_cover' => $record['is_cover'],
+                            'position' => $record['position'],
+                        ];
+                        $validator = Validator::make($attributes, $photoRules);
+
+                        if ($validator->fails()) {
+                            throw new InvalidArgumentException(
+                                'Data foto kendaraan pada file backup tidak valid: '.$validator->errors()->first(),
+                            );
+                        }
+
+                        VehiclePhoto::query()->create($validator->validated());
+                    }
                 }
 
                 if ($buyerResult instanceof \SQLite3Result) {
@@ -449,7 +518,7 @@ class TransactionBackupService
 
     /**
      * @param  array<int, string>  $columns
-     * @param  iterable<CarTransaction|Buyer|SaleNote|SalePayment>  $records
+     * @param  iterable<CarTransaction|Buyer|SaleNote|SalePayment|VehiclePhoto>  $records
      */
     private function writeTable(SQLite3 $database, string $table, array $columns, iterable $records): void
     {

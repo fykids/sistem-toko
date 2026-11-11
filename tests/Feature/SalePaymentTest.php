@@ -46,26 +46,23 @@ it('filters sale notes into unpaid leasing and paid groups', function () {
     ]);
 
     $this->actingAs($master)
-        ->get(route('jual.index', ['status' => 'unpaid']))
+        ->getJson(route('api.spa.jual.index', ['status' => 'unpaid']))
         ->assertOk()
-        ->assertSee($unpaidNote->carTransaction->plate_number)
-        ->assertDontSee($leasingNote->carTransaction->plate_number)
-        ->assertDontSee($paidNote->carTransaction->plate_number)
-        ->assertSee('Belum Lunas')
-        ->assertSee('Proses Leasing')
-        ->assertSee('Lunas');
+        ->assertJsonPath('data.0.id', $unpaidNote->id)
+        ->assertJsonPath('status', 'unpaid')
+        ->assertJsonCount(1, 'data');
 
-    $this->get(route('jual.index', ['status' => 'leasing']))
+    $this->getJson(route('api.spa.jual.index', ['status' => 'leasing']))
         ->assertOk()
-        ->assertSee($leasingNote->carTransaction->plate_number)
-        ->assertDontSee($unpaidNote->carTransaction->plate_number)
-        ->assertDontSee($paidNote->carTransaction->plate_number);
+        ->assertJsonPath('data.0.id', $leasingNote->id)
+        ->assertJsonPath('status', 'leasing')
+        ->assertJsonCount(1, 'data');
 
-    $this->get(route('jual.index', ['status' => 'paid']))
+    $this->getJson(route('api.spa.jual.index', ['status' => 'paid']))
         ->assertOk()
-        ->assertSee($paidNote->carTransaction->plate_number)
-        ->assertDontSee($unpaidNote->carTransaction->plate_number)
-        ->assertDontSee($leasingNote->carTransaction->plate_number);
+        ->assertJsonPath('data.0.id', $paidNote->id)
+        ->assertJsonPath('status', 'paid')
+        ->assertJsonCount(1, 'data');
 });
 
 it('loads a sale detail page when no payment history has been recorded', function () {
@@ -73,9 +70,10 @@ it('loads a sale detail page when no payment history has been recorded', functio
     $saleNote = createSalePaymentTestNote($creator);
 
     $this->actingAs($creator)
-        ->get(route('jual.show', $saleNote))
+        ->getJson(route('api.spa.jual.show', $saleNote))
         ->assertOk()
-        ->assertSee('B 4455 PAY');
+        ->assertJsonPath('data.car_transaction.plate_number', 'B 4455 PAY')
+        ->assertJsonPath('data.payments', []);
 });
 
 it('records a partial payment and updates the remaining balance', function () {
@@ -84,14 +82,13 @@ it('records a partial payment and updates the remaining balance', function () {
     $actor = User::factory()->master()->create();
 
     $this->actingAs($actor)
-        ->post(route('jual.payments.store', $saleNote), [
+        ->postJson(route('api.spa.jual.payments.store', $saleNote), [
             'amount' => '20.000.000',
             'payment_method' => 'bank_transfer',
             'payment_date' => '2026-10-25',
             'notes' => "Referensi TRX-2026-10 <script>alert('x')</script>",
-        ])
-        ->assertRedirect(route('jual.show', $saleNote))
-        ->assertSessionHas('success');
+        ])->assertCreated()
+        ->assertJsonPath('message', 'Pelunasan berhasil dicatat.');
 
     $vehicle = $saleNote->carTransaction()->firstOrFail();
     $this->assertDatabaseHas('sale_payments', [
@@ -107,12 +104,10 @@ it('records a partial payment and updates the remaining balance', function () {
         ->and((float) $vehicle->fresh()->remaining_payment)->toBe(62000000.0)
         ->and($vehicle->fresh()->planned_payment_date)->toBe('2026-11-20');
 
-    $this->get(route('jual.show', $saleNote))
+    $this->getJson(route('api.spa.jual.show', $saleNote))
         ->assertOk()
-        ->assertSee('Total dibayar')
-        ->assertSee('30,000,000')
-        ->assertSee('&lt;script&gt;alert(&#039;x&#039;)&lt;/script&gt;', false)
-        ->assertDontSee("<script>alert('x')</script>", false);
+        ->assertJsonPath('data.payments.0.notes', "Referensi TRX-2026-10 <script>alert('x')</script>")
+        ->assertJsonPath('data.payments.0.amount', '20000000.00');
 });
 
 it('classifies a pending payment recorded through leasing as in progress', function () {
@@ -120,21 +115,19 @@ it('classifies a pending payment recorded through leasing as in progress', funct
     $saleNote = createSalePaymentTestNote($creator);
 
     $this->actingAs($creator)
-        ->post(route('jual.payments.store', $saleNote), [
+        ->postJson(route('api.spa.jual.payments.store', $saleNote), [
             'amount' => 1000000,
             'payment_method' => 'leasing',
             'payment_date' => '2026-10-26',
-        ])
-        ->assertRedirect(route('jual.show', $saleNote));
+        ])->assertCreated();
 
-    $this->get(route('jual.index', ['status' => 'leasing']))
+    $this->getJson(route('api.spa.jual.index', ['status' => 'leasing']))
         ->assertOk()
-        ->assertSee('B 4455 PAY')
-        ->assertSee('Proses Leasing');
+        ->assertJsonPath('data.0.payment_status', 'leasing');
 
-    $this->get(route('jual.index', ['status' => 'unpaid']))
+    $this->getJson(route('api.spa.jual.index', ['status' => 'unpaid']))
         ->assertOk()
-        ->assertDontSee('B 4455 PAY');
+        ->assertJsonCount(0, 'data');
 });
 
 it('marks a transaction paid and clamps its remaining balance after an overpayment', function () {
@@ -142,22 +135,17 @@ it('marks a transaction paid and clamps its remaining balance after an overpayme
     $saleNote = createSalePaymentTestNote($creator);
 
     $this->actingAs($creator)
-        ->get(route('jual.payments.create', $saleNote))
+        ->getJson(route('api.spa.jual.show', $saleNote))
         ->assertOk()
-        ->assertSee('B 4455 PAY')
-        ->assertSee('Dewi Pembeli')
-        ->assertSee('82,000,000')
-        ->assertSee('name="payment_method"', false)
-        ->assertSee('name="payment_date"', false)
-        ->assertSee('name="notes"', false);
+        ->assertJsonPath('data.car_transaction.plate_number', 'B 4455 PAY')
+        ->assertJsonPath('data.nama_konsumen', 'Dewi Pembeli')
+        ->assertJsonPath('data.car_transaction.remaining_payment', 82000000);
 
-    $this->post(route('jual.payments.store', $saleNote), [
+    $this->postJson(route('api.spa.jual.payments.store', $saleNote), [
         'amount' => 90000000,
         'payment_method' => 'cash',
         'payment_date' => '2026-10-26',
-    ])
-        ->assertRedirect(route('jual.show', $saleNote))
-        ->assertSessionHas('success');
+    ])->assertCreated();
 
     expect((float) $saleNote->carTransaction->fresh()->remaining_payment)->toBe(0.0)
         ->and($saleNote->carTransaction->fresh()->planned_payment_date)->toBeNull()
@@ -170,10 +158,10 @@ it('prevents another admin from viewing or recording a sale payment', function (
     $otherAdmin = User::factory()->create();
 
     $this->actingAs($otherAdmin)
-        ->get(route('jual.payments.create', $saleNote))
+        ->getJson(route('api.spa.jual.show', $saleNote))
         ->assertForbidden();
 
-    $this->post(route('jual.payments.store', $saleNote), [
+    $this->postJson(route('api.spa.jual.payments.store', $saleNote), [
         'amount' => 1000000,
         'payment_method' => 'cash',
         'payment_date' => '2026-10-26',
@@ -206,6 +194,24 @@ it('rejects invalid and unnecessary payment entries', function () {
         ->assertSessionHasErrors('amount');
 
     $this->assertDatabaseCount('sale_payments', 0);
+});
+
+it('rejects a payment amount beyond the database decimal range', function () {
+    $creator = User::factory()->create();
+    $saleNote = createSalePaymentTestNote($creator);
+
+    $this->actingAs($creator)
+        ->from(route('jual.payments.create', $saleNote))
+        ->post(route('jual.payments.store', $saleNote), [
+            'amount' => 10000000000000,
+            'payment_method' => 'cash',
+            'payment_date' => '2026-10-26',
+        ])
+        ->assertRedirect(route('jual.payments.create', $saleNote))
+        ->assertSessionHasErrors('amount');
+
+    $this->assertDatabaseCount('sale_payments', 0);
+    expect((float) $saleNote->carTransaction->fresh()->settlement_amount)->toBe(0.0);
 });
 
 it('requires authentication to access the payment form', function () {

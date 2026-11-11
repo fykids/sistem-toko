@@ -36,10 +36,8 @@ class SaveSaleNoteRequest extends FormRequest
     {
         $saleNote = $this->route('saleNote');
 
-        return $this->user()?->can(
-            $saleNote instanceof SaleNote ? 'update' : 'create',
-            $saleNote instanceof SaleNote ? $saleNote : SaleNote::class,
-        ) ?? false;
+        return $saleNote instanceof SaleNote
+            && (bool) $this->user()?->can('update', $saleNote);
     }
 
     /**
@@ -48,13 +46,11 @@ class SaveSaleNoteRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'car_transaction_id' => [
-                $this->isMethod('post') ? 'required' : 'prohibited',
-                'integer',
-                Rule::exists('car_transactions', 'id')->whereNull('sell_date'),
-                Rule::unique('sale_notes', 'car_transaction_id')->ignore($this->route('saleNote')),
-            ],
+            'car_transaction_id' => ['prohibited'],
             'nama_konsumen' => ['required', 'string', 'max:255'],
+            'buyer_nik' => ['nullable', 'digits:16'],
+            'buyer_phone' => ['nullable', 'string', 'max:30'],
+            'buyer_address' => ['nullable', 'string', 'max:2000'],
             'payment_type' => [
                 'required',
                 Rule::in(['selling_price', 'down_payment', 'settlement_amount', 'leasing_disbursement']),

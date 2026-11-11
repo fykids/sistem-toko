@@ -36,7 +36,7 @@ class StoreSalePaymentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'amount' => ['required', 'numeric', 'gt:0'],
+            'amount' => ['required', 'numeric', 'gt:0', 'max:9999999999999.99'],
             'payment_method' => ['required', Rule::in(['cash', 'leasing', 'bank_transfer'])],
             'payment_date' => ['required', 'date'],
             'notes' => ['nullable', 'string', 'max:1000'],
@@ -49,6 +49,7 @@ class StoreSalePaymentRequest extends FormRequest
             'amount.required' => 'Nominal pelunasan wajib diisi.',
             'amount.numeric' => 'Nominal pelunasan harus berupa angka.',
             'amount.gt' => 'Nominal pelunasan harus lebih besar dari nol.',
+            'amount.max' => 'Nominal pelunasan melebihi batas maksimum yang dapat disimpan.',
             'payment_method.required' => 'Pilih metode pelunasan.',
             'payment_method.in' => 'Metode pelunasan yang dipilih tidak valid.',
             'payment_date.required' => 'Tanggal pelunasan wajib diisi.',
