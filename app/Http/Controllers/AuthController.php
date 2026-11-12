@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Services\RoleDashboardResolver;
-use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -49,15 +48,8 @@ class AuthController extends Controller
         return redirect()->route($routeName);
     }
 
-    public function loginApi(Request $request, UserService $userService): JsonResponse
+    public function loginApi(Request $request): JsonResponse
     {
-        if (! $userService->hasMasterAccount()) {
-            return response()->json([
-                'message' => 'Akun Master belum tersedia.',
-                'redirect' => '/setup-master',
-            ], 409);
-        }
-
         $credentials = $request->validate([
             'username' => ['required', 'string', 'max:255'],
             'password' => ['required', 'string'],

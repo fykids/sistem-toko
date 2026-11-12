@@ -6,8 +6,7 @@
 @source '../js/**/*.vue';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: "Inter", system-ui, -apple-system, sans-serif;
 }
 
 :root {
@@ -118,32 +117,32 @@
     --color-scrollbar-thumb: #9db6a7;
     --color-scrollbar-track: #f0f5f2;
     --font-family-body: var(--font-sans);
-    --font-size-micro: 8px;
-    --font-size-caption: 9px;
-    --font-size-xs: 10px;
-    --font-size-sm: 11px;
-    --font-size-md: 12px;
-    --font-size-body-sm: 13px;
+    --font-size-micro: 12px;
+    --font-size-caption: 12px;
+    --font-size-xs: 12px;
+    --font-size-sm: 14px;
+    --font-size-md: 14px;
+    --font-size-body-sm: 14px;
     --font-size-body: 14px;
-    --font-size-body-lg: 15px;
-    --font-size-lg: 16px;
-    --font-size-section: 17px;
+    --font-size-body-lg: 14px;
+    --font-size-lg: 18px;
+    --font-size-section: 18px;
     --font-size-title-sm: 18px;
-    --font-size-title-md: 19px;
+    --font-size-title-md: 20px;
     --font-size-heading-sm: 20px;
-    --font-size-title: 21px;
-    --font-size-title-lg: 22px;
-    --font-size-stat: 23px;
-    --font-size-display-sm: 24px;
-    --font-size-display: 25px;
-    --font-size-heading: 26px;
-    --font-size-report-value: clamp(15px, 1.55vw, 21px);
-    --font-size-stat-value: clamp(17px, 1.8vw, 23px);
-    --font-size-page-title: clamp(28px, 2.4vw, 34px);
-    --font-size-table-header: clamp(7px, .65vw, 9px);
-    --font-size-table-cell: clamp(7px, .68vw, 9px);
-    --font-size-table-primary: clamp(7px, .78vw, 11px);
-    --font-size-table-secondary: clamp(7px, .7vw, 10px);
+    --font-size-title: 20px;
+    --font-size-title-lg: 20px;
+    --font-size-stat: 14px;
+    --font-size-display-sm: 36px;
+    --font-size-display: 14px;
+    --font-size-heading: 36px;
+    --font-size-report-value: 14px;
+    --font-size-stat-value: 14px;
+    --font-size-page-title: clamp(28px, 2.4vw, 36px);
+    --font-size-table-header: 14px;
+    --font-size-table-cell: 14px;
+    --font-size-table-primary: 14px;
+    --font-size-table-secondary: 14px;
     --radius-xs: 5px;
     --radius-compact: 6px;
     --radius-none: 0;
@@ -305,6 +304,22 @@
     --palette-rgb-201-138-83-58: rgb(201 138 83 / 58%);
     --palette-rgb-14-30-24-10: rgb(14 30 24 / 10%);
     --palette-rgb-15-31-25-42: rgb(15 31 25 / 42%);
+}
+
+html, body, input, button, select, textarea, table {
+    font-family: var(--font-sans);
+}
+
+input, button, select, textarea, table {
+    font-size: var(--font-size-body);
+}
+
+label {
+    font-size: var(--font-size-caption);
+}
+
+small {
+    font-size: var(--font-size-caption);
 }
 
 *, *::before, *::after { 
@@ -506,10 +521,10 @@ a:hover { color: var(--accent-dark); }
 .users-dialog-form { display: grid; gap: 18px; padding: 22px; }
 .users-dialog-heading { align-items: flex-start; }
 .users-dialog-heading h2 { font-size: var(--font-size-title); }
-.users-dialog-close { display: grid; width: 34px; height: 34px; flex: 0 0 34px; place-items: center; border: 1px solid var(--color-border); border-radius: var(--radius-control); background: var(--color-surface); color: var(--color-text-secondary); font-size: 22px; cursor: pointer; }
+.users-dialog-close { display: grid; width: 34px; height: 34px; flex: 0 0 34px; place-items: center; border: 1px solid var(--color-border); border-radius: var(--radius-control); background: var(--color-surface); color: var(--color-text-secondary); font-size: 20px; cursor: pointer; }
 .users-dialog-fields { display: grid; gap: 13px; }
 .users-dialog-fields .form-group { display: grid; gap: 5px; margin: 0; }
-.users-dialog-fields .form-group label { color: var(--color-text-strong); font-size: var(--font-size-sm); font-weight: 700; }
+.users-dialog-fields .form-group label { color: var(--color-text-strong); font-size: var(--font-size-caption); font-weight: 700; }
 .users-dialog-fields .form-group label span { color: var(--color-text-subtle); font-weight: 500; }
 .users-dialog-fields .form-group input,
 .users-dialog-fields .form-group select { width: 100%; min-height: 40px; }
@@ -955,12 +970,12 @@ h4 { font-size: var(--font-size-body-lg); }
 
 /* Form Elements */
 .form-group { min-width: 0; margin-bottom: 10px; }
-.form-group label { display: block; margin-bottom: 5px; color: var(--palette-344a40); font-size: var(--font-size-md); font-weight: 800; }
+.form-group label { display: block; margin-bottom: 5px; color: var(--palette-344a40); font-size: var(--font-size-caption); font-weight: 800; }
 .transaction-form .form-group { display: grid; grid-template-columns: minmax(105px, 0.7fr) minmax(0, 1.3fr); align-items: center; column-gap: 12px; margin-bottom: 10px; }
 .transaction-form .form-group label { margin-bottom: 0; }
 .transaction-form .form-help { grid-column: 2; }
 .transaction-form .vehicle-fields .form-group { grid-template-columns: minmax(90px, 0.75fr) minmax(0, 1.25fr); column-gap: 8px; margin-bottom: 4px; }
-.transaction-form .vehicle-fields .form-group label { font-size: var(--font-size-md); line-height: 1.25; }
+.transaction-form .vehicle-fields .form-group label { font-size: var(--font-size-caption); line-height: 1.25; }
 
 .form-group input, .form-group select, .search-wrap input {
     width: 100%;
@@ -971,6 +986,7 @@ h4 { font-size: var(--font-size-body-lg); }
     background: var(--color-white);
     color: var(--ink);
     font: inherit;
+    font-size: var(--font-size-body);
     outline: none;
     transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
 }
@@ -1004,7 +1020,7 @@ h4 { font-size: var(--font-size-body-lg); }
     width: 100%;
     min-width: 0;
 }
-.transaction-form .repair-form-labels { margin-bottom: 5px; color: var(--palette-526960); font-size: var(--font-size-sm); font-weight: 800; }
+.transaction-form .repair-form-labels { margin-bottom: 5px; color: var(--palette-526960); font-size: var(--font-size-caption); font-weight: 800; }
 .transaction-form .repair-form-labels span { flex: 1 1 0; min-width: 0; }
 .transaction-form .repair-form-labels span:first-child,
 .transaction-form .repair-form-row .form-group:first-child { flex-grow: 1.35; }
@@ -1052,7 +1068,7 @@ h4 { font-size: var(--font-size-body-lg); }
 .page-shell--receipt .receipt-page-heading { margin-bottom: 12px; }
 .receipt-back { display: inline-flex; text-decoration: none; font-weight: 700; }
 .vehicle-detail-layout { display: grid; grid-template-columns: minmax(0, 1.72fr) minmax(390px, 1fr); align-items: stretch; gap: 12px; }
-.receipt { display: grid; min-width: 0; margin: 0; overflow: hidden; grid-template-columns: minmax(0, 1fr); align-content: start; align-items: start; color: var(--ink); font: 600 12px/1.3 var(--font-sans); }
+.receipt { display: grid; min-width: 0; margin: 0; overflow: hidden; grid-template-columns: minmax(0, 1fr); align-content: start; align-items: start; color: var(--ink); font: 600 14px/1.3 var(--font-sans); }
 .receipt-header, .receipt-dark-section { background: var(--color-black); color: var(--palette-f6fbf8); }
 .receipt-header { display: grid; grid-template-columns: 1.35fr 1fr; gap: 20px; padding: 12px 16px; }
 .receipt > * { grid-column: 1; }
@@ -1099,7 +1115,7 @@ h4 { font-size: var(--font-size-body-lg); }
 .leasing-vehicle-summary { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 2px; }
 .leasing-vehicle-plate { padding: 3px 7px; border: 1px solid var(--palette-d8e6dd); border-radius: var(--radius-xs); background: var(--palette-edf4ef); color: var(--green); font-size: var(--font-size-xs); font-weight: 800; white-space: nowrap; }
 .leasing-vehicle-name { color: var(--palette-526960); font-size: var(--font-size-xs); font-weight: 700; text-align: right; }
-.leasing-table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: var(--font-size-caption); }
+.leasing-table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: var(--font-size-table-cell); }
 .leasing-table th, .leasing-table td { padding: 7px 2px; border: 1px solid var(--palette-e2ebe6); text-align: center; white-space: nowrap; }
 .leasing-table thead th { background: var(--palette-edf4ef); color: var(--color-text-strong); font-size: var(--font-size-micro); font-weight: 800; }
 .leasing-table th:first-child { width: 16%; }

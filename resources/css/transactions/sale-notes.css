@@ -103,13 +103,13 @@
 
 .page-shell--sale-note-form .sale-note-card-heading h2 {
     color: var(--sale-note-accent-strong);
-    font-size: 1rem;
+    font-size: var(--font-size-title-sm);
 }
 
 .page-shell--sale-note-form .sale-note-card-heading p {
     margin-top: 3px;
     color: var(--color-text-secondary);
-    font-size: 0.8rem;
+    font-size: var(--font-size-body);
 }
 
 .page-shell--sale-note-form .sale-note-section-number {
@@ -121,7 +121,7 @@
     border-radius: 8px;
     background: var(--sale-note-accent-soft);
     color: var(--sale-note-accent-strong);
-    font-size: 0.78rem;
+    font-size: var(--font-size-xs);
     font-weight: 700;
 }
 
@@ -131,7 +131,7 @@
     width: 100%;
     margin-bottom: 12px;
     color: var(--color-text-primary);
-    font-size: 0.84rem;
+    font-size: var(--font-size-caption);
     font-weight: 600;
 }
 
@@ -148,6 +148,7 @@
     background: var(--color-control-surface);
     color: var(--color-text-primary);
     font: inherit;
+    font-size: var(--font-size-body);
     font-weight: 400;
 }
 
@@ -165,7 +166,7 @@
 
 .page-shell--sale-note-form .sale-note-error {
     color: var(--color-danger);
-    font-size: 0.76rem;
+    font-size: var(--font-size-xs);
     font-weight: 500;
 }
 
@@ -174,7 +175,7 @@
     display: grid;
     gap: 10px;
     color: var(--color-text-secondary);
-    font-size: 0.84rem;
+    font-size: var(--font-size-body);
 }
 
 .page-shell--sale-note-form .sale-note-vehicle-summary strong,
@@ -242,7 +243,7 @@
 
 .page-shell--sale-note .sale-note-detail-list dt {
     color: var(--color-text-secondary);
-    font-size: 0.8rem;
+    font-size: var(--font-size-caption);
 }
 
 .page-shell--sale-note .sale-note-detail-list dd {

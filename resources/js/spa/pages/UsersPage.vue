@@ -160,8 +160,8 @@ const roleLabels = { master: 'Master', admin: 'Admin', marketing: 'Marketing' };
                             <td>{{ roleLabels[user.role] ?? user.role }}</td>
                             <td>{{ user.created_at ? new Intl.DateTimeFormat('id-ID').format(new Date(user.created_at)) : '—' }}</td>
                             <td class="spa-row-actions">
-                                <button type="button" :disabled="isSaving" @click="startEdit(user)">Edit</button>
-                                <button type="button" :disabled="isSaving" @click="deleteUser(user)">Hapus</button>
+                                <button v-if="user.role !== 'master'" type="button" :disabled="isSaving" @click="startEdit(user)">Edit</button>
+                                <button v-if="user.role !== 'master'" type="button" :disabled="isSaving" @click="deleteUser(user)">Hapus</button>
                             </td>
                         </tr>
                         <tr v-if="users.length === 0"><td colspan="5" class="spa-empty">Tidak ada akun yang cocok.</td></tr>
@@ -181,7 +181,7 @@ const roleLabels = { master: 'Master', admin: 'Admin', marketing: 'Marketing' };
                 <label><span>Nama</span><input v-model="form.name" required maxlength="255" :disabled="isSaving"><small v-if="fieldErrors.name">{{ fieldErrors.name[0] }}</small></label>
                 <label><span>Username</span><input v-model="form.username" required maxlength="255" :disabled="isSaving"><small v-if="fieldErrors.username">{{ fieldErrors.username[0] }}</small></label>
                 <label><span>{{ editingUserId ? 'Password baru (opsional)' : 'Password' }}</span><input v-model="form.password" type="password" :required="!editingUserId" minlength="8" :disabled="isSaving"><small v-if="fieldErrors.password">{{ fieldErrors.password[0] }}</small></label>
-                <label><span>Peran</span><select v-model="form.role" required :disabled="isSaving"><option value="admin">Admin</option><option value="marketing">Marketing</option><option value="master">Master</option></select><small v-if="fieldErrors.role">{{ fieldErrors.role[0] }}</small></label>
+                <label><span>Peran</span><select v-model="form.role" required :disabled="isSaving"><option value="admin">Admin</option><option value="marketing">Marketing</option></select><small v-if="fieldErrors.role">{{ fieldErrors.role[0] }}</small></label>
                 <div class="spa-form-actions">
                     <button type="button" :disabled="isSaving" @click="formVisible = false">Batal</button>
                     <button type="submit" class="spa-primary-action" :disabled="isSaving">{{ isSaving ? 'Menyimpan...' : 'Simpan akun' }}</button>

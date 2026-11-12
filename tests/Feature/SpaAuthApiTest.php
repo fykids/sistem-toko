@@ -2,7 +2,6 @@
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 
 uses(RefreshDatabase::class);
 
@@ -38,39 +37,25 @@ it('returns a generic validation response for invalid credentials', function () 
     $this->assertGuest();
 });
 
-it('directs login to initial setup when there is no master account', function () {
+it('rejects login when no seeded account exists', function () {
     $this->postJson(route('api.spa.login'), [
         'username' => 'admin',
         'password' => 'password',
-    ])->assertStatus(409)
-        ->assertJsonPath('redirect', '/setup-master');
+    ])->assertUnprocessable()
+        ->assertJsonPath('message', 'Username atau password tidak sesuai.')
+        ->assertJsonValidationErrors('username');
+
+    $this->assertGuest();
 });
 
-it('creates and authenticates the first master through the API', function () {
-    $this->postJson(route('api.spa.setup-master'), [
+it('returns 404 for public Master setup endpoints without creating an account', function () {
+    $this->get('/api/spa/setup-master')->assertNotFound();
+    $this->postJson('/api/spa/setup-master', [
         'name' => 'Master Showroom',
         'username' => 'master_toko',
         'password' => 'a-unique-master-secret',
         'password_confirmation' => 'a-unique-master-secret',
-    ])->assertCreated()
-        ->assertJsonPath('redirect', '/app/dashboard');
-
-    $master = User::query()->where('username', 'master_toko')->sole();
-
-    expect($master->role)->toBe('master')
-        ->and(Hash::check('a-unique-master-secret', $master->password))->toBeTrue();
-
-    $this->assertAuthenticatedAs($master);
-});
-
-it('rejects short initial master passwords without creating an account', function () {
-    $this->postJson(route('api.spa.setup-master'), [
-        'name' => 'Master Showroom',
-        'username' => 'master_toko',
-        'password' => 'short',
-        'password_confirmation' => 'short',
-    ])->assertUnprocessable()
-        ->assertJsonValidationErrors('password');
+    ])->assertNotFound();
 
     expect(User::query()->count())->toBe(0);
 });

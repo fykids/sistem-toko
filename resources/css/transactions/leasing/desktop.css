@@ -940,3 +940,78 @@
         grid-column: 1 / -1;
     }
 }
+
+@media (min-width: 821px) {
+    .page-shell--transaction-form .transaction-form {
+        gap: 12px;
+    }
+
+    .page-shell--transaction-form .page-heading .btn {
+        min-height: 40px;
+        padding: 7px 14px;
+        font-size: var(--font-size-body-sm);
+    }
+
+    .page-shell--transaction-form .transaction-form .section-heading {
+        min-height: 44px;
+        gap: 10px;
+        padding: 8px 12px;
+    }
+
+    .page-shell--transaction-form .transaction-form .section-number {
+        width: 28px;
+        height: 28px;
+        font-size: var(--font-size-xs);
+    }
+
+    .page-shell--transaction-form .transaction-form .section-heading h2 {
+        font-size: var(--font-size-body-lg);
+        font-weight: 700;
+    }
+
+    .page-shell--transaction-form .transaction-form .section-content,
+    .page-shell--transaction-form .transaction-form .leasing-section-content,
+    .page-shell--transaction-form .transaction-form .vehicle-section .section-content {
+        padding: 12px 14px;
+    }
+
+    .page-shell--transaction-form .transaction-form .form-group {
+        margin-bottom: 5px;
+    }
+
+    .page-shell--transaction-form .transaction-form .form-group label,
+    .page-shell--transaction-form .transaction-form .vehicle-fields .form-group label,
+    .page-shell--transaction-form .transaction-form .repair-list-actions {
+        font-size: var(--font-size-md);
+        line-height: 1.35;
+    }
+
+    .page-shell--transaction-form .transaction-form .form-group input:not([type="hidden"]),
+    .page-shell--transaction-form .transaction-form .form-group select,
+    .page-shell--transaction-form .transaction-form .form-group textarea,
+    .page-shell--transaction-form .transaction-form .leasing-custom-table .leasing-input {
+        min-height: 40px;
+        padding: 7px 10px;
+        font-size: var(--font-size-body-sm);
+        line-height: 1.4;
+    }
+
+    .page-shell--transaction-form .transaction-form .leasing-custom-table .leasing-input {
+        min-width: 0;
+    }
+
+    .page-shell--transaction-form .transaction-form .leasing-custom-table thead th {
+        font-size: var(--font-size-xs);
+    }
+
+    .page-shell--transaction-form .transaction-form .form-actions {
+        gap: 10px;
+        padding: 10px 12px;
+    }
+
+    .page-shell--transaction-form .transaction-form .form-actions .btn {
+        min-height: 40px;
+        padding: 7px 14px;
+        font-size: var(--font-size-body-sm);
+    }
+}

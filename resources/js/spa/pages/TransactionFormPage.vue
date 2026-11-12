@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { apiFormRequest, apiRequest } from '../services/api.js';
+import { apiFormRequest, apiRequest, resolvePhotoUrl } from '../services/api.js';
 
 const route = useRoute();
 const router = useRouter();
@@ -17,6 +17,13 @@ const newPhotoInput = ref(null);
 const originalPhotoIds = ref([]);
 const removeLegacyPhoto = ref(false);
 const coverPhoto = ref('');
+const unavailablePhotos = ref([]);
+const selectedExistingPhoto = computed(() => photos.value.find(
+    (photo) => `existing:${photo.id}` === coverPhoto.value,
+));
+const selectedNewPhoto = computed(() => coverPhoto.value.startsWith('new:')
+    ? newPhotos.value[Number(coverPhoto.value.slice(4))] ?? null
+    : null);
 const leasingCompanies = ['BCA', 'MUF', 'BUANA', 'ADIRA', 'SINAR MAS', 'WORI', 'WOM'];
 const form = reactive(emptyTransaction());
 let activeLoadController = null;
@@ -135,12 +142,27 @@ function syncTransaction(transaction) {
         : (transaction.vehicle_photo_path ? 'existing:legacy' : '');
 }
 
+function photoUnavailable(url) {
+    const resolvedUrl = resolvePhotoUrl(url);
+
+    return !resolvedUrl || unavailablePhotos.value.includes(resolvedUrl);
+}
+
+function markPhotoUnavailable(url) {
+    const resolvedUrl = resolvePhotoUrl(url);
+
+    if (resolvedUrl && !unavailablePhotos.value.includes(resolvedUrl)) {
+        unavailablePhotos.value.push(resolvedUrl);
+    }
+}
+
 function resetForm() {
     newPhotos.value.forEach(({ url }) => URL.revokeObjectURL(url));
     Object.assign(form, emptyTransaction());
     photos.value = [];
     newPhotos.value = [];
     originalPhotoIds.value = [];
+    unavailablePhotos.value = [];
     removeLegacyPhoto.value = false;
     coverPhoto.value = '';
     errorMessage.value = '';
@@ -279,7 +301,7 @@ async function submitForm() {
     originalPhotoIds.value.filter((id) => !keptIds.includes(String(id)))
         .forEach((id) => body.append('hapus_foto[]', id));
     Object.keys(emptyTransaction()).forEach((name) => addInput(body, name, form[name]));
-    newPhotos.value.forEach(({ file }) => body.append('foto_kendaraan[]', file));
+    newPhotos.value.forEach(({ file }) => body.append('photos[]', file));
     if (coverPhoto.value) body.append('foto_utama', coverPhoto.value);
     if (removeLegacyPhoto.value) body.append('hapus_foto_legacy', '1');
     if (!canViewSensitiveData) {
@@ -453,17 +475,47 @@ const vehicleFields = [
                             <input id="vehicle-photo-input" ref="newPhotoInput" class="vehicle-photo-input" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" multiple :disabled="photos.length + newPhotos.length >= 20" @change="addPhotos">
                             <small class="form-help">Format JPG, PNG, atau WEBP. Maksimal 5 MB per foto.</small>
                             <div class="vehicle-photo-preview-frame">
-                                <img v-if="photos.find((photo) => `existing:${photo.id}` === coverPhoto)?.url" class="vehicle-photo-preview" :src="photos.find((photo) => `existing:${photo.id}` === coverPhoto)?.url" alt="Pratinjau foto utama kendaraan">
-                                <img v-else-if="newPhotos[Number(coverPhoto.slice(4))]?.url" class="vehicle-photo-preview" :src="newPhotos[Number(coverPhoto.slice(4))]?.url" alt="Pratinjau foto utama kendaraan">
-                                <p v-else class="vehicle-photo-placeholder">Pratinjau foto akan ditampilkan di sini.</p>
+                                <img
+                                    v-if="selectedExistingPhoto?.url && !photoUnavailable(selectedExistingPhoto.url)"
+                                    class="vehicle-photo-preview"
+                                    :src="resolvePhotoUrl(selectedExistingPhoto.url)"
+                                    alt="Pratinjau foto utama kendaraan"
+                                    @error="markPhotoUnavailable(selectedExistingPhoto.url)"
+                                >
+                                <img
+                                    v-else-if="selectedNewPhoto?.url && !photoUnavailable(selectedNewPhoto.url)"
+                                    class="vehicle-photo-preview"
+                                    :src="resolvePhotoUrl(selectedNewPhoto.url)"
+                                    alt="Pratinjau foto utama kendaraan"
+                                    @error="markPhotoUnavailable(selectedNewPhoto.url)"
+                                >
+                                <p v-else class="vehicle-photo-placeholder">
+                                    {{ selectedExistingPhoto || selectedNewPhoto ? 'Foto tidak tersedia' : 'Pratinjau foto akan ditampilkan di sini.' }}
+                                </p>
                             </div>
                             <div class="vehicle-photo-gallery">
                                 <article v-for="photo in photos" :key="photo.id" class="vehicle-photo-item">
-                                    <img :src="photo.url" alt="Foto kendaraan">
+                                    <img
+                                        v-if="!photoUnavailable(photo.url)"
+                                        :src="resolvePhotoUrl(photo.url)"
+                                        alt="Foto kendaraan"
+                                        @error="markPhotoUnavailable(photo.url)"
+                                    >
+                                    <div v-else class="flex aspect-[4/3] items-center justify-center bg-slate-100 px-2 text-center text-xs text-slate-500">
+                                        Foto tidak tersedia
+                                    </div>
                                     <div class="vehicle-photo-item-actions"><label class="vehicle-photo-cover-choice"><input v-model="coverPhoto" type="radio" name="cover" :value="`existing:${photo.id}`"> Foto utama</label><button class="vehicle-photo-remove" type="button" @click="removeExistingPhoto(photo)">Hapus</button></div>
                                 </article>
                                 <article v-for="(photo, index) in newPhotos" :key="`${photo.file.name}-${index}`" class="vehicle-photo-item">
-                                    <img :src="photo.url" :alt="`Pratinjau ${photo.file.name}`">
+                                    <img
+                                        v-if="!photoUnavailable(photo.url)"
+                                        :src="resolvePhotoUrl(photo.url)"
+                                        :alt="`Pratinjau ${photo.file.name}`"
+                                        @error="markPhotoUnavailable(photo.url)"
+                                    >
+                                    <div v-else class="flex aspect-[4/3] items-center justify-center bg-slate-100 px-2 text-center text-xs text-slate-500">
+                                        Foto tidak tersedia
+                                    </div>
                                     <div class="vehicle-photo-item-actions"><label class="vehicle-photo-cover-choice"><input v-model="coverPhoto" type="radio" name="cover" :value="`new:${index}`"> Foto utama</label><button class="vehicle-photo-remove" type="button" @click="removeNewPhoto(index)">Hapus</button></div>
                                 </article>
                             </div>

@@ -25,19 +25,18 @@ test('guests receive the Vue shell for the login page', function () {
         ->assertSee('assets/spa-', false);
 });
 
-test('login page does not create a default master account', function () {
-    $this->get(route('login'))->assertRedirect(route('setup-master.create'));
-    $this->get('/')->assertRedirect(route('setup-master.create'));
-
-    $this->get(route('setup-master.create'))
+test('guests go directly to login and cannot access Master setup routes', function () {
+    $this->get(route('login'))
         ->assertOk()
         ->assertSee('id="app"', false)
         ->assertSee('assets/spa-', false);
 
+    $this->get('/')->assertRedirect(route('login'));
+    $this->get('/setup-master')->assertNotFound();
     $this->post(route('login.store'), [
         'username' => 'admin',
         'password' => 'password',
-    ])->assertRedirect(route('setup-master.create'));
+    ])->assertRedirect();
 
     expect(User::query()->count())->toBe(0);
 });
@@ -48,7 +47,7 @@ test('login page does not promote an existing username to master', function () {
         'password' => 'existing-password',
     ]);
 
-    $this->get(route('login'))->assertRedirect(route('setup-master.create'));
+    $this->get(route('login'))->assertOk();
 
     $existingUser->refresh();
 
@@ -187,52 +186,16 @@ test('emergency password reset reports failure when no master account exists', f
         ->and(CarTransaction::query()->count())->toBe(0);
 });
 
-test('the first master can be created through the setup wizard and is logged in', function () {
-    $this->post(route('setup-master.store'), [
+test('public Master setup routes stay unavailable', function () {
+    $this->get('/setup-master')->assertNotFound();
+    $this->post('/setup-master', [
         'name' => 'Master Showroom',
         'username' => 'master_toko',
         'password' => 'a-unique-master-secret',
         'password_confirmation' => 'a-unique-master-secret',
-    ])->assertRedirect(route('dashboard'));
-
-    $master = User::query()->where('username', 'master_toko')->sole();
-
-    $this->assertAuthenticatedAs($master);
-    $this->get(route('dashboard'))->assertRedirect('/app/dashboard');
-    $this->get('/app/dashboard')->assertOk()->assertSee('id="app"', false);
-    $this->get('/dashboard')->assertRedirect(route('dashboard'));
-    $this->get(route('setup-master.create'))->assertNotFound();
-
-    expect($master->role)->toBe('master')
-        ->and(Hash::check('a-unique-master-secret', $master->password))->toBeTrue();
-});
-
-test('the setup wizard rejects passwords shorter than twelve characters', function () {
-    $this->from(route('setup-master.create'))
-        ->post(route('setup-master.store'), [
-            'name' => 'Master Showroom',
-            'username' => 'master_toko',
-            'password' => 'short',
-            'password_confirmation' => 'short',
-        ])->assertRedirect(route('setup-master.create'))
-        ->assertSessionHasErrors('password');
-
-    $this->assertGuest();
-    expect(User::query()->count())->toBe(0);
-});
-
-test('the setup wizard rejects direct access after a master account exists', function () {
-    User::factory()->master()->create();
-
-    $this->get(route('setup-master.create'))->assertNotFound();
-    $this->post(route('setup-master.store'), [
-        'name' => 'Second Master',
-        'username' => 'second_master',
-        'password' => 'a-unique-master-secret',
-        'password_confirmation' => 'a-unique-master-secret',
     ])->assertNotFound();
 
-    expect(User::query()->where('role', 'master')->count())->toBe(1);
+    expect(User::query()->count())->toBe(0);
     $this->assertGuest();
 });
 

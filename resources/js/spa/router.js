@@ -6,12 +6,12 @@ import UsersPage from './pages/UsersPage.vue';
 import TransactionFormPage from './pages/TransactionFormPage.vue';
 import TransactionDetailPage from './pages/TransactionDetailPage.vue';
 import JualPage from './pages/JualPage.vue';
-import SaleNotesPage from './pages/SaleNotesPage.vue';
-
-const historyBase = window.location.pathname.startsWith('/app/') ? '/app/' : '/';
+import LaporanPenjualanPage from './pages/LaporanPenjualanPage.vue';
+import NotaPenjualanPage from './pages/NotaPenjualanPage.vue';
+import PengeluaranShowroomPage from './pages/PengeluaranShowroomPage.vue';
 
 const router = createRouter({
-    history: createWebHistory(historyBase),
+    history: createWebHistory('/app/'),
     routes: [
         {
             path: '/',
@@ -59,7 +59,8 @@ const router = createRouter({
         },
         {
             path: '/transactions',
-            redirect: '/dashboard',
+            name: 'transactions',
+            component: DashboardPage,
         },
         {
             path: '/jual/create',
@@ -87,29 +88,24 @@ const router = createRouter({
             component: JualPage,
         },
         {
-            path: '/nota-penjualan/:saleNote(\\d+)/edit',
-            name: 'sale-note-edit',
-            component: SaleNotesPage,
-        },
-        {
-            path: '/nota-penjualan/:saleNote(\\d+)',
-            name: 'sale-note-show',
-            component: SaleNotesPage,
+            path: '/laporan-penjualan',
+            name: 'sales-report',
+            component: LaporanPenjualanPage,
         },
         {
             path: '/nota-penjualan',
-            name: 'sale-note-index',
-            component: SaleNotesPage,
+            name: 'sales-receipts',
+            component: NotaPenjualanPage,
+        },
+        {
+            path: '/pengeluaran',
+            name: 'showroom-expenses',
+            component: PengeluaranShowroomPage,
         },
         {
             path: '/login',
             name: 'login',
             component: () => import('./pages/LoginPage.vue'),
-        },
-        {
-            path: '/setup-master',
-            name: 'setup-master',
-            component: () => import('./pages/SetupMasterPage.vue'),
         },
         {
             path: '/:pathMatch(.*)*',
@@ -124,12 +120,18 @@ const router = createRouter({
 });
 
 router.beforeEach((to) => {
-    if (window.spaUser && ['login', 'setup-master'].includes(String(to.name))) {
+    const hasApiToken = Boolean(sessionStorage.getItem('apiToken'));
+
+    if (!hasApiToken) {
+        window.spaUser = null;
+    }
+
+    if (window.spaUser && hasApiToken && to.name === 'login') {
         return window.spaUser.role === 'marketing' ? '/marketing' : '/dashboard';
     }
 
-    if (!window.spaUser && !['login', 'setup-master'].includes(String(to.name))) {
-        return window.location.pathname.endsWith('/setup-master') ? '/setup-master' : '/login';
+    if ((!window.spaUser || !hasApiToken) && to.name !== 'login') {
+        return '/login';
     }
 });
 

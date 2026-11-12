@@ -1,3 +1,5 @@
+import { apiRequest } from './api.js';
+
 export async function fetchDashboard(filters, signal) {
     const query = new URLSearchParams();
 
@@ -7,19 +9,5 @@ export async function fetchDashboard(filters, signal) {
         }
     });
 
-    const response = await fetch(`/api/spa/dashboard?${query}`, {
-        headers: {
-            Accept: 'application/json',
-        },
-        credentials: 'same-origin',
-        signal,
-    });
-    const payload = await response.json();
-
-    if (!response.ok) {
-        const validationMessage = Object.values(payload.errors ?? {}).flat()[0];
-        throw new Error(validationMessage ?? payload.message ?? 'Data dashboard gagal dimuat.');
-    }
-
-    return payload;
+    return apiRequest(`/api/spa/dashboard?${query}`, { signal });
 }

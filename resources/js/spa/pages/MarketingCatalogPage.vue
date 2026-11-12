@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
-import { apiRequest } from '../services/api.js';
+import { apiRequest, resolvePhotoUrl } from '../services/api.js';
 
 const route = useRoute();
 const router = useRouter();
@@ -9,6 +9,7 @@ const payload = ref(null);
 const filters = ref({ q: '', transmission: '', year_from: '', year_to: '' });
 const isLoading = ref(true);
 const errorMessage = ref('');
+const unavailablePhotos = ref([]);
 const vehicles = computed(() => payload.value?.data ?? []);
 const pagination = computed(() => payload.value?.meta ?? null);
 const vehicle = computed(() => route.params.transaction
@@ -26,6 +27,20 @@ function formatAmount(value) {
     return value === undefined || value === null || value === ''
         ? '—'
         : `Rp ${Number(value).toLocaleString('id-ID')}`;
+}
+
+function photoUnavailable(url) {
+    const resolvedUrl = resolvePhotoUrl(url);
+
+    return !resolvedUrl || unavailablePhotos.value.includes(resolvedUrl);
+}
+
+function markPhotoUnavailable(url) {
+    const resolvedUrl = resolvePhotoUrl(url);
+
+    if (resolvedUrl && !unavailablePhotos.value.includes(resolvedUrl)) {
+        unavailablePhotos.value.push(resolvedUrl);
+    }
 }
 
 function applyFilters() {
@@ -46,6 +61,7 @@ watch(
         onCleanup(() => controller.abort());
         isLoading.value = true;
         errorMessage.value = '';
+        unavailablePhotos.value = [];
         filters.value = {
             q: route.query.q ?? '',
             transmission: route.query.transmission ?? '',
@@ -78,8 +94,15 @@ watch(
             <div v-else-if="errorMessage" class="spa-error" role="alert">{{ errorMessage }}</div>
             <article v-else class="spa-vehicle-detail">
                 <div class="spa-vehicle-hero">
-                    <img v-if="vehicle.vehicle_photo_url" :src="vehicle.vehicle_photo_url" :alt="`${vehicle.brand} ${vehicle.model}`">
-                    <div v-else class="spa-vehicle-no-photo">Foto kendaraan belum tersedia</div>
+                    <img
+                        v-if="vehicle.vehicle_photo_url && !photoUnavailable(vehicle.vehicle_photo_url)"
+                        :src="resolvePhotoUrl(vehicle.vehicle_photo_url)"
+                        :alt="`${vehicle.brand} ${vehicle.model}`"
+                        @error="markPhotoUnavailable(vehicle.vehicle_photo_url)"
+                    >
+                    <div v-else class="spa-vehicle-no-photo">
+                        {{ vehicle.vehicle_photo_url ? 'Foto tidak tersedia' : 'Foto kendaraan belum tersedia' }}
+                    </div>
                     <div class="spa-vehicle-info">
                         <p class="spa-eyebrow">{{ vehicle.plate_number }}</p>
                         <h1 id="vehicle-title">{{ vehicle.brand }} {{ vehicle.model }}</h1>
@@ -138,8 +161,16 @@ watch(
             <div v-else-if="errorMessage" class="spa-error" role="alert">{{ errorMessage }}</div>
             <div v-else-if="vehicles.length" class="spa-catalog-grid">
                 <RouterLink v-for="item in vehicles" :key="item.id" class="spa-vehicle-card" :to="{ name: 'marketing-vehicle', params: { transaction: item.id } }">
-                    <img v-if="item.vehicle_photo_url" :src="item.vehicle_photo_url" :alt="`${item.brand} ${item.model}`" loading="lazy">
-                    <div v-else class="spa-vehicle-no-photo">Foto kendaraan belum tersedia</div>
+                    <img
+                        v-if="item.vehicle_photo_url && !photoUnavailable(item.vehicle_photo_url)"
+                        :src="resolvePhotoUrl(item.vehicle_photo_url)"
+                        :alt="`${item.brand} ${item.model}`"
+                        loading="lazy"
+                        @error="markPhotoUnavailable(item.vehicle_photo_url)"
+                    >
+                    <div v-else class="spa-vehicle-no-photo">
+                        {{ item.vehicle_photo_url ? 'Foto tidak tersedia' : 'Foto kendaraan belum tersedia' }}
+                    </div>
                     <div class="spa-vehicle-card-content">
                         <div class="spa-vehicle-title"><div><h2>{{ item.brand }} {{ item.model }}</h2><p>{{ item.plate_number }} · {{ item.year }}</p></div><span>Tersedia</span></div>
                         <div class="spa-vehicle-tags"><span>{{ item.transmission }}</span><span>{{ item.color }}</span><span>Pajak {{ item.tax_status.label }}</span></div>

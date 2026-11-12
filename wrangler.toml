@@ -1,8 +1,15 @@
-name = "sistem-showroom"
-compatibility_date = "2026-11-01"
-pages_build_output_dir = "dist"
+name = "sistem-toko-api"
+main = "src/index.js"
+compatibility_date = "2026-11-11"
+
+[vars]
+VEHICLE_PHOTOS_PUBLIC_URL = ""
 
 [[d1_databases]]
-binding = "sistem_showroom_db"
+binding = "DB"
 database_name = "sistem_showroom_db"
 database_id = "170c0629-77fb-4f16-81da-949f62c6f59f"
+
+[[r2_buckets]]
+binding = "VEHICLE_PHOTOS"
+bucket_name = "sistem-toko-vehicle-photos"

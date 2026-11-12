@@ -15,6 +15,18 @@
     box-shadow: var(--shadow-component-card);
 }
 
+.page-shell--transaction-form .transaction-form {
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+    font-size: var(--font-size-body-sm);
+    font-weight: 400;
+}
+
+.page-shell--transaction-form .transaction-form .form-section,
+.page-shell--transaction-form .transaction-form .leasing-custom-table {
+    font-family: var(--font-sans);
+}
+
 .page-shell--transaction-form .transaction-form .section-heading {
     border-bottom-color: var(--leasing-line);
     background: var(--color-surface-form-heading);
@@ -40,19 +52,26 @@
     color: var(--color-text-strong);
 }
 
+.page-shell--transaction-form .transaction-form .form-group label {
+    font-family: var(--font-sans);
+    font-size: var(--font-size-caption);
+    font-weight: 700;
+    line-height: 1.35;
+}
+
 .page-shell--transaction-form .transaction-form .form-group input:not([type="hidden"]),
 .page-shell--transaction-form .transaction-form .form-group select,
 .page-shell--transaction-form .transaction-form .form-group textarea,
 .page-shell--transaction-form .transaction-form .leasing-custom-table .leasing-input {
     box-sizing: border-box;
-    min-height: 36px;
-    padding: 6px 8px;
+    min-height: 40px;
+    padding: 7px 10px;
     border: 1px solid var(--color-control-border);
     border-radius: var(--radius-input);
     background-color: var(--color-control-surface);
     color: var(--leasing-ink);
-    font-family: var(--font-family-body);
-    font-size: var(--font-size-md);
+    font-family: var(--font-sans);
+    font-size: var(--font-size-body-sm);
     font-weight: 500;
     line-height: 1.4;
     letter-spacing: normal;
@@ -108,6 +127,16 @@
 
 .page-shell--transaction-form .transaction-form .form-help {
     color: var(--leasing-muted);
+    font-family: var(--font-sans);
+    font-size: var(--font-size-sm);
+}
+
+.page-shell--transaction-form .transaction-form .vehicle-photo-button,
+.page-shell--transaction-form .transaction-form .vehicle-photo-item-actions,
+.page-shell--transaction-form .transaction-form .vehicle-administration-subheading,
+.page-shell--transaction-form .transaction-form .leasing-vehicle-summary,
+.page-shell--transaction-form .transaction-form .leasing-table-actions {
+    font-family: var(--font-sans);
 }
 
 .page-shell--transaction-form .transaction-form .form-section-title {

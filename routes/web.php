@@ -7,7 +7,6 @@ use App\Http\Controllers\Api\SellModuleController as ApiSellModuleController;
 use App\Http\Controllers\Api\TransactionController as ApiTransactionController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CarTransactionController;
-use App\Http\Controllers\InitialMasterSetupController;
 use App\Http\Controllers\MarketingCatalogController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SaleNoteController;
@@ -15,26 +14,17 @@ use App\Http\Controllers\SalePaymentController;
 use App\Http\Controllers\SellModuleController;
 use App\Http\Controllers\TransactionBackupController;
 use App\Http\Controllers\UserController;
-use App\Http\Middleware\EnsureInitialMasterSetup;
-use App\Http\Middleware\RedirectGuestsToMasterSetup;
 use App\Models\CarTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['guest', RedirectGuestsToMasterSetup::class])->group(function () {
+Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'create'])
         ->name('login');
     Route::post('/login', [AuthController::class, 'store'])
         ->middleware('throttle:login')
         ->name('login.store');
 });
-
-Route::middleware([EnsureInitialMasterSetup::class, 'guest'])
-    ->controller(InitialMasterSetupController::class)
-    ->group(function (): void {
-        Route::get('/setup-master', 'create')->name('setup-master.create');
-        Route::post('/setup-master', 'store')->name('setup-master.store');
-    });
 
 Route::middleware('guest')
     ->prefix('/api/spa')
@@ -43,17 +33,14 @@ Route::middleware('guest')
         Route::post('/login', [AuthController::class, 'loginApi'])
             ->middleware('throttle:login')
             ->name('login');
-        Route::post('/setup-master', [InitialMasterSetupController::class, 'storeApi'])
-            ->middleware(EnsureInitialMasterSetup::class)
-            ->name('setup-master');
     });
 
 Route::get('/', [CarTransactionController::class, 'index'])
-    ->middleware([RedirectGuestsToMasterSetup::class, 'role.dashboard:master,admin'])
+    ->middleware(['auth', 'role.dashboard:master,admin'])
     ->name('dashboard');
 
 Route::redirect('/dashboard', '/')
-    ->middleware([RedirectGuestsToMasterSetup::class, 'role.dashboard:master,admin'])
+    ->middleware(['auth', 'role.dashboard:master,admin'])
     ->name('dashboard.alias');
 
 Route::post('/logout', [AuthController::class, 'destroy'])

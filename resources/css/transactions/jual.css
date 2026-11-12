@@ -69,7 +69,7 @@
 
 .page-shell--jual .jual-detail-list dt {
     color: var(--color-text-secondary);
-    font-size: 0.8rem;
+    font-size: var(--font-size-caption);
 }
 
 .page-shell--jual .jual-detail-list dd {
@@ -79,17 +79,26 @@
     font-weight: 600;
 }
 
-.page-shell--jual .jual-index-toolbar {
+.page-shell--jual .jual-table-heading {
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 14px;
-    margin-bottom: 16px;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--jual-accent-border);
+}
+
+.page-shell--jual .jual-table-heading h1 {
+    margin: 0;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-page-title);
+    font-weight: 750;
 }
 
 .page-shell--jual .jual-status-filters {
     gap: 8px;
+    padding: 14px 20px;
 }
 
 .page-shell--jual .jual-create-action {
@@ -118,8 +127,8 @@
         flex-direction: column;
     }
 
-    .page-shell--jual .jual-index-toolbar {
-        align-items: stretch;
+    .page-shell--jual .jual-table-heading {
+        align-items: flex-start;
     }
 
     .page-shell--jual .jual-status-filters {

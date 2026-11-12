@@ -4,6 +4,12 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
+        "db:migrate:remote": "npx wrangler d1 execute DB --remote --file=database/d1/0001_create_api_sessions.sql --config wrangler.toml",
+        "db:seed:master:remote": "npx wrangler d1 execute sistem_showroom_db --remote --file=database/seed_master.sql --config wrangler.toml",
+        "deploy:pages": "npm run build && npx wrangler pages deploy dist --project-name=sistem-toko",
+        "deploy:worker": "npx wrangler deploy --config wrangler.toml",
+        "dev:worker": "npx wrangler dev --config wrangler.toml",
+        "test:worker": "node --test tests/worker-api.test.js",
         "dev": "vite"
     },
     "devDependencies": {
@@ -19,6 +25,8 @@
     },
     "dependencies": {
         "@hotwired/turbo": "^8.0.23",
+        "bcryptjs": "^3.0.3",
+        "hono": "^4.13.18",
         "vue": "^3.5.45",
         "vue-router": "^5.4.0"
     }

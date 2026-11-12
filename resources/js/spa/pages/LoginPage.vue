@@ -19,6 +19,13 @@ async function submitLogin() {
             method: 'POST',
             body: credentials.value,
         });
+
+        if (!response.token || !response.user) {
+            throw new Error('Backend tidak mengembalikan sesi login yang valid.');
+        }
+
+        sessionStorage.setItem('apiToken', response.token);
+        sessionStorage.setItem('spaUser', JSON.stringify(response.user));
         window.location.assign(response.redirect);
     } catch (error) {
         if (error.status === 409 && error.redirect) {

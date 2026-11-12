@@ -1,34 +1,44 @@
 {
-  "_fonts-C9MNnjVw.css": {
-    "file": "assets/fonts-C9MNnjVw.css",
-    "src": "_fonts-C9MNnjVw.css"
+  "_fonts-BtXsKKxX.css": {
+    "file": "assets/fonts-BtXsKKxX.css",
+    "src": "_fonts-BtXsKKxX.css"
   },
-  "_instrument-sans-400-normal-D1W7dsQl.woff": {
-    "file": "assets/instrument-sans-400-normal-D1W7dsQl.woff",
-    "src": "_instrument-sans-400-normal-D1W7dsQl.woff"
+  "_inter-400-normal-C38fXH4l.woff2": {
+    "file": "assets/inter-400-normal-C38fXH4l.woff2",
+    "src": "_inter-400-normal-C38fXH4l.woff2"
   },
-  "_instrument-sans-400-normal-DRC__1Mx.woff2": {
-    "file": "assets/instrument-sans-400-normal-DRC__1Mx.woff2",
-    "src": "_instrument-sans-400-normal-DRC__1Mx.woff2"
+  "_inter-400-normal-CyCys3Eg.woff": {
+    "file": "assets/inter-400-normal-CyCys3Eg.woff",
+    "src": "_inter-400-normal-CyCys3Eg.woff"
   },
-  "_instrument-sans-500-normal-Dk9ku72i.woff2": {
-    "file": "assets/instrument-sans-500-normal-Dk9ku72i.woff2",
-    "src": "_instrument-sans-500-normal-Dk9ku72i.woff2"
+  "_inter-500-normal-BL9OpVg8.woff": {
+    "file": "assets/inter-500-normal-BL9OpVg8.woff",
+    "src": "_inter-500-normal-BL9OpVg8.woff"
   },
-  "_instrument-sans-500-normal-Z6ESRlEs.woff": {
-    "file": "assets/instrument-sans-500-normal-Z6ESRlEs.woff",
-    "src": "_instrument-sans-500-normal-Z6ESRlEs.woff"
+  "_inter-500-normal-Cerq10X2.woff2": {
+    "file": "assets/inter-500-normal-Cerq10X2.woff2",
+    "src": "_inter-500-normal-Cerq10X2.woff2"
   },
-  "_instrument-sans-600-normal-B7fBEWYG.woff2": {
-    "file": "assets/instrument-sans-600-normal-B7fBEWYG.woff2",
-    "src": "_instrument-sans-600-normal-B7fBEWYG.woff2"
+  "_inter-600-normal-CiBQ2DWP.woff": {
+    "file": "assets/inter-600-normal-CiBQ2DWP.woff",
+    "src": "_inter-600-normal-CiBQ2DWP.woff"
   },
-  "_instrument-sans-600-normal-B9e8oLYv.woff": {
-    "file": "assets/instrument-sans-600-normal-B9e8oLYv.woff",
-    "src": "_instrument-sans-600-normal-B9e8oLYv.woff"
+  "_inter-600-normal-LgqL8muc.woff2": {
+    "file": "assets/inter-600-normal-LgqL8muc.woff2",
+    "src": "_inter-600-normal-LgqL8muc.woff2"
+  },
+  "index.html": {
+    "file": "assets/index-D5UAVNsv.js",
+    "name": "index",
+    "src": "index.html",
+    "isEntry": true,
+    "imports": [
+      "resources/js/spa.js",
+      "resources/js/spa.js"
+    ]
   },
   "resources/css/app.css": {
-    "file": "assets/app-Dl6IVbfv.css",
+    "file": "assets/app-CU-SxnL9.css",
     "name": "app",
     "names": [
       "app.css"
@@ -37,32 +47,22 @@
     "isEntry": true
   },
   "resources/js/spa.js": {
-    "file": "assets/spa-CXls92Km.js",
+    "file": "assets/spa-D4WGkUY6.js",
     "name": "spa",
     "src": "resources/js/spa.js",
     "isEntry": true,
     "dynamicImports": [
-      "resources/js/spa/pages/LoginPage.vue",
-      "resources/js/spa/pages/SetupMasterPage.vue"
+      "resources/js/spa/pages/LoginPage.vue"
     ],
     "css": [
-      "assets/spa-DioatKs4.css",
-      "assets/app-Dl6IVbfv.css"
+      "assets/spa-GAUOH4WM.css",
+      "assets/app-CU-SxnL9.css"
     ]
   },
   "resources/js/spa/pages/LoginPage.vue": {
-    "file": "assets/LoginPage-BwLGqEDx.js",
+    "file": "assets/LoginPage-CAjUu-t7.js",
     "name": "LoginPage",
     "src": "resources/js/spa/pages/LoginPage.vue",
-    "isDynamicEntry": true,
-    "imports": [
-      "resources/js/spa.js"
-    ]
-  },
-  "resources/js/spa/pages/SetupMasterPage.vue": {
-    "file": "assets/SetupMasterPage-BxmaAW8a.js",
-    "name": "SetupMasterPage",
-    "src": "resources/js/spa/pages/SetupMasterPage.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/spa.js"

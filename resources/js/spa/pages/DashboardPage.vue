@@ -16,7 +16,9 @@ const endDate = ref('');
 const isDeletingTransaction = ref(false);
 const successMessage = ref('');
 
-const currentView = computed(() => route.query.view ?? 'dashboard');
+const currentView = computed(() => route.query.view ?? (
+    route.name === 'transactions' ? 'inventory' : 'dashboard'
+));
 const rows = computed(() => payload.value?.data ?? []);
 const pagination = computed(() => payload.value?.meta ?? null);
 const canViewSensitiveData = computed(() => payload.value?.permissions?.can_view_sensitive_data ?? false);
@@ -67,19 +69,33 @@ async function deleteTransaction(transaction) {
     }
 
     isDeletingTransaction.value = true;
-    isLoading.value = true;
     errorMessage.value = '';
     successMessage.value = '';
 
     try {
         await apiRequest(`/api/spa/transactions/${transaction.id}`, { method: 'DELETE' });
+        const remainingRows = rows.value.filter((item) => item.id !== transaction.id);
+        payload.value = payload.value
+            ? { ...payload.value, data: remainingRows }
+            : payload.value;
+        errorMessage.value = '';
         successMessage.value = 'Data transaksi berhasil dihapus.';
-        refreshKey.value++;
+
+        const currentPage = Number(route.query.page) || 1;
+        if (remainingRows.length === 0 && currentPage > 1) {
+            await router.replace({
+                query: {
+                    ...route.query,
+                    page: String(Math.max(1, currentPage - 1)),
+                },
+            });
+        } else {
+            refreshKey.value++;
+        }
     } catch (error) {
         errorMessage.value = error.message;
     } finally {
         isDeletingTransaction.value = false;
-        isLoading.value = false;
     }
 }
 
