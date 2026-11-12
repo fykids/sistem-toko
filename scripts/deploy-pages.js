@@ -5,6 +5,12 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const npmCli = process.env.npm_execpath;
+
+if (!npmCli) {
+    throw new Error('npm_execpath is unavailable; run this script through npm.');
+}
+
 const temporaryDirectory = mkdtempSync(join(tmpdir(), 'sistem-toko-pages-'));
 
 try {
@@ -14,8 +20,11 @@ try {
     );
 
     const result = spawnSync(
-        process.platform === 'win32' ? 'npx.cmd' : 'npx',
+        process.execPath,
         [
+            npmCli,
+            'exec',
+            '--',
             'wrangler',
             'pages',
             'deploy',
@@ -26,7 +35,6 @@ try {
         ],
         {
             cwd: projectRoot,
-            shell: process.platform === 'win32',
             stdio: 'inherit',
         },
     );
