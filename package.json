@@ -6,7 +6,7 @@
         "build": "vite build",
         "db:migrate:remote": "npx wrangler d1 execute DB --remote --file=database/d1/0001_create_api_sessions.sql --config wrangler.toml",
         "db:seed:master:remote": "npx wrangler d1 execute sistem_showroom_db --remote --file=database/seed_master.sql --config wrangler.toml",
-        "deploy:pages": "npm run build && npx wrangler pages deploy dist --project-name=sistem-toko --config wrangler.pages.toml",
+        "deploy:pages": "npm run build && node scripts/deploy-pages.js",
         "deploy:worker": "npx wrangler deploy --config wrangler.toml",
         "dev:worker": "npx wrangler dev --config wrangler.toml",
         "test:worker": "node --test tests/worker-api.test.js",
